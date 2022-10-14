@@ -1,3 +1,6 @@
+#ifndef _ARTEMISCHANNELS_H
+#define _ARTEMISCHANNELS_H
+
 #include <TeensyThreads.h>
 #include <rfm23.h>
 #include <Wire.h>
@@ -22,3 +25,5 @@ namespace Artemis
         }
     }
 }
+
+#endif
