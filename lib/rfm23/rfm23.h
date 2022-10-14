@@ -1,3 +1,6 @@
+#ifndef _RFM23_H
+#define _RFM23_H
+
 #include <SPI.h>
 #include <RH_RF22.h>
 #include <RHHardwareSPI1.h>
@@ -39,4 +42,4 @@ namespace Artemis {
     }
 }
 
-
+#endif
