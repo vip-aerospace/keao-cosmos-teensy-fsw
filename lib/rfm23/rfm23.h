@@ -1,23 +1,24 @@
 #include <SPI.h>
 #include <RH_RF22.h>
 #include <RHHardwareSPI1.h>
+#include <teensy_pins.h>
 
 /* RFM23 FREQUENCY CONFIG */
 #define RFM23_FREQ   434.0
 
 /* RFM23 PIN CONFIG */
-#define RFM23_CS_PIN  38
-#define RFM23_INT_PIN 8
+#define RFM23_CS_PIN  SPI1_CS1
+#define RFM23_INT_PIN NIRQ
 
 /* SPI MISO/MOSI/SCK CONFIG */
-#define RFM23_SPI_MISO 39
-#define RFM23_SPI_MOSI 26
-#define RFM23_SPI_SCK 27
+#define RFM23_SPI_MISO SPI1_D0
+#define RFM23_SPI_MOSI SPI1_D1
+#define RFM23_SPI_SCK SPI1_SCLK
 
 /* RFM23 Power Level */
 #define RFM23_TX_POWER 20
-#define RX_ON 30
-#define TX_ON 31
+#define RFM23_RX_ON RX_ON
+#define RFM23_TX_ON TX_ON
 
 namespace Artemis {
     namespace Teensy {
@@ -25,8 +26,6 @@ namespace Artemis {
             class RFM23 {
                 private:
                     RH_RF22 rfm23;
-                    uint8_t RFM23_SEND_BUF[62];
-                    uint8_t RFM23_SEND_LEN = 0;
                     uint8_t RFM23_RECV_BUF[RH_RF22_MAX_MESSAGE_LEN];
                     uint8_t RFM23_RECV_LEN = sizeof(RFM23_RECV_BUF);
                 public:

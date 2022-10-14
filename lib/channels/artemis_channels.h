@@ -5,6 +5,7 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_LSM6DSOX.h>
 #include <Adafruit_INA219.h>
+#include <pdu.h>
 
 namespace Artemis
 {
@@ -17,6 +18,7 @@ namespace Artemis
             void accelerometer_gyroscope_channel();
             void temperature_channel();
             void current_channel();
+            void pdu_channel();
         }
     }
 }
