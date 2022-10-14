@@ -13,8 +13,8 @@ namespace Artemis
                 SPI1.setMISO(RFM23_SPI_MISO);
                 SPI1.setMOSI(RFM23_SPI_MOSI);
                 SPI1.setSCK(RFM23_SPI_SCK);
-                pinMode(RX_ON, OUTPUT);
-                pinMode(TX_ON, OUTPUT);
+                pinMode(RFM23_RX_ON, OUTPUT);
+                pinMode(RFM23_TX_ON, OUTPUT);
 
                 // while loop to give multiple init attempts
                 while (!rfm23.init())
@@ -36,8 +36,8 @@ namespace Artemis
 
             void RFM23::RFM23_SEND(const char *msg)
             {
-                digitalWrite(RX_ON, HIGH);
-                digitalWrite(TX_ON, LOW);
+                digitalWrite(RFM23_RX_ON, HIGH);
+                digitalWrite(RFM23_TX_ON, LOW);
                 Serial.print("[RFM23] Sending: [");
                 Serial.print(msg);
                 Serial.println("]");
@@ -50,8 +50,8 @@ namespace Artemis
             void RFM23::RFM23_RECV()
             {
 
-                digitalWrite(RX_ON, LOW);
-                digitalWrite(TX_ON, HIGH);
+                digitalWrite(RFM23_RX_ON, LOW);
+                digitalWrite(RFM23_TX_ON, HIGH);
 
                 if (rfm23.waitAvailableTimeout(100))
                 {

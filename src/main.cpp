@@ -20,6 +20,7 @@ void setup()
   thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::magnetometer_channel), "magnetomter thread"});
   thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::temperature_channel), "temperature thread"});
   thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::current_channel), "current thread"});
+  thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::pdu_channel), "pdu thread"});
 }
 void loop()
 {
