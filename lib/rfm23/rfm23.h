@@ -5,9 +5,10 @@
 #include <RH_RF22.h>
 #include <RHHardwareSPI1.h>
 #include <teensy_pins.h>
+#include <cmd_queue.h>
 
 /* RFM23 FREQUENCY CONFIG */
-#define RFM23_FREQ   434.0
+#define RFM23_FREQ   430.0
 
 /* RFM23 PIN CONFIG */
 #define RFM23_CS_PIN  SPI1_CS1
@@ -34,7 +35,7 @@ namespace Artemis {
                 public:
                     RFM23(uint8_t slaveSelectPin = RFM23_CS_PIN, uint8_t interruptPin = RFM23_INT_PIN, RHGenericSPI& spi = hardware_spi1);
                     void RFM23_RESET();
-                    void RFM23_INIT();
+                    bool RFM23_INIT();
                     void RFM23_SEND(const char *input);
                     void RFM23_RECV();
             };
@@ -42,4 +43,4 @@ namespace Artemis {
     }
 }
 
-#endif
+#endif // _RFM23_H
