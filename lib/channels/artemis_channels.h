@@ -9,7 +9,7 @@
 #include <Adafruit_LSM6DSOX.h>
 #include <Adafruit_INA219.h>
 #include <pdu.h>
-#include <support/packetcomm.h>
+#include "support/packetcomm.h"
 
 namespace Artemis
 {
@@ -18,8 +18,6 @@ namespace Artemis
         namespace Channels
         {
             void rfm23_channel();
-            void magnetometer_channel();
-            void accelerometer_gyroscope_channel();
             void pdu_channel();
         }
     }

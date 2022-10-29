@@ -1,6 +1,8 @@
 #include <Arduino.h>
+#include <map>
 #include <vector>
 #include <artemis_channels.h>
+#include "support/packetcomm.h"
 
 Adafruit_LIS3MDL magnetometer;
 Adafruit_LSM6DSOX imu;
@@ -94,7 +96,7 @@ void setup()
 
   // Threads
   thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::rfm23_channel), "rfm23 thread"});
-  thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::pdu_channel), "pdu thread"});
+  // thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::pdu_channel), "pdu thread"});
 }
 void readtempertaure() // future make this its own library
 {
@@ -137,16 +139,34 @@ void readimu()
   gyroz = (gyro.gyro.z);
   imutemp = (temp.temperature);
 }
+
+PacketComm packet;
+
 void loop()
 {
-  readtempertaure();
-  readcurrent();
-  readimu();
+  Serial.println("In main loop");
+  while (main_queue.size())
+  {
+    packet = main_queue.front();
+    main_queue.pop();
+    switch (packet.header.type)
+    {
+    case PacketComm::TypeId::CommandReset:
+      Serial.println("Recieved reset command"); // add actual logic to reset or etc
+      break;
+    default:
+      Serial.println("Have recieved a packet");
+    }
+  }
+  // readtempertaure();
+  // readcurrent();
+  // readimu();
 
   // create new packet this will be done by packetcom
   // put battery level in packet
   // send to radio queue
   // repeat with any other telem hardware data
   // ...
-  threads.sleep(10000);
+
+  threads.delay(5000);
 }
