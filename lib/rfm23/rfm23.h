@@ -4,9 +4,7 @@
 #include <SPI.h>
 #include <RH_RF22.h>
 #include <RHHardwareSPI1.h>
-#include <teensy_pins.h>
-#include <cmd_queue.h>
-#include "support/packetcomm.h"
+#include <artemis_defs.h>
 
 /* RFM23 FREQUENCY CONFIG */
 #define RFM23_FREQ 430.0
@@ -35,16 +33,13 @@ namespace Artemis
             {
             private:
                 RH_RF22 rfm23;
-                uint8_t RFM23_RECV_BUF[RH_RF22_MAX_MESSAGE_LEN];
-                const uint8_t RFM23_RECV_LEN = sizeof(RFM23_RECV_BUF);
-                Cosmos::Support::PacketComm packet;
 
             public:
                 RFM23(uint8_t slaveSelectPin = RFM23_CS_PIN, uint8_t interruptPin = RFM23_INT_PIN, RHGenericSPI &spi = hardware_spi1);
-                void RFM23_RESET();
-                bool RFM23_INIT();
-                void RFM23_SEND(const unsigned char *input, size_t length);
-                void RFM23_RECV();
+                void reset();
+                bool init();
+                void send(const unsigned char *input, size_t length);
+                bool recv(PacketComm *packet);
             };
         }
     }
