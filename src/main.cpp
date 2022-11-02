@@ -1,42 +1,126 @@
 #include <Arduino.h>
-#include <map>
 #include <vector>
 #include <artemis_channels.h>
-#include "support/packetcomm.h"
+#include <support/configCosmos.h>
+#include <USBHost_t36.h>
 
-Adafruit_LIS3MDL magnetometer;
-Adafruit_LSM6DSOX imu;
-Adafruit_INA219 current_1(0x40); // Solar 1
-Adafruit_INA219 current_2(0x41); // Solar 2
-Adafruit_INA219 current_3(0x42); // Solar 3
-Adafruit_INA219 current_4(0x43); // Solar 4
-Adafruit_INA219 current_5(0x44); // Battery
+/* Helper Function Defs */
+bool setup_magnetometer(void);
+bool setup_imu(void);
+void setup_current(void);
+void setup_temperature(void);
+void read_temperature(void);
+void read_current(void);
+void read_imu(void);
 
-#define current_count 5 // The total number of current sensors
-const char *current_sen_names[current_count] = {"solar_panel_1", "solar_panel_2", "solar_panel_3", "solar_panel_4", "battery_board"};
-float busvoltage[current_count] = {0}, current[current_count] = {0}, power[current_count] = {0};
-Adafruit_INA219 *p[current_count] = {&current_1, &current_2, &current_3, &current_4, &current_5};
-
-#define temp_count 7 // The total number of temperature sensors
-#define aref_voltage 3.3
-const int temps[temp_count] = {A0, A1, A6, A7, A8, A9, A17};
-const char *temp_sen_names[temp_count] = {"solar_panel_1", "solar_panel_2", "solar_panel_3", "solar_panel_4", "battery_board"};
-float voltage[temp_count] = {0}, temperatureC[temp_count] = {0};
-
-float magx = {0}, magy = {0}, magz = {0};
-float accelx = {0}, accely = {0}, accelz = {0};
-float gyrox = {0}, gyroy = {0}, gyroz = {0};
-float imutemp = {0};
-
-struct thread_struct
+namespace
 {
-  int thread_id;
-  const char *thread_name;
-};
+  PacketComm packet;
 
-std::vector<struct thread_struct> thread_list;
+  USBHost usb;
+  Adafruit_LIS3MDL magnetometer;
+  Adafruit_LSM6DSOX imu;
+  Adafruit_INA219 current_1(0x40); // Solar 1
+  Adafruit_INA219 current_2(0x41); // Solar 2
+  Adafruit_INA219 current_3(0x42); // Solar 3
+  Adafruit_INA219 current_4(0x43); // Solar 4
+  Adafruit_INA219 current_5(0x44); // Battery
 
-bool setupmagnetometer(void)
+  // Current Sensors
+  const char *current_sen_names[ARTEMIS_CURRENT_SENSOR_COUNT] = {"solar_panel_1", "solar_panel_2", "solar_panel_3", "solar_panel_4", "battery_board"};
+  float busvoltage[ARTEMIS_CURRENT_SENSOR_COUNT] = {0}, current[ARTEMIS_CURRENT_SENSOR_COUNT] = {0}, power[ARTEMIS_CURRENT_SENSOR_COUNT] = {0};
+  Adafruit_INA219 *p[ARTEMIS_CURRENT_SENSOR_COUNT] = {&current_1, &current_2, &current_3, &current_4, &current_5};
+
+  // Temperature Sensors
+  const int temps[ARTEMIS_TEMP_SENSOR_COUNT] = {A0, A1, A6, A7, A8, A9, A17};
+  const char *temp_sen_names[ARTEMIS_TEMP_SENSOR_COUNT] = {"solar_panel_1", "solar_panel_2", "solar_panel_3", "solar_panel_4", "battery_board"};
+  float voltage[ARTEMIS_TEMP_SENSOR_COUNT] = {0}, temperatureC[ARTEMIS_TEMP_SENSOR_COUNT] = {0};
+
+  // IMU
+  float magx = {0}, magy = {0}, magz = {0};
+  float accelx = {0}, accely = {0}, accelz = {0};
+  float gyrox = {0}, gyroy = {0}, gyroz = {0};
+  float imutemp = {0};
+}
+
+void setup()
+{
+  Serial.begin(115200);
+  usb.begin();
+  pinMode(RPI_ENABLE, OUTPUT);
+  // digitalWrite(RPI_ENABLE, HIGH);
+  delay(3000);
+
+  setup_magnetometer();
+  setup_imu();
+  setup_current();
+
+  // Threads
+  thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::rfm23_channel), "rfm23 thread"});
+  // thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::pdu_channel), "pdu thread"});
+}
+
+void loop()
+{
+  // packet.header.orig = teensy_node_id;
+  // packet.header.dest = ground_node_id;
+  // packet.header.radio = ARTEMIS_RADIOS::RFM23;
+  // packet.header.type = PacketComm::TypeId::DataPong;
+  // packet.data.resize(0);
+  // const char *data = "Pong";
+  // for (size_t i = 0; i < strlen(data); i++) {
+  //   packet.data.push_back(data[i]);
+  // }
+  // packet.data.resize(strlen(data));
+  // PushQueue(&packet, main_queue, main_queue_mtx);
+  delay(1000);
+
+  if (PullQueue(&packet, main_queue, main_queue_mtx))
+  {
+    if (packet.header.dest == ground_node_id)
+    {
+      switch (packet.header.radio)
+      {
+      case ARTEMIS_RADIOS::RFM23:
+        PushQueue(&packet, rfm23_queue, rfm23_queue_mtx);
+        break;
+      case ARTEMIS_RADIOS::ASTRODEV:
+        PushQueue(&packet, astrodev_queue, astrodev_queue_mtx);
+        break;
+      }
+    }
+    else if (packet.header.dest == rpi_node_id)
+    {
+    }
+    else if (packet.header.dest == pleiades_node_id)
+    {
+      PushQueue(&packet, rfm98_queue, rfm98_queue_mtx);
+    }
+    else if (packet.header.dest == teensy_node_id)
+    {
+      switch (packet.header.type)
+      {
+      case PacketComm::TypeId::CommandEpsCommunicate:
+      case PacketComm::TypeId::CommandEpsMinimumPower:
+      case PacketComm::TypeId::CommandEpsReset:
+      case PacketComm::TypeId::CommandEpsSetTime:
+      case PacketComm::TypeId::CommandEpsState:
+      case PacketComm::TypeId::CommandEpsSwitchName:
+      case PacketComm::TypeId::CommandEpsSwitchNames:
+      case PacketComm::TypeId::CommandEpsSwitchNumber:
+      case PacketComm::TypeId::CommandEpsSwitchStatus:
+      case PacketComm::TypeId::CommandEpsWatchdog:
+        PushQueue(&packet, pdu_queue, pdu_queue_mtx);
+        break;
+      default:
+        break;
+      }
+    }
+  }
+}
+
+/* Helper Functions */
+bool setup_magnetometer(void)
 {
   if (!magnetometer.begin_I2C())
   {
@@ -51,7 +135,7 @@ bool setupmagnetometer(void)
   return true;
 }
 
-bool setupimu(void)
+bool setup_imu(void)
 {
   if (!imu.begin_I2C())
   {
@@ -65,7 +149,7 @@ bool setupimu(void)
   return true;
 }
 
-void setupcurrent() // go through library and see what we need to configure and callibrate
+void setup_current(void) // go through library and see what we need to configure and callibrate
 {
   current_1.begin(&Wire2);
   current_2.begin(&Wire2);
@@ -76,7 +160,7 @@ void setupcurrent() // go through library and see what we need to configure and 
   return;
 }
 
-void setuptemperature()
+void setup_temperature(void)
 {
   for (const int pin : temps)
   {
@@ -86,33 +170,21 @@ void setuptemperature()
   return;
 }
 
-void setup()
+void read_tempertaure(void) // future make this its own library
 {
-  Serial.begin(115200);
-
-  setupmagnetometer();
-  setupimu();
-  setupcurrent();
-
-  // Threads
-  thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::rfm23_channel), "rfm23 thread"});
-  // thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::pdu_channel), "pdu thread"});
-}
-void readtempertaure() // future make this its own library
-{
-  for (int i = 0; i < temp_count; i++)
+  for (int i = 0; i < ARTEMIS_TEMP_SENSOR_COUNT; i++)
   {
     const int reading = analogRead(temps[i]);
-    voltage[i] = reading * aref_voltage;
+    voltage[i] = reading * AREF_VOLTAGE;
     voltage[i] /= 1024.0;
     const float temperatureF = (voltage[i] * 1000) - 58;
     temperatureC[i] = (temperatureF - 32) / 1.8;
   }
 }
 
-void readcurrent()
+void read_current(void)
 {
-  for (int i = 0; i < current_count; i++)
+  for (int i = 0; i < ARTEMIS_CURRENT_SENSOR_COUNT; i++)
   {
     busvoltage[i] = (p[i]->getBusVoltage_V());
     current[i] = (p[i]->getCurrent_mA());
@@ -120,7 +192,7 @@ void readcurrent()
   }
 }
 
-void readimu()
+void read_imu(void)
 {
   sensors_event_t event;
   sensors_event_t accel;
@@ -138,35 +210,4 @@ void readimu()
   gyroy = (gyro.gyro.y);
   gyroz = (gyro.gyro.z);
   imutemp = (temp.temperature);
-}
-
-PacketComm packet;
-
-void loop()
-{
-  Serial.println("In main loop");
-  while (main_queue.size())
-  {
-    packet = main_queue.front();
-    main_queue.pop();
-    switch (packet.header.type)
-    {
-    case PacketComm::TypeId::CommandReset:
-      Serial.println("Recieved reset command"); // add actual logic to reset or etc
-      break;
-    default:
-      Serial.println("Have recieved a packet");
-    }
-  }
-  // readtempertaure();
-  // readcurrent();
-  // readimu();
-
-  // create new packet this will be done by packetcom
-  // put battery level in packet
-  // send to radio queue
-  // repeat with any other telem hardware data
-  // ...
-
-  threads.delay(5000);
 }
