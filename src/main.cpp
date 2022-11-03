@@ -27,13 +27,13 @@ namespace
   Adafruit_INA219 current_5(0x44); // Battery
 
   // Current Sensors
-  const char *current_sen_names[ARTEMIS_CURRENT_SENSOR_COUNT] = {"solar_panel_1", "solar_panel_2", "solar_panel_3", "solar_panel_4", "battery_board"};
+  // const char *current_sen_names[ARTEMIS_CURRENT_SENSOR_COUNT] = {"solar_panel_1", "solar_panel_2", "solar_panel_3", "solar_panel_4", "battery_board"};
   float busvoltage[ARTEMIS_CURRENT_SENSOR_COUNT] = {0}, current[ARTEMIS_CURRENT_SENSOR_COUNT] = {0}, power[ARTEMIS_CURRENT_SENSOR_COUNT] = {0};
   Adafruit_INA219 *p[ARTEMIS_CURRENT_SENSOR_COUNT] = {&current_1, &current_2, &current_3, &current_4, &current_5};
 
   // Temperature Sensors
   const int temps[ARTEMIS_TEMP_SENSOR_COUNT] = {A0, A1, A6, A7, A8, A9, A17};
-  const char *temp_sen_names[ARTEMIS_TEMP_SENSOR_COUNT] = {"solar_panel_1", "solar_panel_2", "solar_panel_3", "solar_panel_4", "battery_board"};
+  // const char *temp_sen_names[ARTEMIS_TEMP_SENSOR_COUNT] = {"solar_panel_1", "solar_panel_2", "solar_panel_3", "solar_panel_4", "battery_board"};
   float voltage[ARTEMIS_TEMP_SENSOR_COUNT] = {0}, temperatureC[ARTEMIS_TEMP_SENSOR_COUNT] = {0};
 
   // IMU
@@ -48,7 +48,7 @@ void setup()
   Serial.begin(115200);
   usb.begin();
   pinMode(RPI_ENABLE, OUTPUT);
-  // digitalWrite(RPI_ENABLE, HIGH);
+  digitalWrite(RPI_ENABLE, HIGH);
   delay(3000);
 
   setup_magnetometer();
@@ -62,17 +62,18 @@ void setup()
 
 void loop()
 {
-  // packet.header.orig = teensy_node_id;
-  // packet.header.dest = ground_node_id;
-  // packet.header.radio = ARTEMIS_RADIOS::RFM23;
-  // packet.header.type = PacketComm::TypeId::DataPong;
-  // packet.data.resize(0);
-  // const char *data = "Pong";
-  // for (size_t i = 0; i < strlen(data); i++) {
-  //   packet.data.push_back(data[i]);
-  // }
-  // packet.data.resize(strlen(data));
-  // PushQueue(&packet, main_queue, main_queue_mtx);
+  packet.header.orig = teensy_node_id;
+  packet.header.dest = ground_node_id;
+  packet.header.radio = ARTEMIS_RADIOS::RFM23;
+  packet.header.type = PacketComm::TypeId::DataPong;
+  packet.data.resize(0);
+  const char *data = "Pong";
+  for (size_t i = 0; i < strlen(data); i++)
+  {
+    packet.data.push_back(data[i]);
+  }
+  packet.data.resize(strlen(data));
+  PushQueue(&packet, main_queue, main_queue_mtx);
   delay(1000);
 
   if (PullQueue(&packet, main_queue, main_queue_mtx))

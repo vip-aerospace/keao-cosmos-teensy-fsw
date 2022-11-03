@@ -63,7 +63,8 @@ namespace Artemis
 
                 rfm23.sleep();
                 Serial.print("[RFM23] SENDING: [");
-                for(size_t i = 0; i < length; i++) {
+                for (size_t i = 0; i < length; i++)
+                {
                     Serial.print(msg[i]);
                 }
                 Serial.println("]");
