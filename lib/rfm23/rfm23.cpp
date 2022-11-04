@@ -43,7 +43,7 @@ namespace Artemis
                 rfm23.sleep();
 
                 Serial.println("[RFM23] INIT SUCCESS");
-                void setModeIdle();
+                rfm23.setModeIdle();
                 return true;
             }
 
@@ -59,14 +59,14 @@ namespace Artemis
                 digitalWrite(RFM23_TX_ON, LOW);
 
                 Threads::Scope scope(spi1_mtx);
-                void setModeTX();
+                rfm23.setModeTx();
                 rfm23.send((uint8_t *)msg, length);
                 // rfm23.waitPacketSent();
 
                 delay(1000);
 
                 rfm23.sleep();
-                void setModeIdle();
+                rfm23.setModeIdle();
                 Serial.print("[RFM23] SENDING: [");
                 for (size_t i = 0; i < length; i++)
                 {
@@ -83,7 +83,7 @@ namespace Artemis
                 uint8_t bytes_recieved = sizeof(packet->wrapped);
 
                 Threads::Scope scope(spi1_mtx);
-                void setModeRx();
+                rfm23.setModeRx();
                 if (rfm23.waitAvailableTimeout(100))
                 {
                     packet->wrapped.resize(RH_RF22_MAX_MESSAGE_LEN);
@@ -91,12 +91,12 @@ namespace Artemis
                     {
                         packet->wrapped.resize(bytes_recieved);
                         packet->Unwrap();
-                        void setModeIdle();
+                        rfm23.setModeIdle();
 
                         return true;
                     }
                 }
-                void setModeIdle();
+                rfm23.setModeIdle();
                 return false;
             }
         }
