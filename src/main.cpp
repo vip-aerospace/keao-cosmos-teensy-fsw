@@ -55,47 +55,38 @@ void setup()
 
   // Threads
   thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::rfm23_channel), "rfm23 thread"});
-  // thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::pdu_channel), "pdu thread"});
+  thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::pdu_channel), "pdu thread"});
 }
 
 void loop()
 {
-  packet.header.orig = teensy_node_id;
-  packet.header.dest = ground_node_id;
+  // TODO: This packet should be sent from the ground station.
+  // Temporarily placed here for testing.
+  packet.header.orig = NODES::GROUND_NODE_ID;
+  packet.header.dest = NODES::TEENSY_NODE_ID;
   packet.header.radio = ARTEMIS_RADIOS::RFM23;
   packet.header.type = PacketComm::TypeId::CommandPing;
   packet.data.resize(0);
-  const char *data = "Pong";
+  const char *data = "Ping";
   for (size_t i = 0; i < strlen(data); i++)
   {
     packet.data.push_back(data[i]);
   }
-
   PushQueue(&packet, main_queue, main_queue_mtx);
   threads.delay(1000);
+  // TODO: This packet should be sent from the ground station.
 
   if (PullQueue(&packet, main_queue, main_queue_mtx))
   {
-    if (packet.header.dest == ground_node_id)
+    if (packet.header.dest == NODES::GROUND_NODE_ID)
     {
-      switch (packet.header.radio)
-      {
-      case ARTEMIS_RADIOS::RFM23:
-        PushQueue(&packet, rfm23_queue, rfm23_queue_mtx);
-        break;
-      case ARTEMIS_RADIOS::ASTRODEV:
-        PushQueue(&packet, astrodev_queue, astrodev_queue_mtx);
-        break;
-      }
+      PushQueue(&packet, rfm23_queue, rfm23_queue_mtx);
     }
-    else if (packet.header.dest == rpi_node_id)
+    else if (packet.header.dest == NODES::RPI_NODE_ID)
     {
+      PushQueue(&packet, rpi_queue, rpi_queue_mtx);
     }
-    else if (packet.header.dest == pleiades_node_id)
-    {
-      PushQueue(&packet, rfm98_queue, rfm98_queue_mtx);
-    }
-    else if (packet.header.dest == teensy_node_id)
+    else if (packet.header.dest == NODES::TEENSY_NODE_ID)
     {
       switch (packet.header.type)
       {
@@ -112,7 +103,18 @@ void loop()
         PushQueue(&packet, pdu_queue, pdu_queue_mtx);
         break;
       case PacketComm::TypeId::CommandPing:
-        Serial.print("Pong");
+        packet.header.orig = NODES::TEENSY_NODE_ID;
+        packet.header.dest = NODES::GROUND_NODE_ID;
+        packet.header.radio = ARTEMIS_RADIOS::RFM23;
+        packet.header.type = PacketComm::TypeId::DataPong;
+        packet.data.resize(0);
+        data = "Pong";
+        for (size_t i = 0; i < strlen(data); i++)
+        {
+          packet.data.push_back(data[i]);
+        }
+        PushQueue(&packet, rfm23_queue, rfm23_queue_mtx);
+        break;
       default:
         break;
       }
@@ -191,8 +193,8 @@ void read_temperature(void) // future make this its own library
     const float temperatureF = (voltage * 1000) - 58;
     beacon.temperatureC[i] = (temperatureF - 32) / 1.8;
   }
-  packet.header.orig = teensy_node_id;
-  packet.header.dest = ground_node_id;
+  packet.header.orig = NODES::TEENSY_NODE_ID;
+  packet.header.dest = NODES::GROUND_NODE_ID;
   packet.header.radio = ARTEMIS_RADIOS::RFM23;
   packet.header.type = PacketComm::TypeId::DataBeacon;
   packet.data.resize(sizeof(beacon));
@@ -210,8 +212,8 @@ void read_current(void)
     beacon.current[i] = (p[i]->getCurrent_mA());
     beacon.power[i] = (p[i]->getPower_mW());
   }
-  packet.header.orig = teensy_node_id;
-  packet.header.dest = ground_node_id;
+  packet.header.orig = NODES::TEENSY_NODE_ID;
+  packet.header.dest = NODES::GROUND_NODE_ID;
   packet.header.radio = ARTEMIS_RADIOS::RFM23;
   packet.header.type = PacketComm::TypeId::DataBeacon;
   packet.data.resize(sizeof(beacon));
@@ -241,8 +243,8 @@ void read_imu(void)
   beacon.gyroz = (gyro.gyro.z);
   beacon.imutemp = (temp.temperature);
 
-  packet.header.orig = teensy_node_id;
-  packet.header.dest = ground_node_id;
+  packet.header.orig = NODES::TEENSY_NODE_ID;
+  packet.header.dest = NODES::GROUND_NODE_ID;
   packet.header.radio = ARTEMIS_RADIOS::RFM23;
   packet.header.type = PacketComm::TypeId::DataBeacon;
   packet.data.resize(sizeof(beacon));
