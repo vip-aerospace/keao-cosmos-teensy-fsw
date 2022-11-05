@@ -22,14 +22,12 @@ void Artemis::Teensy::Channels::rfm23_channel()
             case PacketComm::TypeId::DataResponse:
                 packet.Wrap();
                 rfm23.send(packet.wrapped.data(), packet.wrapped.size());
-                packet.wrapped.resize(0);
                 break;
             default:
                 break;
             }
         }
 
-        packet.data.resize(0);
         if (rfm23.recv(&packet))
         {
             Serial.print("[RFM23] RECEIVED: [");
@@ -39,5 +37,6 @@ void Artemis::Teensy::Channels::rfm23_channel()
             }
             Serial.println("]");
         }
+        threads.delay(10);
     }
 }
