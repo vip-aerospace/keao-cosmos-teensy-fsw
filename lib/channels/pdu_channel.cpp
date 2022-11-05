@@ -1,7 +1,10 @@
 #include <artemis_channels.h>
 
-Artemis::Teensy::PDU pdu(115200);
-PacketComm packet;
+namespace
+{
+    Artemis::Teensy::PDU pdu(115200);
+    PacketComm packet;
+}
 
 void Artemis::Teensy::Channels::pdu_channel()
 {
