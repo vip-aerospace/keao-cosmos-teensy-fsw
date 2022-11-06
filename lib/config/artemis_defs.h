@@ -10,6 +10,14 @@
 #define ARTEMIS_TEMP_SENSOR_COUNT 7
 #define AREF_VOLTAGE 3.3
 
+// Nodes
+enum NODES : uint8_t
+{
+  GROUND_NODE_ID = 1,
+  TEENSY_NODE_ID = 2,
+  RPI_NODE_ID = 3,
+};
+
 // Structs
 struct thread_struct
 {
@@ -68,36 +76,26 @@ enum ARTEMIS_RADIOS : uint8_t
 {
   NONE,
   RFM23,
-  RFM98,
-  ASTRODEV,
 };
 
 // Max threads = 16
 extern vector<struct thread_struct> thread_list;
 
-// Nodes
-const uint8_t ground_node_id = 1;
-const uint8_t teensy_node_id = 2;
-const uint8_t rpi_node_id = 3;
-const uint8_t pleiades_node_id = 4;
-
 // Mutex for Command Queues
 extern Threads::Mutex main_queue_mtx;
-extern Threads::Mutex astrodev_queue_mtx;
 extern Threads::Mutex rfm23_queue_mtx;
-extern Threads::Mutex rfm98_queue_mtx;
 extern Threads::Mutex pdu_queue_mtx;
+extern Threads::Mutex rpi_queue_mtx;
 
 // Command Queues
 extern queue<PacketComm> main_queue;
-extern queue<PacketComm> astrodev_queue;
 extern queue<PacketComm> rfm23_queue;
-extern queue<PacketComm> rfm98_queue;
 extern queue<PacketComm> pdu_queue;
+extern queue<PacketComm> rpi_queue;
 
 // Other Mutex
-extern Threads::Mutex spi_mtx;
 extern Threads::Mutex spi1_mtx;
+extern Threads::Mutex i2c1_mtx;
 
 // Utility Functions
 int kill_thread(char *thread_name);

@@ -8,6 +8,7 @@ Threads::Mutex astrodev_queue_mtx;
 Threads::Mutex rfm23_queue_mtx;
 Threads::Mutex rfm98_queue_mtx;
 Threads::Mutex pdu_queue_mtx;
+Threads::Mutex rpi_queue_mtx;
 
 // Command Queues
 queue<PacketComm> main_queue;
@@ -15,10 +16,11 @@ queue<PacketComm> astrodev_queue;
 queue<PacketComm> rfm23_queue;
 queue<PacketComm> rfm98_queue;
 queue<PacketComm> pdu_queue;
+queue<PacketComm> rpi_queue;
 
 // Other Mutex
-Threads::Mutex spi_mtx;
 Threads::Mutex spi1_mtx;
+Threads::Mutex i2c1_mtx;
 
 // Utility Functions
 int kill_thread(char *thread_name)
@@ -39,14 +41,14 @@ int kill_thread(char *thread_name)
 // Thread-safe way of pushing onto the packet queue
 int32_t PushQueue(PacketComm *packet, queue<PacketComm> &queue, Threads::Mutex &mtx)
 {
-    Threads::Scope scope(mtx);
+    Threads::Scope lock(mtx);
     queue.push(*packet);
     return 1;
 }
 // Thread-safe way of pulling from the packet queue
 int32_t PullQueue(PacketComm *packet, queue<PacketComm> &queue, Threads::Mutex &mtx)
 {
-    Threads::Scope scope(mtx);
+    Threads::Scope lock(mtx);
     if (queue.size() > 0)
     {
         *packet = queue.front();

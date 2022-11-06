@@ -5,6 +5,7 @@
 #include <TeensyThreads.h>
 #include <rfm23.h>
 #include <Wire.h>
+#include <i2c_driver_wire.h>
 #include <Adafruit_LIS3MDL.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_LSM6DSOX.h>
@@ -20,6 +21,7 @@ namespace Artemis
         {
             void rfm23_channel();
             void pdu_channel();
+            void rpi_channel();
         }
     }
 }
