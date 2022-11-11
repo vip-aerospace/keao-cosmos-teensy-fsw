@@ -39,7 +39,7 @@ namespace Artemis
                 void reset();
                 bool init();
                 void send(const uint8_t *input, size_t length);
-                bool recv(PacketComm *packet);
+                bool recv(PacketComm &packet);
             };
         }
     }

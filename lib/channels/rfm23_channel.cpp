@@ -13,7 +13,7 @@ void Artemis::Teensy::Channels::rfm23_channel()
 
     while (true)
     {
-        if (PullQueue(&packet, rfm23_queue, rfm23_queue_mtx))
+        if (PullQueue(packet, rfm23_queue, rfm23_queue_mtx))
         {
             switch (packet.header.type)
             {
@@ -31,7 +31,7 @@ void Artemis::Teensy::Channels::rfm23_channel()
             }
         }
 
-        if (rfm23.recv(&packet))
+        if (rfm23.recv(packet))
         {
             Serial.print("[RFM23] RECEIVED: [");
             for (size_t i = 0; i < packet.data.size(); i++)

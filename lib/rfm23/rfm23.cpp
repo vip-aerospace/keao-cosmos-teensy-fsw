@@ -75,7 +75,7 @@ namespace Artemis
                 Serial.println("]");
             }
 
-            bool RFM23::recv(PacketComm *packet)
+            bool RFM23::recv(PacketComm &packet)
             {
 
                 digitalWrite(RFM23_RX_ON, LOW);
@@ -86,11 +86,11 @@ namespace Artemis
                 rfm23.setModeRx();
                 if (rfm23.waitAvailableTimeout(100))
                 {
-                    packet->wrapped.resize(RH_RF22_MAX_MESSAGE_LEN);
-                    if (rfm23.recv(packet->wrapped.data(), &bytes_recieved))
+                    packet.wrapped.resize(RH_RF22_MAX_MESSAGE_LEN);
+                    if (rfm23.recv(packet.wrapped.data(), &bytes_recieved))
                     {
-                        packet->wrapped.resize(bytes_recieved);
-                        packet->Unwrap();
+                        packet.wrapped.resize(bytes_recieved);
+                        packet.Unwrap();
                         rfm23.setModeIdle();
 
                         return true;

@@ -55,7 +55,7 @@ void setup()
 
   // Threads
   thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::rfm23_channel), "rfm23 thread"});
-  thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::pdu_channel), "pdu thread"});
+  // thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::pdu_channel), "pdu thread"});
 }
 
 void loop()
@@ -72,19 +72,19 @@ void loop()
   {
     packet.data.push_back(data[i]);
   }
-  PushQueue(&packet, main_queue, main_queue_mtx);
+  PushQueue(packet, main_queue, main_queue_mtx);
   threads.delay(1000);
   // TODO: This packet should be sent from the ground station.
 
-  if (PullQueue(&packet, main_queue, main_queue_mtx))
+  if (PullQueue(packet, main_queue, main_queue_mtx))
   {
     if (packet.header.dest == NODES::GROUND_NODE_ID)
     {
-      PushQueue(&packet, rfm23_queue, rfm23_queue_mtx);
+      PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
     }
     else if (packet.header.dest == NODES::RPI_NODE_ID)
     {
-      PushQueue(&packet, rpi_queue, rpi_queue_mtx);
+      PushQueue(packet, rpi_queue, rpi_queue_mtx);
     }
     else if (packet.header.dest == NODES::TEENSY_NODE_ID)
     {
@@ -100,7 +100,7 @@ void loop()
       case PacketComm::TypeId::CommandEpsSwitchNumber:
       case PacketComm::TypeId::CommandEpsSwitchStatus:
       case PacketComm::TypeId::CommandEpsWatchdog:
-        PushQueue(&packet, pdu_queue, pdu_queue_mtx);
+        PushQueue(packet, pdu_queue, pdu_queue_mtx);
         break;
       case PacketComm::TypeId::CommandPing:
         packet.header.orig = NODES::TEENSY_NODE_ID;
@@ -113,7 +113,7 @@ void loop()
         {
           packet.data.push_back(data[i]);
         }
-        PushQueue(&packet, rfm23_queue, rfm23_queue_mtx);
+        PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
         break;
       default:
         break;
@@ -199,7 +199,7 @@ void read_temperature(void) // future make this its own library
   packet.header.type = PacketComm::TypeId::DataBeacon;
   packet.data.resize(sizeof(beacon));
   memcpy(packet.data.data(), &beacon, sizeof(beacon));
-  PushQueue(&packet, rfm23_queue, rfm23_queue_mtx);
+  PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
 }
 
 void read_current(void)
@@ -218,7 +218,7 @@ void read_current(void)
   packet.header.type = PacketComm::TypeId::DataBeacon;
   packet.data.resize(sizeof(beacon));
   memcpy(packet.data.data(), &beacon, sizeof(beacon));
-  PushQueue(&packet, rfm23_queue, rfm23_queue_mtx);
+  PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
 }
 
 void read_imu(void)
@@ -249,5 +249,5 @@ void read_imu(void)
   packet.header.type = PacketComm::TypeId::DataBeacon;
   packet.data.resize(sizeof(beacon));
   memcpy(packet.data.data(), &beacon, sizeof(beacon));
-  PushQueue(&packet, rfm23_queue, rfm23_queue_mtx);
+  PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
 }
