@@ -30,9 +30,17 @@ namespace Artemis
                 rfm23.setFrequency(RFM23_FREQ);   // frequency default is 434MHz
                 rfm23.setTxPower(RFM23_TX_POWER); // 20 is the max
 
+                /* RFM23 modulation schemes and data rates
+                 * <FSK_Rb125Fd125>   highest FSK data rate (125kbs)
+                 * <FSK_Rb2Fd5>       lowe FSK data rate (2kbs)
+                 * <GFSK_Rb125Fd125>  highest GFSK rate GFSK (125kbs)
+                 * <GFSK_Rb2Fd5>      lowest GFSK data rate (2kbs)
+                 * <FSK_Rb_512Fd2_5>  original FSK test modulation (0.512kbs)
+                 */
+
                 rfm23.sleep();
                 timeoutStart = millis();
-                while (!rfm23.setModemConfig(RH_RF22::FSK_Rb_512Fd2_5))
+                while (!rfm23.setModemConfig(RH_RF22::GFSK_Rb125Fd125))
                 {
                     if (millis() - timeoutStart > 10000)
                     {
@@ -55,22 +63,21 @@ namespace Artemis
 
             void RFM23::send(const uint8_t *msg, size_t length)
             {
-                digitalWrite(RFM23_RX_ON, HIGH);
+                digitalWrite(RFM23_RX_ON, LOW);
                 digitalWrite(RFM23_TX_ON, LOW);
 
                 Threads::Scope lock(spi1_mtx);
                 rfm23.setModeTx();
+                Serial.print(length);
                 rfm23.send(msg, length);
-                // rfm23.waitPacketSent();
-
-                threads.delay(1000);
+                rfm23.waitPacketSent();
 
                 rfm23.sleep();
                 rfm23.setModeIdle();
                 Serial.print("[RFM23] SENDING: [");
                 for (size_t i = 0; i < length; i++)
                 {
-                    Serial.print(msg[i]);
+                    Serial.print(msg[i], HEX);
                 }
                 Serial.println("]");
             }
@@ -80,13 +87,16 @@ namespace Artemis
 
                 digitalWrite(RFM23_RX_ON, LOW);
                 digitalWrite(RFM23_TX_ON, HIGH);
-                uint8_t bytes_recieved = 0;
 
                 Threads::Scope lock(spi1_mtx);
                 rfm23.setModeRx();
-                if (rfm23.waitAvailableTimeout(100))
+                int wait_time = 5000 - rfm23_queue.size() * 1000;
+                if (wait_time < 100)
+                    wait_time = 100;
+                if (rfm23.waitAvailableTimeout(wait_time))
                 {
                     packet.wrapped.resize(RH_RF22_MAX_MESSAGE_LEN);
+                    uint8_t bytes_recieved = packet.wrapped.size();
                     if (rfm23.recv(packet.wrapped.data(), &bytes_recieved))
                     {
                         packet.wrapped.resize(bytes_recieved);
