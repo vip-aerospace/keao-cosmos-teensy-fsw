@@ -24,8 +24,7 @@ void Artemis::Teensy::Channels::rfm23_channel()
             case PacketComm::TypeId::DataAdcsResponse:
             case PacketComm::TypeId::DataResponse:
             {
-                packet.Wrap();
-                rfm23.send(packet.wrapped.data(), packet.wrapped.size());
+                rfm23.send(packet);
                 threads.delay(500);
                 break;
             }
@@ -42,6 +41,7 @@ void Artemis::Teensy::Channels::rfm23_channel()
                 Serial.print(packet.data[i], HEX);
             }
             Serial.println("]");
+            PushQueue(packet, main_queue, main_queue_mtx);
         }
         threads.delay(10);
     }

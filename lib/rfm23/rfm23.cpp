@@ -92,12 +92,12 @@ namespace Artemis
                 digitalWrite(RFM23_TX_ON, HIGH);
 
                 Threads::Scope lock(spi1_mtx);
-                rfm23.setModeRx();
                 int wait_time = 5000 - rfm23_queue.size() * 1000;
                 if (wait_time < 100)
                     wait_time = 100;
                 if (rfm23.waitAvailableTimeout(wait_time))
                 {
+                    packet.wrapped.resize(0);
                     packet.wrapped.resize(RH_RF22_MAX_MESSAGE_LEN);
                     uint8_t bytes_recieved = packet.wrapped.size();
                     if (rfm23.recv(packet.wrapped.data(), &bytes_recieved))

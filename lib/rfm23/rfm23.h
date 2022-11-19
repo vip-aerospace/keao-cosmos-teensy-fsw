@@ -2,7 +2,7 @@
 #define _RFM23_H
 
 #undef RH_RF22_MAX_MESSAGE_LEN
-#define RH_RF22_MAX_MESSAGE_LEN 64
+#define RH_RF22_MAX_MESSAGE_LEN 50
 
 // #include <SPI.h>
 #include <RH_RF22.h>

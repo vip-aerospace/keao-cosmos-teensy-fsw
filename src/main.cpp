@@ -36,7 +36,7 @@ namespace
 
   // Temperature Sensors
   const int temps[ARTEMIS_TEMP_SENSOR_COUNT] = {A0, A1, A6, A7, A8, A9, A17};
-  // const char *temp_sen_names[ARTEMIS_TEMP_SENSOR_COUNT] = {"solar_panel_1", "solar_panel_2", "solar_panel_3", "solar_panel_4", "battery_board"};
+  // const char *temp_sen_names[ARTEMIS_TEMP_SENSOR_COUNT] = {"obc", "pdu", "battery board", "solar pannel 1", "solar panel 2", "solar panel 3", "solar panel 4"};
 
   elapsedMillis sensortimer;
   elapsedMillis uptime;
@@ -47,7 +47,6 @@ void setup()
   Serial.begin(115200);
   usb.begin();
   pinMode(RPI_ENABLE, OUTPUT);
-  digitalWrite(RPI_ENABLE, HIGH);
   delay(3000);
 
   setup_magnetometer();
@@ -58,7 +57,7 @@ void setup()
 
   // Threads
   thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::rfm23_channel, 0, 6000), "rfm23 thread"});
-  // thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::pdu_channel), "pdu thread"});
+  thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::pdu_channel), "pdu thread"});
 }
 
 void loop()
@@ -99,6 +98,21 @@ void loop()
       case PacketComm::TypeId::CommandEpsSetTime:
       case PacketComm::TypeId::CommandEpsState:
       case PacketComm::TypeId::CommandEpsSwitchName:
+      {
+        Artemis::Teensy::PDU::PDU_CMD switchid = (Artemis::Teensy::PDU::PDU_CMD)packet.data[0];
+        switch (switchid)
+        {
+        case Artemis::Teensy::PDU::PDU_CMD::RPI:
+        {
+          digitalWrite(RPI_ENABLE, packet.data[1]);
+          break;
+        }
+        default:
+          PushQueue(packet, pdu_queue, pdu_queue_mtx);
+          break;
+        }
+      }
+      break;
       case PacketComm::TypeId::CommandEpsSwitchNames:
       case PacketComm::TypeId::CommandEpsSwitchNumber:
       case PacketComm::TypeId::CommandEpsSwitchStatus:
@@ -127,13 +141,11 @@ void loop()
   {
     sensortimer -= 5000;
 
-#ifdef SEND_CODE
-    read_temperature();
-    read_current(0, 2);
-    read_current(2, ARTEMIS_CURRENT_SENSOR_COUNT);
-    read_imu();
-    read_mag();
-#endif
+    // read_temperature();
+    // read_current(0, 2);
+    // read_current(2, ARTEMIS_CURRENT_SENSOR_COUNT);
+    // read_imu();
+    // read_mag();
   }
   threads.delay(10);
 }

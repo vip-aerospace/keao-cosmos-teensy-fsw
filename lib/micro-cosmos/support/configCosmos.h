@@ -146,7 +146,7 @@ using namespace Cosmos::Support;
 // --------------------- LINUX ------------------------------------
 // linux definition can be UNIX or __unix__ or LINUX or __linux__.
 // For GCC on Linux: __GNUC__
-#ifdef __linux__
+#if defined(__linux__) || defined(USE_LINUX_LIBRARIES)
 //! \addtogroup defs_macros More Special COSMOS macros
 //! @{
 #define COSMOS_LINUX_OS
@@ -166,6 +166,7 @@ using namespace Cosmos::Support;
 #include <sys/vfs.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
+#include "json11.hpp"
 #endif
 #endif
 
@@ -207,6 +208,7 @@ using namespace Cosmos::Support;
 #include <thread>
 #include <io.h>
 #include <process.h>
+#include "json11.hpp"
 
 #endif
 
@@ -231,6 +233,7 @@ using namespace Cosmos::Support;
 #include <sys/time.h>
 #include <sys/param.h>
 #include <sys/mount.h>
+#include "json11.hpp"
 #endif
 
 // --------------------- CYGWIN ------------------------------------
@@ -251,9 +254,7 @@ using namespace Cosmos::Support;
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/vfs.h>
+#include "json11.hpp"
 #endif // COSMOS_CYGWIN_OS
-
-//#include "json11.hpp"
-
 
 #endif // CONFIGCOSMOS_H
