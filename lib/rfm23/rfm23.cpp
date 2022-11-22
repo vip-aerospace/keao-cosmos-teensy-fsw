@@ -70,7 +70,6 @@ namespace Artemis
                 packet.Wrap();
 
                 Threads::Scope lock(spi1_mtx);
-                rfm23.setModeTx();
                 rfm23.send(packet.wrapped.data(), packet.wrapped.size());
                 rfm23.waitPacketSent();
 
@@ -102,6 +101,7 @@ namespace Artemis
                     uint8_t bytes_recieved = packet.wrapped.size();
                     if (rfm23.recv(packet.wrapped.data(), &bytes_recieved))
                     {
+                        threads.delay(1000);
                         packet.wrapped.resize(bytes_recieved);
                         iretn = packet.Unwrap();
                         rfm23.setModeIdle();

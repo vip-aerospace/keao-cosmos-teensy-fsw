@@ -8,6 +8,9 @@ namespace
 
 void Artemis::Teensy::Channels::pdu_channel()
 {
+    threads.delay(5000);
+    while (!Serial1)
+        ;
     // Enable burn wire
     pdu.PDU_SWITCH(Artemis::Teensy::PDU::PDU_CMD::BURN, true);
     threads.delay(10000);

@@ -36,9 +36,9 @@ void Artemis::Teensy::Channels::rfm23_channel()
         if (rfm23.recv(packet))
         {
             Serial.print("[RFM23] RECEIVED: [");
-            for (size_t i = 0; i < packet.data.size(); i++)
+            for (size_t i = 0; i < packet.wrapped.size(); i++)
             {
-                Serial.print(packet.data[i], HEX);
+                Serial.print(packet.wrapped[i], HEX);
             }
             Serial.println("]");
             PushQueue(packet, main_queue, main_queue_mtx);
