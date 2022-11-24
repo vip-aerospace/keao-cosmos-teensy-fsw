@@ -62,21 +62,6 @@ void setup()
 
 void loop()
 {
-  // TODO: This packet should be sent from the ground station.
-  // Temporarily placed here for testing.
-  // packet.header.orig = NODES::GROUND_NODE_ID;
-  // packet.header.dest = NODES::TEENSY_NODE_ID;
-  // packet.header.radio = ARTEMIS_RADIOS::RFM23;
-  // packet.header.type = PacketComm::TypeId::CommandPing;
-  // packet.data.resize(0);
-  const char *data = "Ping";
-  // for (size_t i = 0; i < strlen(data); i++)
-  // {
-  //   packet.data.push_back(data[i]);
-  // }
-  // PushQueue(packet, main_queue, main_queue_mtx);
-  // threads.delay(1000);
-  // TODO: This packet should be sent from the ground station.
 
   if (PullQueue(packet, main_queue, main_queue_mtx))
   {
@@ -99,7 +84,7 @@ void loop()
         packet.header.radio = ARTEMIS_RADIOS::RFM23;
         packet.header.type = PacketComm::TypeId::DataPong;
         packet.data.resize(0);
-        data = "Pong";
+        const char *data = "Pong";
         for (size_t i = 0; i < strlen(data); i++)
         {
           packet.data.push_back(data[i]);
