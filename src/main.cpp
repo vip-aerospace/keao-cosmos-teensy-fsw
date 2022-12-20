@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <vector>
 #include <artemis_channels.h>
-#include <support/configCosmos.h>
+#include <support/configCosmosKernel.h>
 #include <USBHost_t36.h>
 #include "artemisbeacons.h"
 
@@ -64,7 +64,7 @@ void setup()
 void loop()
 {
   // Testing I2C, delete later
-  packet.header.type = PacketComm ::TypeId::CommandTakePhoto;
+  packet.header.type = (PacketComm ::TypeId)200;
   packet.header.orig = NODES::TEENSY_NODE_ID;
   packet.header.dest = NODES::RPI_NODE_ID;
   packet.data.resize(0);
