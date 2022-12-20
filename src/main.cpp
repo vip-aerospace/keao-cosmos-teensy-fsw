@@ -56,6 +56,7 @@ void setup()
   threads.setSliceMillis(10);
 
   // Threads
+  thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::rpi_channel), "rpi thread"});
   thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::rfm23_channel, 0, 6000), "rfm23 thread"});
   thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::pdu_channel), "pdu thread"});
 }
