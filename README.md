@@ -11,8 +11,8 @@ Current Functionality of the software:
   * Will not turn on RPi if battery levels are too low, unless given overide command
 * Turn on/off voltage switches on the PDU
 * Send telem (temp, current, and imu) data
-  * periodically automatically sends data
-  * can manually request data
+  * Periodically sends data automatically
+  * Can manually request data as well 
 * Receive take photo command and forwards to RPi
 * If battery temp is low heaters are automatically turned on/off
 
