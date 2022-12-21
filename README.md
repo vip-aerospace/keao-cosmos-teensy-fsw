@@ -21,4 +21,4 @@ This repository contains the flight software for the Artemis Teensy 4.1 microcon
 
 ## Flight Software Architetcture 
 
-![Flight Software Architetcture](FSWArchitecture.png)
+![Flight Software Architetcture](/image/FSWArchitecture.png)
