@@ -104,10 +104,10 @@ void loop()
       }
       case PacketComm::TypeId::CommandEpsSwitchName:
       {
-        Artemis::Teensy::PDU::PDU_CMD switchid = (Artemis::Teensy::PDU::PDU_CMD)packet.data[0];
+        Artemis::Teensy::PDU::PDU_SW switchid = (Artemis::Teensy::PDU::PDU_SW)packet.data[0];
         switch (switchid)
         {
-        case Artemis::Teensy::PDU::PDU_CMD::RPI:
+        case Artemis::Teensy::PDU::PDU_SW::RPI:
         {
           digitalWrite(RPI_ENABLE, packet.data[1]);
           break;
@@ -130,13 +130,38 @@ void loop()
       }
     }
   }
-  if (sensortimer > 60000 * 10)
+  if (sensortimer > 60000 * 1)
   {
-    sensortimer -= 60000 * 10;
+    sensortimer -= 60000 * 1;
     read_temperature();
     read_current();
     read_imu();
     read_mag();
+
+    int temperature = analogRead(A6);
+    float temperatureC = (temperature * 0.004882814) - 50.0;
+    if (temperatureC > TEMP_THRESHOLD)
+    {
+      packet.header.orig = NODES::TEENSY_NODE_ID;
+      packet.header.dest = NODES::RPI_NODE_ID;
+      packet.header.radio = ARTEMIS_RADIOS::NONE;
+      packet.header.type = PacketComm::TypeId::CommandEpsSwitchName;
+      packet.data.resize(0);
+      packet.data.push_back((uint8_t)Artemis::Teensy::PDU::PDU_SW::SW_5V_1);
+      packet.data.push_back(0);
+      PushQueue(packet, pdu_queue, pdu_queue_mtx);
+    }
+    else
+    {
+      packet.header.orig = NODES::TEENSY_NODE_ID;
+      packet.header.dest = NODES::RPI_NODE_ID;
+      packet.header.radio = ARTEMIS_RADIOS::NONE;
+      packet.header.type = PacketComm::TypeId::CommandEpsSwitchName;
+      packet.data.resize(0);
+      packet.data.push_back((uint8_t)Artemis::Teensy::PDU::PDU_SW::SW_5V_1);
+      packet.data.push_back(1);
+      PushQueue(packet, pdu_queue, pdu_queue_mtx);
+    }
   }
   threads.delay(10);
 }

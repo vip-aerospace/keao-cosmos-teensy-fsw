@@ -13,6 +13,9 @@
 
 #define MAXQUEUESIZE 50
 
+// Battery temperature threshold for heater on/off
+const int TEMP_THRESHOLD = 26;
+
 // Nodes
 enum NODES : uint8_t
 {
