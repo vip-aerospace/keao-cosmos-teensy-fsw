@@ -56,7 +56,6 @@ void setup()
   threads.setSliceMillis(10);
 
   // Threads
-  thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::rpi_channel), "rpi thread"});
   thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::rfm23_channel, 0, 6000), "rfm23 thread"});
   thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::pdu_channel), "pdu thread"});
 }
@@ -109,7 +108,16 @@ void loop()
         {
         case Artemis::Teensy::PDU::PDU_SW::RPI:
         {
-          digitalWrite(RPI_ENABLE, packet.data[1]);
+          float curr_V = p[4]->getBusVoltage_V();
+          if ((packet.data[1] == 1 && curr_V >= 7.0) || (packet.data[1] == 1 && packet.data[2] == 1))
+          {
+            digitalWrite(RPI_ENABLE, packet.data[1]);
+            thread_list.push_back({threads.addThread(Artemis::Teensy::Channels::rpi_channel), "rpi thread"});
+          }
+          else if (packet.data[1] == 0)
+          {
+            PushQueue(packet, rpi_queue, rpi_queue_mtx);
+          }
           break;
         }
         default:

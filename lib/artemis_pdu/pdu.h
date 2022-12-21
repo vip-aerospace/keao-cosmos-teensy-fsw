@@ -21,6 +21,7 @@ namespace Artemis
                 CommandGetSwitchStatus,
                 DataPong,
                 DataSwitchStatus,
+                DataSwitchTelem,
             };
 
             enum class PDU_SW : uint8_t

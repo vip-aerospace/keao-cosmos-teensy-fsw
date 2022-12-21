@@ -6,7 +6,6 @@ void sendData();
 namespace
 {
     PacketComm packet;
-    size_t send_index = 0;
     bool ready = false;
 }
 
@@ -15,11 +14,19 @@ void Artemis::Teensy::Channels::rpi_channel()
     I2C_Wire1.begin(0x08);
     I2C_Wire1.onReceive(receiveData);
     I2C_Wire1.onRequest(sendData);
+    pinMode(PI_STATUS, INPUT);
 
     packet.wrapped.resize(0);
 
     while (true)
     {
+        if (digitalRead(PI_STATUS) == 0)
+        {
+            digitalWrite(RPI_ENABLE, 0);
+            rpi_queue.empty();
+            kill_thread("rpi thread");
+        }
+
         if (!ready && PullQueue(packet, rpi_queue, rpi_queue_mtx))
         {
             packet.Wrap();
