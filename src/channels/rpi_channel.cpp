@@ -1,10 +1,13 @@
-#include "artemis_channels.h"
+#include "channels/artemis_channels.h"
+#include <i2c_driver_wire.h>
+#include <pdu.h>
 
 void receiveData(int byte_count);
 void sendData();
 
 namespace
 {
+    using namespace Artemis;
     PacketComm packet;
     bool ready = false;
 }
@@ -20,19 +23,32 @@ void Artemis::Teensy::Channels::rpi_channel()
 
     while (true)
     {
-        if (digitalRead(PI_STATUS) == 0)
-        {
-            digitalWrite(RPI_ENABLE, 0);
-            rpi_queue.empty();
-            kill_thread("rpi thread");
-        }
-
         if (!ready && PullQueue(packet, rpi_queue, rpi_queue_mtx))
         {
+            // Special case to turn Pi off and kill RPI Channel
+            if (packet.header.type == PacketComm::TypeId::CommandEpsSwitchName)
+            {
+                if ((Artemis::Teensy::PDU::PDU_SW)packet.data[0] == Artemis::Teensy::PDU::PDU_SW::RPI && packet.data[1] == 0)
+                {
+                    // Wait for PI_STATUS to turn off
+                    while (digitalRead(PI_STATUS))
+                        ;
+                    threads.delay(10000); // Wait 10s just to be safe
+                    digitalWrite(RPI_ENABLE, LOW);
+
+                    // Empty RPI Queue
+                    while (!rpi_queue.empty())
+                        rpi_queue.pop_front();
+
+                    kill_thread(Artemis::Teensy::Channels::Channel_ID::RPI_CHANNEL);
+                    return;
+                }
+            }
+
             packet.Wrap();
             ready = true;
         }
-        delay(100);
+        threads.delay(100);
     }
 }
 

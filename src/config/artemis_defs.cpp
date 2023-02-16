@@ -1,4 +1,4 @@
-#include <artemis_defs.h>
+#include "config/artemis_defs.h"
 
 vector<struct thread_struct> thread_list;
 
@@ -8,37 +8,28 @@ std::map<string, NODES> NodeType = {
     {"artemis_rpi", NODES::RPI_NODE_ID},
 };
 
-std::map<string, ARTEMIS_RADIOS> RadioType = {
-    {"none", ARTEMIS_RADIOS::NONE},
-    {"rfm23", ARTEMIS_RADIOS::RFM23},
-};
-
 // Mutex for Command Queues
 Threads::Mutex main_queue_mtx;
-Threads::Mutex astrodev_queue_mtx;
 Threads::Mutex rfm23_queue_mtx;
-Threads::Mutex rfm98_queue_mtx;
 Threads::Mutex pdu_queue_mtx;
 Threads::Mutex rpi_queue_mtx;
 
 // Command Queues
-queue<PacketComm> main_queue;
-queue<PacketComm> astrodev_queue;
-queue<PacketComm> rfm23_queue;
-queue<PacketComm> rfm98_queue;
-queue<PacketComm> pdu_queue;
-queue<PacketComm> rpi_queue;
+std::deque<PacketComm> main_queue;
+std::deque<PacketComm> rfm23_queue;
+std::deque<PacketComm> pdu_queue;
+std::deque<PacketComm> rpi_queue;
 
 // Other Mutex
 Threads::Mutex spi1_mtx;
 Threads::Mutex i2c1_mtx;
 
 // Utility Functions
-int kill_thread(char *thread_name)
+int kill_thread(uint8_t channel_id)
 {
     for (auto it = thread_list.begin(); it != thread_list.end(); it++)
     {
-        if (it->thread_name == thread_name)
+        if (it->channel_id == channel_id)
         {
             int ret = it->thread_id;
             threads.kill(it->thread_id);
@@ -49,26 +40,24 @@ int kill_thread(char *thread_name)
     return -1;
 }
 
-// Thread-safe way of pushing onto the packet queue
-int32_t PushQueue(PacketComm &packet, queue<PacketComm> &queue, Threads::Mutex &mtx) // change pointers to references
+int32_t PushQueue(PacketComm &packet, std::deque<PacketComm> &queue, Threads::Mutex &mtx)
 {
     Threads::Scope lock(mtx);
-
-    queue.push(packet);
-    if (queue.size() >= MAXQUEUESIZE)
+    if (queue.size() > MAXQUEUESIZE)
     {
-        queue.pop();
+        queue.pop_front();
     }
+    queue.push_back(packet);
     return 1;
 }
-// Thread-safe way of pulling from the packet queue
-int32_t PullQueue(PacketComm &packet, queue<PacketComm> &queue, Threads::Mutex &mtx)
+
+int32_t PullQueue(PacketComm &packet, std::deque<PacketComm> &queue, Threads::Mutex &mtx)
 {
     Threads::Scope lock(mtx);
     if (queue.size() > 0)
     {
         packet = queue.front();
-        queue.pop();
+        queue.pop_front();
         return 1;
     }
     else
