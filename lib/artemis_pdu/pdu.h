@@ -1,7 +1,9 @@
 #ifndef _PDU_H
 #define _PDU_H
 
+#include <Arduino.h>
 #include <stdint.h>
+#include <TeensyThreads.h>
 #include "support/configCosmosKernel.h"
 
 #define PDU_CMD_OFFSET 48
@@ -71,11 +73,20 @@ namespace Artemis
                 uint8_t sw_state = 0;
             };
 
-            PDU(int baud_rate);
-            void set_switch(PDU_SW sw, uint8_t enable);
-            bool get_switch(PDU_SW sw);
-            void send(pdu_packet packet);
-            bool recv();
+            struct __attribute__((packed)) pdu_telem
+            {
+                PDU_Type type = PDU_Type::DataSwitchTelem;
+                uint8_t sw_state[12];
+            };
+
+            PDU(HardwareSerial *hw_serial, int baud_rate);
+            int32_t set_switch(PDU_SW sw, uint8_t enable);
+            int32_t get_switch(PDU_SW sw);
+            int32_t send(pdu_packet packet);
+            int32_t recv(std::string &response);
+
+        private:
+            HardwareSerial *serial;
         };
     }
 }
