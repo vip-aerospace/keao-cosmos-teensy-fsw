@@ -25,15 +25,6 @@ void send_test_packets()
     PushQueue(packet, rpi_queue, rpi_queue_mtx);
 #endif
 
-#ifdef TEST_ASTRODEV
-    packet.header.type = PacketComm::TypeId::DataObcPong;
-    packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
-    packet.header.nodedest = (uint8_t)NODES::GROUND_NODE_ID;
-    packet.header.chanorig = 0;
-    packet.header.chandest = Artemis::Teensy::Channels::Channel_ID::ASTRODEV_CHANNEL;
-    PushQueue(packet, main_queue, main_queue_mtx);
-#endif
-
 #ifdef TEST_PDU
     packet.header.type = PacketComm::TypeId::CommandEpsSwitchName;
     packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
