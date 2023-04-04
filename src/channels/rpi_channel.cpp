@@ -17,7 +17,7 @@ void Artemis::Teensy::Channels::rpi_channel()
     I2C_Wire1.begin(0x08);
     I2C_Wire1.onReceive(receiveData);
     I2C_Wire1.onRequest(sendData);
-    pinMode(PI_STATUS, INPUT);
+    pinMode(UART6_RX, INPUT);
 
     packet.wrapped.resize(0);
 
@@ -31,7 +31,7 @@ void Artemis::Teensy::Channels::rpi_channel()
                 if ((Artemis::Teensy::PDU::PDU_SW)packet.data[0] == Artemis::Teensy::PDU::PDU_SW::RPI && packet.data[1] == 0)
                 {
                     // Wait for PI_STATUS to turn off
-                    while (digitalRead(PI_STATUS))
+                    while (digitalRead(UART6_RX))
                         ;
                     threads.delay(10000); // Wait 10s just to be safe
                     digitalWrite(RPI_ENABLE, LOW);

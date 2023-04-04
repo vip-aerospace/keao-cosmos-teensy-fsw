@@ -117,7 +117,10 @@ namespace Artemis
                         rfm23.setModeIdle();
 
                         if (iretn < 0)
+                        {
+                            Serial.println("received, not packetcomm");
                             return -1;
+                        }
 
                         return packet.wrapped.size();
                     }

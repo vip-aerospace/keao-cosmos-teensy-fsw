@@ -69,7 +69,7 @@ void loop()
   {
     if (packet.header.nodedest == (uint8_t)NODES::GROUND_NODE_ID)
     {
-      switch (packet.header.chandest)
+      switch (packet.header.chanout)
       {
       case Channels::Channel_ID::RFM23_CHANNEL:
         PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
@@ -97,7 +97,7 @@ void loop()
         {
           packet.data.push_back(data[i]);
         }
-        switch (packet.header.chandest)
+        switch (packet.header.chanout)
         {
         case Channels::Channel_ID::RFM23_CHANNEL:
           PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
@@ -175,14 +175,14 @@ void loop()
   }
 
   // Periodic Telemetry
-  if (sensortimer > 10000)
+  if (sensortimer > 60000)
   {
     sensortimer = 0;
-    devices.read_temperature(uptime);
-    devices.read_current(uptime);
-    devices.read_imu(uptime);
-    devices.read_mag(uptime);
-    devices.read_gps(uptime);
+    // devices.read_temperature(uptime);
+    // devices.read_current(uptime);
+    // devices.read_imu(uptime);
+    // devices.read_mag(uptime);
+    // devices.read_gps(uptime);
   }
   devices.update_gps();
 

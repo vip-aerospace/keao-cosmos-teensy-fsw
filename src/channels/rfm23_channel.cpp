@@ -18,7 +18,7 @@ namespace
             .rx_on = RX_ON,
         },
     };
-    
+
     RFM23 rfm23(config.pins.cs, config.pins.nirq, hardware_spi1);
     PacketComm packet;
     elapsedMillis telem;
@@ -56,10 +56,12 @@ void Artemis::Teensy::Channels::rfm23_channel()
             timeout = 100;
         if (rfm23.recv(packet, (uint16_t)timeout) >= 0)
         {
-            Serial.print("[RFM23] RECEIVED: [");
-            for (size_t i = 0; i < packet.data.size(); i++)
+            Serial.print("[RFM23] RECEIVED ");
+            Serial.print(packet.wrapped.size());
+            Serial.print(" BYTES: [");
+            for (size_t i = 0; i < packet.wrapped.size(); i++)
             {
-                Serial.print(packet.data[i], HEX);
+                Serial.print(packet.wrapped[i], HEX);
             }
             Serial.println("]");
             PushQueue(packet, main_queue, main_queue_mtx);
