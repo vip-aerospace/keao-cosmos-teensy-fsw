@@ -56,9 +56,9 @@ void Artemis::Teensy::Channels::rfm23_channel()
             timeout = 100;
         if (rfm23.recv(packet, (uint16_t)timeout) >= 0)
         {
-            Serial.print("[RFM23] RECEIVED ");
+            Serial.print("Radio received ");
             Serial.print(packet.wrapped.size());
-            Serial.print(" BYTES: [");
+            Serial.print(" bytes: [");
             for (size_t i = 0; i < packet.wrapped.size(); i++)
             {
                 Serial.print(packet.wrapped[i], HEX);
@@ -69,7 +69,7 @@ void Artemis::Teensy::Channels::rfm23_channel()
 
         if (telem > 10000)
         {
-            Serial.print("[RFM23] TSEN = ");
+            Serial.print("Radio temperature = ");
             Serial.println(rfm23.get_tsen());
             telem = 0;
         }

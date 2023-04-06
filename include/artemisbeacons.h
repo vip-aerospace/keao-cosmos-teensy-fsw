@@ -58,7 +58,7 @@ struct __attribute__((packed)) gpsbeacon
 {
     TypeId type = TypeId::gps;
     uint32_t deci = 0;
-    float latitude = 0, longitude = 0, speed = 0, angle = 0, altitude = 0, satellites = 0;
+    float latitude = 0, longitude = 0, speed = 0, angle = 0, altitude = 0, satellites = 0, hour = 0, minute = 0, seconds = 0, milliseconds = 0, day = 0, month = 0, year = 0;
 };
 
 #endif // _ARTEMIS_BEACONS_H

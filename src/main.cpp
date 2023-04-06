@@ -52,8 +52,8 @@ void setup()
   threads.setSliceMillis(10);
 
   // Threads
-  thread_list.push_back({threads.addThread(Channels::rfm23_channel, 9000), Channels::Channel_ID::RFM23_CHANNEL});
-  thread_list.push_back({threads.addThread(Channels::pdu_channel, 9000), Channels::Channel_ID::PDU_CHANNEL});
+  // thread_list.push_back({threads.addThread(Channels::rfm23_channel, 9000), Channels::Channel_ID::RFM23_CHANNEL});
+  // thread_list.push_back({threads.addThread(Channels::pdu_channel, 9000), Channels::Channel_ID::PDU_CHANNEL});
 
   Serial.println("Setup Complete");
 }
@@ -175,14 +175,14 @@ void loop()
   }
 
   // Periodic Telemetry
-  if (sensortimer > 60000)
+  if (sensortimer > 600000)
   {
     sensortimer = 0;
-    // devices.read_temperature(uptime);
-    // devices.read_current(uptime);
-    // devices.read_imu(uptime);
-    // devices.read_mag(uptime);
-    // devices.read_gps(uptime);
+    devices.read_temperature(uptime);
+    devices.read_current(uptime);
+    devices.read_imu(uptime);
+    devices.read_mag(uptime);
+    devices.read_gps(uptime);
   }
   devices.update_gps();
 

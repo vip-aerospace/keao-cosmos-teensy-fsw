@@ -5,11 +5,15 @@
 #include <support/packetcomm.h>
 #include <support/configCosmosKernel.h>
 
-// Sensor Defs
+// Current Sensor Defs
 #define ARTEMIS_CURRENT_BEACON_1_COUNT 2
 #define ARTEMIS_CURRENT_SENSOR_COUNT 5
+
+// Temperature Sensor Defs
 #define ARTEMIS_TEMP_SENSOR_COUNT 7
-#define AREF_VOLTAGE 3.3
+const float MV_PER_DEGREE_F = 1.0;             // 1 mV/°F
+const float OFFSET_F = 58.0;                   // 58 mV (58°F) offset in the output voltage
+const float MV_PER_ADC_UNIT = 3300.0 / 1024.0; // 3.3V reference voltage and 10-bit ADC resolution
 
 #define MAXQUEUESIZE 50
 
