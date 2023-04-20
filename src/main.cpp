@@ -41,12 +41,12 @@ void setup()
   iretn = devices.setup_magnetometer();
   if (iretn < 0)
   {
-    Serial.println("Fail to initialize magnetometer");
+    Serial.println("Failed to initialize magnetometer");
   }
   iretn = devices.setup_imu();
   if (iretn < 0)
   {
-    Serial.println("Fail to initialize IMU");
+    Serial.println("Failed to initialize IMU");
   }
   devices.setup_current();
   devices.setup_gps();
@@ -55,10 +55,10 @@ void setup()
 
   // Threads
   thread_list.push_back({threads.addThread(Channels::rfm23_channel, 9000), Channels::Channel_ID::RFM23_CHANNEL});
-  // thread_list.push_back({threads.addThread(Channels::pdu_channel, 9000), Channels::Channel_ID::PDU_CHANNEL});
+  thread_list.push_back({threads.addThread(Channels::pdu_channel, 9000), Channels::Channel_ID::PDU_CHANNEL});
   // thread_list.push_back({threads.addThread(Channels::rpi_channel, 9000), Channels::Channel_ID::RPI_CHANNEL});
 
-  Serial.println("Setup Complete");
+  Serial.println("Teensy Flight Software Setup Complete");
 }
 
 void loop()
@@ -86,7 +86,6 @@ void loop()
       if (!digitalRead(UART6_RX))
       {
         float curr_V = devices.current_sensors["battery_board"]->getBusVoltage_V();
-        Serial.println(curr_V);
         if ((packet.data[1] == 1 && curr_V >= 7.0) || (packet.data[1] == 1 && packet.data[2] == 1))
         {
           Serial.println(packet.data[1]);
@@ -143,7 +142,6 @@ void loop()
         case PDU::PDU_SW::RPI:
         {
           float curr_V = devices.current_sensors["battery_board"]->getBusVoltage_V();
-          Serial.println(curr_V);
           if ((packet.data[1] == 1 && curr_V >= 7.0) || (packet.data[1] == 1 && packet.data[2] == 1))
           {
             Serial.println(packet.data[1]);
@@ -199,6 +197,14 @@ void loop()
         devices.read_imu(uptime);
         devices.read_mag(uptime);
         devices.read_gps(uptime);
+
+        // Get PDU Switches
+        packet.header.type = PacketComm::TypeId::CommandEpsSwitchStatus;
+        packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
+        packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
+        packet.data.clear();
+        packet.data.push_back((uint8_t)Artemis::Teensy::PDU::PDU_SW::All);
+        PushQueue(packet, pdu_queue, pdu_queue_mtx);
       }
       default:
         break;

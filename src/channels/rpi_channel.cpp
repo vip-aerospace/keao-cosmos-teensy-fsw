@@ -58,7 +58,7 @@ void Artemis::Teensy::Channels::rpi_channel()
 void sendToPi()
 {
     packet.SLIPPacketize();
-    Serial.println("Forwarding to pi... ");
+    Serial.println("Forwarding to RPi");
     for (size_t i = 0; i < packet.packetized.size(); i++)
     {
         Serial.print((unsigned)packet.packetized[i]);
