@@ -89,7 +89,6 @@ namespace Artemis
 
                 threads.delay(100);
             }
-            // TODO: Send to PacketComm packet -> then to ground Ethan
             Serial.print("UART RECV: ");
             Serial.println(response.c_str());
             return 0;
