@@ -14,26 +14,22 @@ namespace Artemis
 
         int32_t PDU::send(pdu_packet packet)
         {
-            char *cmd = (char *)malloc(sizeof(packet));
-            memcpy(cmd, &packet, sizeof(packet));
-
-            std::string msg = "";
+            char *ptr = (char *)&packet;
             for (size_t i = 0; i < sizeof(packet); i++)
             {
-                msg += cmd[i] + PDU_CMD_OFFSET;
+                serial->print((char)(*(ptr + i) + PDU_CMD_OFFSET));
             }
-            serial->print(msg.c_str());
+            serial->write('\0');
             serial->print('\n');
 
             Serial.print("Sending to PDU: [");
-            for (size_t i = 0; i < msg.length(); i++)
+
+            for (size_t i = 0; i < sizeof(packet); i++)
             {
-                Serial.print(msg[i] - PDU_CMD_OFFSET, HEX);
+                Serial.print(*(ptr + i), HEX);
             }
             Serial.println(']');
-
-            free(cmd);
-            delay(1);
+            threads.delay(100);
             return 0;
         }
 
@@ -44,8 +40,8 @@ namespace Artemis
                 String UART1_RX = serial->readString();
                 if (UART1_RX.length() > 0)
                 {
-                    // Serial.print("UART RECV: ");
-                    // Serial.println(UART1_RX);
+                    Serial.print("UART received: ");
+                    Serial.print(UART1_RX);
                     response = UART1_RX.c_str();
                     return UART1_RX.length();
                 }
@@ -70,7 +66,7 @@ namespace Artemis
                 {
                     if (timeout > 5000)
                     {
-                        Serial.print("Attempt ");
+                        Serial.print("Attempt: ");
                         Serial.print(attempts);
                         Serial.println(": Failed to send CMD to PDU");
                         timeout = 0;
@@ -89,8 +85,8 @@ namespace Artemis
 
                 threads.delay(100);
             }
-            Serial.print("UART RECV: ");
-            Serial.println(response.c_str());
+            Serial.print("UART received: ");
+            Serial.print(response.c_str());
             return 0;
         }
 
@@ -110,7 +106,7 @@ namespace Artemis
                 {
                     if (timeout > 5000)
                     {
-                        Serial.print("Attempt ");
+                        Serial.print("Attempt: ");
                         Serial.print(attempts);
                         Serial.println(": Failed to send CMD to PDU");
                         timeout = 0;
@@ -128,8 +124,8 @@ namespace Artemis
                 }
                 threads.delay(100);
             }
-            Serial.print("UART RECV: ");
-            Serial.println(response.c_str());
+            Serial.print("UART received: ");
+            Serial.print(response.c_str());
             ret = response;
 
             if (sw == PDU_SW::All)

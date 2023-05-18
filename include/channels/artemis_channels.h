@@ -20,6 +20,7 @@ namespace Artemis
             void rfm23_channel();
             void pdu_channel();
             void rpi_channel();
+            void handle_pdu_queue();
         }
     }
 }

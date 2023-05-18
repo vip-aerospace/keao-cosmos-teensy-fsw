@@ -24,6 +24,8 @@ std::deque<PacketComm> rpi_queue;
 Threads::Mutex spi1_mtx;
 Threads::Mutex i2c1_mtx;
 
+bool deploymentmode = false;
+
 // Utility Functions
 int kill_thread(uint8_t channel_id)
 {

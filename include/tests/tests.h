@@ -1,7 +1,7 @@
 #include "channels/artemis_channels.h"
 
-#ifndef _PACKET_TESTS_H
-#define _PACKET_TESTS_H
+#ifndef _TESTS_H
+#define _TESTS_H
 
 // #define TEST_PI
 // #define TEST_I2C_PI
@@ -10,7 +10,9 @@
 // #define TEST_CAMERACAPTURE
 // #define TEST_RPI_SHUTDOWN
 // #define TEST_RFM23
+// #define TEST_THREADS
+// #define TEST_BEACONS
 
-void send_test_packets();
+void run_test();
 
-#endif //_PACKET_TESTS_H
+#endif //_TESTS_H

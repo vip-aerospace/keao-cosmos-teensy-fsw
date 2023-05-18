@@ -9,6 +9,7 @@
 #include <Adafruit_LSM6DSOX.h>
 #include <Adafruit_INA219.h>
 #include <Adafruit_GPS.h>
+#include <SD.h>
 
 namespace Artemis
 {

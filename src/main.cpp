@@ -6,7 +6,7 @@
 #include "channels/artemis_channels.h"
 #include "artemis_devices.h"
 #include "artemisbeacons.h"
-#include "tests/packet_tests.h"
+#include "tests/tests.h"
 
 // For setting Teensy Clock Frequency (only for Teensy 4.0 and 4.1)
 #if defined(__IMXRT1062__)
@@ -19,9 +19,13 @@ namespace
   Artemis::Devices devices;
   PacketComm packet;
   USBHost usb;
-  elapsedMillis sensortimer;
   elapsedMillis uptime;
   int32_t iretn = 0;
+
+  // Deployment variables
+  elapsedMillis deploymentbeacon;
+  // const unsigned long readInterval = 300000; // Flight
+  const unsigned long readInterval = 20000; // Testing
 }
 
 void setup()
@@ -34,7 +38,7 @@ void setup()
 
   usb.begin();
   pinMode(RPI_ENABLE, OUTPUT);
-  pinMode(UART6_TX, INPUT);
+
   delay(3000);
 
   iretn = devices.setup_magnetometer();
@@ -46,11 +50,11 @@ void setup()
   threads.setSliceMillis(10);
 
   // Threads
-  thread_list.push_back({threads.addThread(Channels::rfm23_channel, 9000), Channels::Channel_ID::RFM23_CHANNEL});
-  thread_list.push_back({threads.addThread(Channels::pdu_channel, 9000), Channels::Channel_ID::PDU_CHANNEL});
+  thread_list.push_back({threads.addThread(Channels::rfm23_channel, 0, 4096), Channels::Channel_ID::RFM23_CHANNEL});
+  thread_list.push_back({threads.addThread(Channels::pdu_channel, 0, 8192), Channels::Channel_ID::PDU_CHANNEL});
 
-// Only uncomment these when testing and you want to force the RPi to turn on  
-  // thread_list.push_back({threads.addThread(Channels::rpi_channel, 9000), Channels::Channel_ID::RPI_CHANNEL});
+  // Only uncomment these when testing and you want to force the RPi to turn on
+  // thread_list.push_back({threads.addThread(Channels::rpi_channel), Channels::Channel_ID::RPI_CHANNEL});
   // pinMode(RPI_ENABLE, HIGH);
 
   threads.delay(5000);
@@ -59,12 +63,38 @@ void setup()
 
 void loop()
 {
-#ifdef TEST_PACKETS
-  send_test_packets();
-  threads.delay(5000);
+  pinMode(UART6_RX, INPUT);
+
+#ifdef TESTS
+  run_test();
+  threads.delay(10000);
 #endif
-  pinMode(UART6_TX, INPUT);
-  Serial.println(digitalRead(UART6_TX));
+
+  // During deployment mode send beacons every 5 minutes for 2 weeks.
+  if (deploymentmode)
+  {
+    // Check if it's time to read the sensors
+    if (deploymentbeacon >= readInterval)
+    {
+      Serial.println("Deployment beacons sending");
+      devices.read_temperature(uptime);
+      devices.read_current(uptime);
+      devices.read_imu(uptime);
+      devices.read_mag(uptime);
+      devices.read_gps(uptime);
+
+      // Get PDU Switches
+      packet.header.type = PacketComm::TypeId::CommandEpsSwitchStatus;
+      packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
+      packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
+      packet.data.clear();
+      packet.data.push_back((uint8_t)Artemis::Teensy::PDU::PDU_SW::All);
+      PushQueue(packet, pdu_queue, pdu_queue_mtx);
+
+      // Reset the timer
+      deploymentbeacon = 0;
+    }
+  }
 
   if (PullQueue(packet, main_queue, main_queue_mtx))
   {
@@ -81,7 +111,7 @@ void loop()
     }
     else if (packet.header.nodedest == (uint8_t)NODES::RPI_NODE_ID)
     {
-      if (!digitalRead(UART6_TX))
+      if (!digitalRead(UART6_RX))
       {
         float curr_V = devices.current_sensors["battery_board"]->getBusVoltage_V();
         if ((curr_V >= 7.0) || 1)
@@ -210,26 +240,6 @@ void loop()
       }
     }
   }
-
-  // Periodic Telemetry
-  if (sensortimer > 600000)
-  {
-    sensortimer = 0;
-    devices.read_temperature(uptime);
-    devices.read_current(uptime);
-    devices.read_imu(uptime);
-    devices.read_mag(uptime);
-    devices.read_gps(uptime);
-
-    // Get PDU Switches
-    packet.header.type = PacketComm::TypeId::CommandEpsSwitchStatus;
-    packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
-    packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
-    packet.data.clear();
-    packet.data.push_back((uint8_t)Artemis::Teensy::PDU::PDU_SW::All);
-    PushQueue(packet, pdu_queue, pdu_queue_mtx);
-  }
   devices.update_gps();
-
-  threads.delay(1000);
+  threads.delay(100);
 }

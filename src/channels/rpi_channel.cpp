@@ -26,22 +26,15 @@ void Artemis::Teensy::Channels::rpi_channel()
                 if ((Artemis::Teensy::PDU::PDU_SW)packet.data[0] == Artemis::Teensy::PDU::PDU_SW::RPI && packet.data[1] == 0)
                 {
                     packet.header.type = PacketComm::TypeId::CommandObcHalt;
-
-                    // Wait for PI_STATUS to turn off
-                    while (digitalRead(UART6_TX))
-                    {
-                        Serial.println((uint16_t)packet.header.type);
-                        sendToPi();
-                        threads.delay(1000);
-                    }
-                    threads.delay(10000); // Wait 10s just to be safe
+                    sendToPi();
+                    threads.delay(20000); // Wait 20s to give the rpi time to turn off
                     digitalWrite(RPI_ENABLE, LOW);
 
                     // Empty RPI Queue
                     while (!rpi_queue.empty())
                         rpi_queue.pop_front();
 
-                    Serial.println("Kill RPI Thread");
+                    Serial.println("Killing RPi thread");
                     kill_thread(Artemis::Teensy::Channels::Channel_ID::RPI_CHANNEL);
                     return;
                 }
@@ -53,7 +46,6 @@ void Artemis::Teensy::Channels::rpi_channel()
         }
         threads.delay(100);
     }
-    
 }
 
 void sendToPi()

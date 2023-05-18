@@ -20,7 +20,8 @@ struct __attribute__((packed)) temperaturebeacon
 {
     TypeId type = TypeId::temperature;
     uint32_t deci = 0;
-    float temperatureC[ARTEMIS_TEMP_SENSOR_COUNT];
+    float tmp36_tempC[ARTEMIS_TEMP_SENSOR_COUNT];
+    float teensy_tempC = 0;
 };
 
 struct __attribute__((packed)) currentbeacon1

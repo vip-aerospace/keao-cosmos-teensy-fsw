@@ -19,14 +19,13 @@ namespace
         },
     };
 
-    RFM23 rfm23(config.pins.cs, config.pins.nirq, hardware_spi1);
+    RFM23 radio(config.pins.cs, config.pins.nirq, hardware_spi1);
     PacketComm packet;
-    elapsedMillis telem;
 }
 
 void Artemis::Teensy::Channels::rfm23_channel()
 {
-    while (rfm23.init(config, &spi1_mtx) < 0)
+    while (radio.init(config, &spi1_mtx) < 0)
         ;
 
     while (true)
@@ -42,7 +41,7 @@ void Artemis::Teensy::Channels::rfm23_channel()
             case PacketComm::TypeId::DataAdcsResponse:
             case PacketComm::TypeId::DataObcResponse:
             {
-                rfm23.send(packet);
+                radio.send(packet);
                 threads.delay(500);
                 break;
             }
@@ -54,7 +53,7 @@ void Artemis::Teensy::Channels::rfm23_channel()
         int32_t timeout = 5000 - rfm23_queue.size() * 1000;
         if (timeout < 100)
             timeout = 100;
-        if (rfm23.recv(packet, (uint16_t)timeout) >= 0)
+        if (radio.recv(packet, (uint16_t)timeout) >= 0)
         {
             Serial.print("Radio received ");
             Serial.print(packet.wrapped.size());
@@ -68,15 +67,6 @@ void Artemis::Teensy::Channels::rfm23_channel()
             threads.delay(2000);
             PushQueue(packet, main_queue, main_queue_mtx);
         }
-
-        // TODO
-        // if (telem > 10000)
-        // {
-        //     Serial.print("Radio temperature = ");
-        //     Serial.println(rfm23.get_tsen());
-        //     telem = 0;
-        // }
-
         threads.delay(10);
     }
 }

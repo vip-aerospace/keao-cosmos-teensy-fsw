@@ -41,10 +41,10 @@ namespace Artemis
                 int32_t send(PacketComm &packet);
                 int32_t recv(PacketComm &packet, uint16_t timeout);
                 int32_t set_tx_power(uint8_t power);
-                int32_t get_tsen();
+                int32_t read_rssi();
 
             private:
-                RH_RF22 rfm23;
+              RH_RF22 rfm23;
 
                 Threads::Mutex *spi_mtx;
                 rfm23_config config;

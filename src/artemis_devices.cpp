@@ -87,7 +87,7 @@ namespace Artemis
         return 0;
     }
 
-    int32_t Devices::setup_current(void) // go through library and see what we need to configure and callibrate
+    int32_t Devices::setup_current(void) // TODO: Go through library and see what we need to configure and callibrate
     {
         for (auto &it : current_sensors)
         {
@@ -103,7 +103,6 @@ namespace Artemis
     int32_t Devices::read_current(uint32_t uptime)
     {
         PacketComm packet;
-
         currentbeacon1 beacon1;
         currentbeacon2 beacon2;
         packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
@@ -149,6 +148,8 @@ namespace Artemis
             pinMode(it.second, INPUT);
         }
 
+        // *(volatile uint32_t *)(TEMP_SENSOR_ADDR + 4) = 0x2000000;
+
         return 0;
     }
 
@@ -157,13 +158,21 @@ namespace Artemis
         PacketComm packet;
         temperaturebeacon beacon;
         beacon.deci = uptime;
+
         for (auto &it : temp_sensors)
         {
             const int reading = analogRead(it.second);
             float voltage = reading * MV_PER_ADC_UNIT;
-            const float temperatureF = (voltage - OFFSET_F) / MV_PER_DEGREE_F;                                                   // Convert voltage to temperature in Fahrenheit and then subtract the offset
-            beacon.temperatureC[std::distance(temp_sensors.begin(), temp_sensors.find(it.first))] = (temperatureF - 32) * 5 / 9; // Convert temperature to Celsius
+            const float temperatureF = (voltage - OFFSET_F) / MV_PER_DEGREE_F;
+            beacon.tmp36_tempC[std::distance(temp_sensors.begin(), temp_sensors.find(it.first))] = (temperatureF - 32) * 5 / 9;
         }
+
+        // //  TODO: Read temperature from Teensy 4.1 
+        // uint32_t adc_data = *(volatile uint32_t *)TEMP_SENSOR_ADDR;
+        // uint16_t temp_value = (adc_data & 0xFFFF0000) >> 16;
+        // float temperature = (float)temp_value * TEMP_SCALE_FACTOR;
+        // return temperature - 273.15; // Return the temperature in Celsius
+
         packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
         packet.header.nodedest = (uint8_t)NODES::GROUND_NODE_ID;
         packet.header.type = PacketComm::TypeId::DataObcBeacon;
@@ -200,7 +209,7 @@ namespace Artemis
         {
             if (gps->parse(gps->lastNMEA())) // A successful message was parsed
             {
-                // Serial.print(gps->lastNMEA());
+                Serial.print(gps->lastNMEA());
             }
         }
 

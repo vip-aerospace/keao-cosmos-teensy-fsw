@@ -81,7 +81,7 @@ namespace Artemis
                 }
                 if (packet.wrapped.size() > RH_RF22_MAX_MESSAGE_LEN)
                 {
-                    Serial.println("[RFM23] oversize");
+                    Serial.println("Radio oversize");
                     return COSMOS_GENERAL_ERROR_OVERSIZE;
                 }
 
@@ -127,7 +127,7 @@ namespace Artemis
 
                         if (iretn < 0)
                         {
-                            Serial.println("Data received, but not in packetcomm format");
+                            Serial.println("Data was received, but not in packetcomm format.");
                             return -1;
                         }
 
@@ -149,9 +149,9 @@ namespace Artemis
                 return 0;
             }
 
-            int32_t RFM23::get_tsen()
+            int32_t RFM23::read_rssi()
             {
-                return rfm23.temperatureRead();
+                return rfm23.rssiRead();
             }
         }
     }
