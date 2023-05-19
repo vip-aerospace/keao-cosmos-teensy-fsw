@@ -66,7 +66,7 @@ void Artemis::Teensy::Channels::pdu_channel()
             // Define elapsedMillis variable
             elapsedMillis timeElapsed;
             // unsigned long twoWeeksMillis = 14 * 24 * 60 * 60 * 1000;  // Flight: two weeks in milliseconds
-            unsigned long twoWeeksMillis = 90000; // Testing: set desired deployment length in milliseconds
+            unsigned long twoWeeksMillis = 60000; // Testing: set desired deployment length in milliseconds
 
             elapsedMillis heatertimer;
 
@@ -94,13 +94,14 @@ void Artemis::Teensy::Channels::pdu_channel()
                 threads.delay(10000);
             }
         }
+        else
+        {
+            Serial.println("Satellite was already deployed"); // issue
+        }
     }
-    else
-    {
-        Serial.println("Satellite was already deployed"); // issue
-    }
+
     deploymentmode = false;
-    Serial.println("Deployment sequence finished, satellite is now in passive state.");
+    Serial.println("Satellite is now in passive state.");
     while (true)
     {
         handle_pdu_queue();
