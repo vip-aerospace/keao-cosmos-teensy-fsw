@@ -15,11 +15,6 @@ const float MV_PER_DEGREE_F = 1.0;             // 1 mV/°F
 const float OFFSET_F = 58.0;                   // 58 mV (58°F) offset in the output voltage
 const float MV_PER_ADC_UNIT = 3300.0 / 1024.0; // 3.3V reference voltage and 10-bit ADC resolution
 
-// // Teensy 4.1 built-in temperature sensor address help
-// #define TEMP_SENSOR_ADDR 0x400A0000
-// // Scale factor for converting the temperature value
-// #define TEMP_SCALE_FACTOR 0.00244140625
-
 // Heater 
 const float heater_threshold = -10.0;
 

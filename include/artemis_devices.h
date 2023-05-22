@@ -10,6 +10,7 @@
 #include <Adafruit_INA219.h>
 #include <Adafruit_GPS.h>
 #include <SD.h>
+#include <InternalTemperature.h>
 
 namespace Artemis
 {

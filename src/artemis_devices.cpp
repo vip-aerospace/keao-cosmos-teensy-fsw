@@ -148,8 +148,6 @@ namespace Artemis
             pinMode(it.second, INPUT);
         }
 
-        // *(volatile uint32_t *)(TEMP_SENSOR_ADDR + 4) = 0x2000000;
-
         return 0;
     }
 
@@ -167,11 +165,8 @@ namespace Artemis
             beacon.tmp36_tempC[std::distance(temp_sensors.begin(), temp_sensors.find(it.first))] = (temperatureF - 32) * 5 / 9;
         }
 
-        // //  TODO: Read temperature from Teensy 4.1 
-        // uint32_t adc_data = *(volatile uint32_t *)TEMP_SENSOR_ADDR;
-        // uint16_t temp_value = (adc_data & 0xFFFF0000) >> 16;
-        // float temperature = (float)temp_value * TEMP_SCALE_FACTOR;
-        // return temperature - 273.15; // Return the temperature in Celsius
+        // Read temperature from Teensy 4.1 interal temperature sensor
+        beacon.teensy_tempC = InternalTemperature.readTemperatureC();
 
         packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
         packet.header.nodedest = (uint8_t)NODES::GROUND_NODE_ID;
