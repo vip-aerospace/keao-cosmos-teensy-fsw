@@ -27,7 +27,6 @@ void Artemis::Teensy::Channels::rfm23_channel()
 {
     while (radio.init(config, &spi1_mtx) < 0)
         ;
-
     while (true)
     {
         if (PullQueue(packet, rfm23_queue, rfm23_queue_mtx))

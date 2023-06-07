@@ -34,6 +34,10 @@ void Artemis::Teensy::Channels::pdu_channel()
         }
         threads.delay(100);
     }
+    // The radio is connected to the 3V3_2 switch however it is still getting power from somewhere else.
+    // Uncommenting these two lines crashes the flight software. TODO: troubleshoot harwdare & software.
+    // pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::SW_3V3_2, true);
+    // threads.delay(1000);
 
     if (SD.begin(BUILTIN_SDCARD))
     {
