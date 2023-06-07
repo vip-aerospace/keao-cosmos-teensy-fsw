@@ -1,96 +1,146 @@
 #include <pdu.h>
-#include <Arduino.h>
 
 namespace Artemis
 {
     namespace Teensy
     {
-        PDU::PDU(int baud_rate)
+        PDU::PDU(HardwareSerial *hw_serial, int baud_rate)
         {
-            Serial1.begin(baud_rate);
+            serial = hw_serial;
+            serial->begin(baud_rate);
+            serial->clear();
+            serial->flush();
         }
 
-        void PDU::PDU_SEND(const char *cmd)
+        int32_t PDU::send(pdu_packet packet)
         {
-            Serial1.print(cmd);
-            Serial1.print('\n');
-            Serial.print("SENDING TO PDU: [");
-            Serial.print(cmd);
-            Serial.println(']');
-        }
-
-        bool PDU::PDU_RECV()
-        {
-            if (Serial1.available() > 0)
+            char *ptr = (char *)&packet;
+            for (size_t i = 0; i < sizeof(packet); i++)
             {
-                String UART1_RX = Serial1.readString();
+                serial->print((char)(*(ptr + i) + PDU_CMD_OFFSET));
+            }
+            serial->write('\0');
+            serial->print('\n');
+
+            Serial.print("Sending to PDU: [");
+
+            for (size_t i = 0; i < sizeof(packet); i++)
+            {
+                Serial.print(*(ptr + i), HEX);
+            }
+            Serial.println(']');
+            threads.delay(100);
+            return 0;
+        }
+
+        int32_t PDU::recv(std::string &response)
+        {
+            if (serial->available() > 0)
+            {
+                String UART1_RX = serial->readString();
                 if (UART1_RX.length() > 0)
                 {
-                    Serial.print("UART RECV: ");
-                    Serial.println(UART1_RX);
-                    return true;
+                    Serial.print("UART received: ");
+                    Serial.print(UART1_RX);
+                    response = UART1_RX.c_str();
+                    return UART1_RX.length();
                 }
             }
-            return false;
+            return -1;
         }
 
-        void PDU::PDU_SWITCH(PDU_CMD _cmd, bool _enable)
+        int32_t PDU::set_switch(PDU_SW sw, uint8_t _enable)
         {
-            const char *state = _enable ? "ENABLE" : "DISABLE";
-            char *cmd = (char *)malloc(sizeof(char));
-            cmd[0] = '\0';
+            std::string response;
+            pdu_packet packet;
+            packet.type = PDU_Type::CommandSetSwitch;
+            packet.sw = sw;
+            packet.sw_state = _enable > 0 ? 1 : 0;
 
-            switch (_cmd)
+            uint8_t attempts = 1;
+            elapsedMillis timeout;
+            while (1)
             {
-            case SW_3V3_1:
-                strcat(cmd, "CMD: SW_3V3_1 ");
-                break;
-            case SW_3V3_2:
-                strcat(cmd, "CMD: SW_3V3_2 ");
-                break;
-            case SW_5V_1:
-                strcat(cmd, "CMD: SW_5V_1 ");
-                break;
-            case SW_5V_2:
-                strcat(cmd, "CMD: SW_5V_2 ");
-                break;
-            case SW_5V_3:
-                strcat(cmd, "CMD: SW_5V_3 ");
-                break;
-            case SW_5V_4:
-                strcat(cmd, "CMD: SW_5V_4 ");
-                break;
-            case SW_12V:
-                strcat(cmd, "CMD: SW_12V ");
-                break;
-            case VBATT:
-                strcat(cmd, "CMD: VBATT ");
-                break;
-            case WDT:
-                strcat(cmd, "CMD: WDT ");
-                break;
-            case HBRIDGE1:
-                strcat(cmd, "CMD: HBRIDGE1 ");
-                break;
-            case HBRIDGE2:
-                strcat(cmd, "CMD: HBRIDGE2 ");
-                break;
-            case BURN:
-                strcat(cmd, "CMD: BURN ");
-            }
-            PDU::PDU_SEND(strcat(cmd, state));
-
-            unsigned long timeoutStart = millis();
-            while (!PDU::PDU_RECV())
-            {
-                if (millis() - timeoutStart > 5000)
+                send(packet);
+                while (recv(response) < 0)
                 {
-                    Serial.println("FAIL TO SEND CMD TO PDU");
+                    if (timeout > 5000)
+                    {
+                        Serial.print("Attempt: ");
+                        Serial.print(attempts);
+                        Serial.println(": Failed to send CMD to PDU");
+                        timeout = 0;
+
+                        if (++attempts == 5)
+                        {
+                            return -1;
+                        }
+                        break;
+                    }
+                }
+                if ((response[1] == (uint8_t)sw + PDU_CMD_OFFSET) || (sw == PDU_SW::All && response[0] == (uint8_t)PDU::PDU_Type::DataSwitchTelem + PDU_CMD_OFFSET))
+                {
                     break;
                 }
+
+                threads.delay(100);
+            }
+            Serial.print("UART received: ");
+            Serial.print(response.c_str());
+            return 0;
+        }
+
+        int32_t PDU::get_switch(PDU_SW sw, string &ret)
+        {
+            std::string response;
+            pdu_packet packet;
+            packet.type = PDU_Type::CommandGetSwitchStatus;
+            packet.sw = sw;
+
+            uint8_t attempts = 1;
+            elapsedMillis timeout;
+            while (1)
+            {
+                send(packet);
+                while (recv(response) < 0)
+                {
+                    if (timeout > 5000)
+                    {
+                        Serial.print("Attempt: ");
+                        Serial.print(attempts);
+                        Serial.println(": Failed to send CMD to PDU");
+                        timeout = 0;
+
+                        if (++attempts == 5)
+                        {
+                            return -1;
+                        }
+                        break;
+                    }
+                }
+                if ((response[1] == (uint8_t)sw + PDU_CMD_OFFSET) || (sw == PDU_SW::All && response[0] == (uint8_t)PDU::PDU_Type::DataSwitchTelem + PDU_CMD_OFFSET))
+                {
+                    break;
+                }
+                threads.delay(100);
+            }
+            Serial.print("UART received: ");
+            Serial.print(response.c_str());
+            ret = response;
+
+            if (sw == PDU_SW::All)
+            {
+                for (size_t i = 2; i < response.length(); i++)
+                {
+                    if (response[i] == '0')
+                    {
+                        return 0;
+                    }
+                }
+                return 1;
             }
 
-            free(cmd);
+            return response[3] - PDU_CMD_OFFSET;
         }
     }
 }
