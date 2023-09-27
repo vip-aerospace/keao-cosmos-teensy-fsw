@@ -2,37 +2,36 @@
 #define _ARTEMIS_DEFS_H
 
 #include <TeensyThreads.h>
-#include <support/packetcomm.h>
 #include <support/configCosmosKernel.h>
+#include <support/packetcomm.h>
 
 // Current Sensor Defs
 #define ARTEMIS_CURRENT_BEACON_1_COUNT 2
-#define ARTEMIS_CURRENT_SENSOR_COUNT 5
+#define ARTEMIS_CURRENT_SENSOR_COUNT   5
 
 // Temperature Sensor Defs
-#define ARTEMIS_TEMP_SENSOR_COUNT 7
-const float MV_PER_DEGREE_F = 1.0;             // 1 mV/°F
-const float OFFSET_F = 58.0;                   // 58 mV (58°F) offset in the output voltage
-const float MV_PER_ADC_UNIT = 3300.0 / 1024.0; // 3.3V reference voltage and 10-bit ADC resolution
+#define ARTEMIS_TEMP_SENSOR_COUNT      7
+const float MV_PER_DEGREE_F = 1.0; // 1 mV/°F
+const float OFFSET_F = 58.0;       // 58 mV (58°F) offset in the output voltage
+const float MV_PER_ADC_UNIT =
+    3300.0 / 1024.0; // 3.3V reference voltage and 10-bit ADC resolution
 
-// Heater 
+// Heater
 const float heater_threshold = -10.0;
 
 #define MAXQUEUESIZE 50
 
 // Nodes
-enum class NODES : uint8_t
-{
+enum class NODES : uint8_t {
   GROUND_NODE_ID = 1,
   TEENSY_NODE_ID = 2,
-  RPI_NODE_ID = 3,
+  RPI_NODE_ID    = 3,
 };
 
 extern std::map<string, NODES> NodeType;
 
-struct thread_struct
-{
-  int thread_id;
+struct thread_struct {
+  int     thread_id;
   uint8_t channel_id;
 };
 
@@ -86,25 +85,27 @@ enum TEENSY_PINS // Artemis OBC v4.23
 extern vector<struct thread_struct> thread_list;
 
 // Mutex for Command Queues
-extern Threads::Mutex main_queue_mtx;
-extern Threads::Mutex rfm23_queue_mtx;
-extern Threads::Mutex pdu_queue_mtx;
-extern Threads::Mutex rpi_queue_mtx;
+extern Threads::Mutex               main_queue_mtx;
+extern Threads::Mutex               rfm23_queue_mtx;
+extern Threads::Mutex               pdu_queue_mtx;
+extern Threads::Mutex               rpi_queue_mtx;
 
 // Command Queues
-extern std::deque<PacketComm> main_queue;
-extern std::deque<PacketComm> rfm23_queue;
-extern std::deque<PacketComm> pdu_queue;
-extern std::deque<PacketComm> rpi_queue;
+extern std::deque<PacketComm>       main_queue;
+extern std::deque<PacketComm>       rfm23_queue;
+extern std::deque<PacketComm>       pdu_queue;
+extern std::deque<PacketComm>       rpi_queue;
 
 // Other Mutex
-extern Threads::Mutex spi1_mtx;
-extern Threads::Mutex i2c1_mtx;
+extern Threads::Mutex               spi1_mtx;
+extern Threads::Mutex               i2c1_mtx;
 
 // Utility Functions
-int kill_thread(uint8_t channel_id);
-int32_t PushQueue(PacketComm &packet, std::deque<PacketComm> &queue, Threads::Mutex &mtx);
-int32_t PullQueue(PacketComm &packet, std::deque<PacketComm> &queue, Threads::Mutex &mtx);
+int                                 kill_thread(uint8_t channel_id);
+int32_t     PushQueue(PacketComm &packet, std::deque<PacketComm> &queue,
+                      Threads::Mutex &mtx);
+int32_t     PullQueue(PacketComm &packet, std::deque<PacketComm> &queue,
+                      Threads::Mutex &mtx);
 
 extern bool deploymentmode;
 
