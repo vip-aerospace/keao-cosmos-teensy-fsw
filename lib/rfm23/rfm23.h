@@ -11,41 +11,39 @@
 
 namespace Artemis {
   namespace Devices {
-    namespace Radios {
-      class RFM23 {
-      public:
-        struct __attribute__((packed)) rfm23_config {
-          uint16_t freq;
-          uint8_t  tx_power;
+    class RFM23 {
+    public:
+      struct __attribute__((packed)) rfm23_config {
+        uint16_t freq;
+        uint8_t  tx_power;
 
-          struct {
-            uint8_t spi_miso;
-            uint8_t spi_mosi;
-            uint8_t spi_sck;
-            uint8_t nirq;
-            uint8_t cs;
-            uint8_t tx_on;
-            uint8_t rx_on;
-          } pins;
-        };
-
-        RFM23(uint8_t slaveSelectPin, uint8_t interruptPin,
-              RHGenericSPI &spi = hardware_spi1);
-        int32_t reset();
-        int32_t init(rfm23_config cfg, Threads::Mutex *mtx);
-        int32_t send(PacketComm &packet);
-        int32_t recv(PacketComm &packet, uint16_t timeout);
-        int32_t set_tx_power(uint8_t power);
-        int32_t read_rssi();
-
-      private:
-        RH_RF22         rfm23;
-
-        Threads::Mutex *spi_mtx;
-        rfm23_config    config;
+        struct {
+          uint8_t spi_miso;
+          uint8_t spi_mosi;
+          uint8_t spi_sck;
+          uint8_t nirq;
+          uint8_t cs;
+          uint8_t tx_on;
+          uint8_t rx_on;
+        } pins;
       };
-    } // namespace Radios
-  }   // namespace Devices
+
+      RFM23(uint8_t slaveSelectPin, uint8_t interruptPin,
+            RHGenericSPI &spi = hardware_spi1);
+      int32_t reset();
+      int32_t init(rfm23_config cfg, Threads::Mutex *mtx);
+      int32_t send(PacketComm &packet);
+      int32_t recv(PacketComm &packet, uint16_t timeout);
+      int32_t set_tx_power(uint8_t power);
+      int32_t read_rssi();
+
+    private:
+      RH_RF22         rfm23;
+
+      Threads::Mutex *spi_mtx;
+      rfm23_config    config;
+    };
+  } // namespace Devices
 } // namespace Artemis
 
 #endif // _RFM23_H

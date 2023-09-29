@@ -2,7 +2,7 @@
 #include <rfm23.h>
 
 namespace {
-  using namespace Artemis::Devices::Radios;
+  using namespace Artemis::Devices;
 
   RFM23::rfm23_config config = {
       .freq     = 433,
