@@ -27,6 +27,9 @@ namespace Artemis {
       if (serial->available() > 0) {
         String UART1_RX = serial->readString();
         if (UART1_RX.length() > 0) {
+          for (unsigned int i = 0; i < UART1_RX.length(); i++) {
+            UART1_RX[i] = UART1_RX[i] - PDU_CMD_OFFSET;
+          }
           Helpers::print_hexdump(Helpers::PDU,
                                  "UART received: ", (uint8_t *)UART1_RX.c_str(),
                                  UART1_RX.length());
@@ -61,10 +64,9 @@ namespace Artemis {
             break;
           }
         }
-        if ((response[1] == (uint8_t)sw + PDU_CMD_OFFSET) ||
+        if ((response[1] == (uint8_t)sw) ||
             (sw == PDU_SW::All &&
-             response[0] ==
-                 (uint8_t)PDU::PDU_Type::DataSwitchTelem + PDU_CMD_OFFSET)) {
+             response[0] == (uint8_t)PDU::PDU_Type::DataSwitchTelem)) {
           break;
         }
 
@@ -99,10 +101,9 @@ namespace Artemis {
             break;
           }
         }
-        if ((response[1] == (uint8_t)sw + PDU_CMD_OFFSET) ||
+        if ((response[1] == (uint8_t)sw) ||
             (sw == PDU_SW::All &&
-             response[0] ==
-                 (uint8_t)PDU::PDU_Type::DataSwitchTelem + PDU_CMD_OFFSET)) {
+             response[0] == (uint8_t)PDU::PDU_Type::DataSwitchTelem)) {
           break;
         }
         threads.delay(100);

@@ -34,8 +34,7 @@ namespace Artemis {
           pdu.send(pdu_packet);
           pdu.recv(response);
           if (response[0] ==
-              (uint8_t)Artemis::Devices::PDU::PDU_Type::DataPong +
-                  PDU_CMD_OFFSET) {
+              (uint8_t)Artemis::Devices::PDU::PDU_Type::DataPong) {
             Helpers::print_debug(Helpers::PDU, "PDU connection established");
             break;
           }
@@ -154,8 +153,7 @@ namespace Artemis {
                 pdu.send(pdu_packet);
                 pdu.recv(response);
                 if (response[0] ==
-                    (uint8_t)Artemis::Devices::PDU::PDU_Type::DataPong +
-                        PDU_CMD_OFFSET) {
+                    (uint8_t)Artemis::Devices::PDU::PDU_Type::DataPong) {
                   pdu_packet.type = Artemis::Devices::PDU::PDU_Type::DataPong;
                   packet.header.nodedest = packet.header.nodeorig;
                   packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
