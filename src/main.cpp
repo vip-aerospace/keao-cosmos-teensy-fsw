@@ -73,6 +73,25 @@ void loop() {
 
 #ifdef TESTS
   run_test();
+#ifdef ENABLE_TEMPERATURESENSORS
+  temperature_sensors.read(uptime);
+#endif
+
+#ifdef ENABLE_CURRENTSENSORS
+  current_sensors.read(uptime);
+#endif
+
+#ifdef ENABLE_IMU
+  imu.read(uptime);
+#endif
+
+#ifdef ENABLE_MAGNETOMETER
+  magnetometer.read(uptime);
+#endif
+
+#ifdef ENABLE_GPS
+  gps.read(uptime);
+#endif
   threads.delay(10000);
 #endif
 

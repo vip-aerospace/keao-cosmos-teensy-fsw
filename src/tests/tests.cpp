@@ -83,28 +83,9 @@ void run_test() {
 
   for (auto &t : thread_list) {
     Helpers::print_debug(Helpers::MAIN, "thread_id: ", (int32_t)t.thread_id);
-    Helpers::print_debug(Helpers::MAIN, "state: ", (u_int32_t)threads.getState(t.thread_id);
+    Helpers::print_debug(Helpers::MAIN,
+                         "state: ", (u_int32_t)threads.getState(t.thread_id));
   }
-
-#ifdef ENABLE_TEMPERATURESENSORS
-  devices.read_temperature(uptime);
-#endif
-
-#ifdef ENABLE_CURRENTSENSORS
-  devices.read_current(uptime);
-#endif
-
-#ifdef ENABLE_IMU
-  devices.read_imu(uptime);
-#endif
-
-#ifdef ENABLE_MAGNETOMETER
-  devices.read_mag(uptime);
-#endif
-
-#ifdef ENABLE_GPS
-  devices.read_gps(uptime);
-#endif
 
 // PDU Switch Status
 #ifdef ENABLE_PDU
