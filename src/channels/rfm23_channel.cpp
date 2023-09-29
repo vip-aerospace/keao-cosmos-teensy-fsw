@@ -23,7 +23,7 @@ namespace {
   PacketComm packet;
 } // namespace
 
-void Artemis::Teensy::Channels::rfm23_channel() {
+void Artemis::Channels::rfm23_channel() {
   while (radio.init(config, &spi1_mtx) < 0)
     ;
   while (true) {

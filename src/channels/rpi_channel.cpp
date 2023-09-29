@@ -8,7 +8,7 @@ namespace {
   PacketComm packet;
 } // namespace
 
-void Artemis::Teensy::Channels::rpi_channel() {
+void Artemis::Channels::rpi_channel() {
   Serial.println("RPI Thread starting..");
   Serial2.begin(9600);
 
@@ -30,7 +30,7 @@ void Artemis::Teensy::Channels::rpi_channel() {
               rpi_queue.pop_front();
 
             Serial.println("Killing RPi thread");
-            kill_thread(Artemis::Teensy::Channels::Channel_ID::RPI_CHANNEL);
+            kill_thread(Artemis::Channels::Channel_ID::RPI_CHANNEL);
             return;
           }
           break;

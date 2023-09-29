@@ -14,7 +14,7 @@ extern "C" uint32_t set_arm_clock(uint32_t frequency);
 #endif
 
 namespace {
-  using namespace Artemis::Teensy;
+  using namespace Artemis;
   Artemis::Devices    devices;
   PacketComm          packet;
   USBHost             usb;

@@ -16,7 +16,7 @@ namespace {
                              // time between code runs.
 } // namespace
 
-void Artemis::Teensy::Channels::pdu_channel() {
+void Artemis::Channels::pdu_channel() {
   while (!Serial1)
     ;
   threads.delay(5000); // Give the PDU some time to warm up...
@@ -126,7 +126,7 @@ void Artemis::Teensy::Channels::pdu_channel() {
   }
 }
 
-void Artemis::Teensy::Channels::handle_pdu_queue() {
+void Artemis::Channels::handle_pdu_queue() {
   if (PullQueue(packet, pdu_queue, pdu_queue_mtx)) {
     switch (packet.header.type) {
       case PacketComm::TypeId::CommandEpsCommunicate: {
@@ -175,9 +175,8 @@ void Artemis::Teensy::Channels::handle_pdu_queue() {
         packet.header.nodedest = (uint8_t)NODES::GROUND_NODE_ID;
         packet.data.resize(sizeof(beacon));
         memcpy(packet.data.data(), &beacon, sizeof(beacon));
-        packet.header.chanin = 0;
-        packet.header.chanout =
-            Artemis::Teensy::Channels::Channel_ID::RFM23_CHANNEL;
+        packet.header.chanin  = 0;
+        packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
         PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
         break;
       }
