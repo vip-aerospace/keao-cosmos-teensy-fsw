@@ -1,6 +1,7 @@
 #include "artemis_devices.h"
 #include "artemisbeacons.h"
 #include "channels/artemis_channels.h"
+#include "helpers.h"
 #include "tests/tests.h"
 #include <Arduino.h>
 #include <USBHost_t36.h>
@@ -32,7 +33,7 @@ namespace {
 } // namespace
 
 void setup() {
-  Serial.begin(115200);
+  Helpers::connect_serial_debug(115200);
 
 #if defined(__IMXRT1062__)
   set_arm_clock(
@@ -64,7 +65,7 @@ void setup() {
   // Channels::Channel_ID::RPI_CHANNEL}); pinMode(RPI_ENABLE, HIGH);
 
   threads.delay(5000);
-  Serial.println("Teensy Flight Software Setup Complete");
+  Helpers::print_debug(Helpers::MAIN, "Teensy Flight Software Setup Complete");
 }
 
 void loop() {
@@ -79,7 +80,7 @@ void loop() {
   if (deploymentmode) {
     // Check if it's time to read the sensors
     if (deploymentbeacon >= readInterval) {
-      Serial.println("Deployment beacons sending");
+      Helpers::print_debug(Helpers::MAIN, "Deployment beacons sending");
       temperature_sensors.read(uptime);
       current_sensors.read(uptime);
       imu.read(uptime);
@@ -113,7 +114,7 @@ void loop() {
         float curr_V =
             current_sensors.current_sensors["battery_board"]->getBusVoltage_V();
         if ((curr_V >= 7.0) || 1) {
-          Serial.println("Turning on RPi");
+          Helpers::print_debug(Helpers::MAIN, "Turning on RPi");
           digitalWrite(RPI_ENABLE, HIGH);
           thread_list.push_back(
               {threads.addThread(Channels::RPI::rpi_channel, 9000),

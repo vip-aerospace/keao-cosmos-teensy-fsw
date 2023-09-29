@@ -48,13 +48,11 @@ namespace Artemis {
           if (timeout < 100)
             timeout = 100;
           if (radio.recv(packet, (uint16_t)timeout) >= 0) {
-            Serial.print("Radio received ");
-            Serial.print(packet.wrapped.size());
-            Serial.print(" bytes: [");
-            for (size_t i = 0; i < packet.wrapped.size(); i++) {
-              Serial.print(packet.wrapped[i], HEX);
-            }
-            Serial.println("]");
+            Helpers::print_hexdump(Helpers::RFM23,
+                                                      "Radio received :", &packet.wrapped[0],
+                                                      packet.wrapped.size());
+            Helpers::print_debug(Helpers::RFM23, "Bytes received: ",
+                                                    (int32_t)packet.wrapped.size());
 
             threads.delay(2000);
             PushQueue(packet, main_queue, main_queue_mtx);

@@ -70,21 +70,20 @@ void run_test() {
 
   packet.data.resize(0);
   String data_str = String(packet_count);
+  Helpers::print_hexdump(Helpers::MAIN,
+                         "data_str: ", (uint8_t *)data_str.c_str(),
+                         data_str.length());
   for (size_t i = 0; i < data_str.length(); i++) {
-    Serial.print((unsigned)(data_str[i] - '0'));
     packet.data.push_back(data_str[i] - '0');
   }
-  Serial.println();
   packet_count++;
 
   PushQueue(packet, main_queue, main_queue_mtx);
 #endif
 
   for (auto &t : thread_list) {
-    Serial.print("Thread ");
-    Serial.print(t.thread_id);
-    Serial.print(": ");
-    Serial.println(threads.getState(t.thread_id));
+    Helpers::print_debug(Helpers::MAIN, "thread_id: ", (int32_t)t.thread_id);
+    Helpers::print_debug(Helpers::MAIN, "state: ", (u_int32_t)threads.getState(t.thread_id);
   }
 
 #ifdef ENABLE_TEMPERATURESENSORS

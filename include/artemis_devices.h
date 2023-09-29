@@ -3,6 +3,7 @@
 
 #include "artemisbeacons.h"
 #include "config/artemis_defs.h"
+#include "helpers.h"
 #include <Adafruit_GPS.h>
 #include <Adafruit_INA219.h>
 #include <Adafruit_LIS3MDL.h>

@@ -20,8 +20,7 @@ namespace Artemis {
       elapsedMillis timeout;
       while (!rfm23.init()) {
         if (timeout > 10000) {
-
-          Serial.println("Radio failed to initialize");
+          print_debug(Helpers::RFM23, "Radio failed to initialize");
           return -1;
         }
       }
@@ -40,13 +39,14 @@ namespace Artemis {
       timeout = 0;
       while (!rfm23.setModemConfig(RH_RF22::FSK_Rb2Fd5)) {
         if (timeout > 10000) {
-          Serial.println("Radio failed to set FSK modulation");
+          Helpers::print_debug(Helpers::RFM23,
+                               "Radio failed to set FSK modulation");
           return -1;
         }
       }
       rfm23.sleep();
 
-      Serial.println("Radio initialized");
+      Helpers::print_debug(Helpers::RFM23, "Radio initialized");
       rfm23.setModeIdle();
       return 0;
     }
@@ -66,11 +66,11 @@ namespace Artemis {
       packet.wrapped.resize(0);
       iretn = packet.Wrap();
       if (iretn < 0) {
-        Serial.println("Wrap fail");
+        Helpers::print_debug(Helpers::RFM23, "Wrap fail", iretn);
         return -1;
       }
       if (packet.wrapped.size() > RH_RF22_MAX_MESSAGE_LEN) {
-        Serial.println("Radio oversize");
+        Helpers::print_debug(Helpers::RFM23, "Radio oversize");
         return COSMOS_GENERAL_ERROR_OVERSIZE;
       }
 
@@ -84,11 +84,9 @@ namespace Artemis {
 
       rfm23.sleep();
       rfm23.setModeIdle();
-      Serial.print("Radio Sending: [");
-      for (size_t i = 0; i < packet.wrapped.size(); i++) {
-        Serial.print(packet.wrapped[i], HEX);
-      }
-      Serial.println("]");
+      Helpers::print_hexdump(Helpers::RFM23,
+                             "Radio Sending: ", &packet.wrapped[0],
+                             packet.wrapped.size());
 
       return 0;
     }
@@ -110,7 +108,9 @@ namespace Artemis {
           rfm23.setModeIdle();
 
           if (iretn < 0) {
-            Serial.println("Data was received, but not in packetcomm format.");
+            Helpers::print_debug(
+                Helpers::RFM23,
+                "Data was received, but not in packetcomm format.");
             return -1;
           }
 

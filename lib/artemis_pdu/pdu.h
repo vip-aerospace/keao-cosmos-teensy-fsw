@@ -1,6 +1,7 @@
 #ifndef _PDU_H
 #define _PDU_H
 
+#include "helpers.h"
 #include "support/configCosmosKernel.h"
 #include <Arduino.h>
 #include <TeensyThreads.h>

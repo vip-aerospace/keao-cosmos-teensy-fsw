@@ -31,7 +31,7 @@ namespace Artemis {
           if (response[0] ==
               (uint8_t)Artemis::Devices::PDU::PDU_Type::DataPong +
                   PDU_CMD_OFFSET) {
-            Serial.println("PDU connection established");
+            Helpers::print_debug(Helpers::PDU, "PDU connection established");
             break;
           }
           threads.delay(100);
@@ -49,20 +49,21 @@ namespace Artemis {
                 5000); // Deployment delay (set to desired delay length)
 
             // Enable burn wire
-            Serial.println("Starting Deployment Sequence");
+            Helpers::print_debug(Helpers::PDU, "Starting Deployment Sequence");
             pdu.set_switch(Artemis::Devices::PDU::PDU_SW::BURN1, true);
-            Serial.println("Burn switch on");
+            Helpers::print_debug(Helpers::PDU, "Burn switch on");
             threads.delay(5000); // burn wire on time
             pdu.set_switch(Artemis::Devices::PDU::PDU_SW::BURN1, false);
-            Serial.println("Burn switch off");
+            Helpers::print_debug(Helpers::PDU, "Burn switch off");
 
             SD.begin(BUILTIN_SDCARD);
             File file = SD.open("/deployed.txt", FILE_WRITE);
             if (file) {
               file.close();
-              Serial.println("Deployment recorded on SD card.");
+              Helpers::print_debug(Helpers::PDU,
+                                                                "Deployment recorded on SD card.");
             } else {
-              Serial.println("Error closing file");
+              Helpers::print_debug(Helpers::PDU, "Error closing file");
               return;
             }
 
@@ -97,12 +98,15 @@ namespace Artemis {
               threads.delay(10000);
             }
           } else {
-            Serial.println("Satellite was already deployed"); // issue
+            // issue
+            Helpers::print_debug(Helpers::PDU,
+                                                              "Satellite was already deployed");
           }
         }
 
         deploymentmode = false;
-        Serial.println("Satellite is now in passive state.");
+        Helpers::print_debug(Helpers::PDU,
+                                                          "Satellite is now in passive state.");
         while (true) {
           handle_pdu_queue();
           if (heaterinterval > static_cast<unsigned long>(checkinterval)) {
@@ -115,11 +119,11 @@ namespace Artemis {
             if (temperatureC <= heater_threshold) {
               // turn heater on
               pdu.set_switch(Artemis::Devices::PDU::PDU_SW::SW_5V_2, true);
-              Serial.println("Heater turned on");
+              Helpers::print_debug(Helpers::PDU, "Heater turned on");
             } else {
               // turn heater off
               pdu.set_switch(Artemis::Devices::PDU::PDU_SW::SW_5V_2, false);
-              Serial.println("Heater turned off");
+              Helpers::print_debug(Helpers::PDU, "Heater turned off");
             }
           }
 
@@ -152,7 +156,7 @@ namespace Artemis {
                 }
 
                 if (millis() - timeoutStart > 5000) {
-                  Serial.println("Unable to Ping PDU");
+                  Helpers::print_debug(Helpers::PDU, "Unable to Ping PDU");
                   break;
                 }
 

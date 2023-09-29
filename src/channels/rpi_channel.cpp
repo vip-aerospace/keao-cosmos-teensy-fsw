@@ -8,12 +8,13 @@ namespace Artemis {
       PacketComm packet;
 
       void       rpi_channel() {
-        Serial.println("RPI Thread starting..");
+        Helpers::print_debug(Helpers::RPI, "RPI Thread starting..");
         Serial2.begin(9600);
 
         while (true) {
           if (PullQueue(packet, rpi_queue, rpi_queue_mtx)) {
-            Serial.println((uint16_t)packet.header.type);
+            Helpers::print_debug(Helpers::RPI, "packet.header.type: ",
+                                       (u_int32_t)packet.header.type);
             switch (packet.header.type) {
               case PacketComm::TypeId::CommandEpsSwitchName:
                 if ((Devices::PDU::PDU_SW)packet.data[0] ==
@@ -29,7 +30,7 @@ namespace Artemis {
                   while (!rpi_queue.empty())
                     rpi_queue.pop_front();
 
-                  Serial.println("Killing RPi thread");
+                  Helpers::print_debug(Helpers::RPI, "Killing RPi thread");
                   kill_thread(Artemis::Channels::Channel_ID::RPI_CHANNEL);
                   return;
                 }
@@ -45,13 +46,12 @@ namespace Artemis {
 
       void sendToPi() {
         packet.SLIPPacketize();
-        Serial.println("Forwarding to RPi");
+        Helpers::print_hexdump(Helpers::RPI,
+                               "Forwarding to RPi: ", &packet.packetized[0],
+                               packet.packetized.size());
         for (size_t i = 0; i < packet.packetized.size(); i++) {
-          Serial.print((unsigned)packet.packetized[i]);
-          Serial.print(" ");
           Serial2.write(packet.packetized[i]);
         }
-        Serial.println();
       }
     } // namespace RPI
   }   // namespace Channels

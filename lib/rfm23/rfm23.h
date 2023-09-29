@@ -1,6 +1,7 @@
 #ifndef _RFM23_H
 #define _RFM23_H
 
+#include "helpers.h"
 #include <RHHardwareSPI1.h>
 #include <RH_RF22.h>
 #include <TeensyThreads.h>
