@@ -1,3 +1,4 @@
+#include "artemis_devices.h"
 #include "artemisbeacons.h"
 #include "channels/artemis_channels.h"
 #include <SD.h>
@@ -85,11 +86,11 @@ namespace Artemis {
 
                 // Turn heater on or off based on temperature
                 if (temperatureC <= heater_threshold) {
-                  pdu.set_switch(Artemis::Devices::PDU::PDU_SW::SW_5V_2,
-                                                              true); // turn heater on
+                  // turn heater on
+                  pdu.set_switch(Artemis::Devices::PDU::PDU_SW::SW_5V_2, true);
                 } else {
-                  pdu.set_switch(Artemis::Devices::PDU::PDU_SW::SW_5V_2,
-                                                              false); // turn heater off
+                  // turn heater off
+                  pdu.set_switch(Artemis::Devices::PDU::PDU_SW::SW_5V_2, false);
                 }
                 heatertimer = 0;
               }
@@ -112,12 +113,12 @@ namespace Artemis {
             float temperatureC = (temperatureF - 32) * 5 / 9;
             // Turn heater on or off based on temperature
             if (temperatureC <= heater_threshold) {
-              pdu.set_switch(Artemis::Devices::PDU::PDU_SW::SW_5V_2,
-                                                          true); // turn heater on
+              // turn heater on
+              pdu.set_switch(Artemis::Devices::PDU::PDU_SW::SW_5V_2, true);
               Serial.println("Heater turned on");
             } else {
-              pdu.set_switch(Artemis::Devices::PDU::PDU_SW::SW_5V_2,
-                                                          false); // turn heater off
+              // turn heater off
+              pdu.set_switch(Artemis::Devices::PDU::PDU_SW::SW_5V_2, false);
               Serial.println("Heater turned off");
             }
           }
@@ -168,7 +169,7 @@ namespace Artemis {
             case PacketComm::TypeId::CommandEpsSwitchStatus: {
               string response;
               pdu.get_switch(Artemis::Devices::PDU::PDU_SW::All, response);
-              switchbeacon beacon;
+              Artemis::Devices::Switches::switchbeacon beacon;
               beacon.deci = uptime;
               for (size_t i = 1; i < response.length() - 2; i++) {
                 beacon.sw[i - 1] = response[i] - PDU_CMD_OFFSET;

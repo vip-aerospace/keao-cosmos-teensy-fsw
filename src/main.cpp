@@ -15,16 +15,20 @@ extern "C" uint32_t set_arm_clock(uint32_t frequency);
 
 namespace {
   using namespace Artemis;
-  Artemis::DevicesClass devices;
-  PacketComm            packet;
-  USBHost               usb;
-  elapsedMillis         uptime;
-  int32_t               iretn = 0;
+  Devices::IMU                imu;
+  Devices::Magnetometer       magnetometer;
+  Devices::CurrentSensors     current_sensors;
+  Devices::GPS                gps;
+  Devices::TemperatureSensors temperature_sensors;
+  PacketComm                  packet;
+  USBHost                     usb;
+  elapsedMillis               uptime;
+  int32_t                     iretn = 0;
 
   // Deployment variables
-  elapsedMillis         deploymentbeacon;
+  elapsedMillis               deploymentbeacon;
   // const unsigned long readInterval = 300000; // Flight
-  const unsigned long   readInterval = 20000; // Testing
+  const unsigned long         readInterval = 20000; // Testing
 } // namespace
 
 void setup() {
@@ -40,11 +44,11 @@ void setup() {
 
   delay(3000);
 
-  iretn = devices.setup_magnetometer();
-  iretn = devices.setup_imu();
+  iretn = magnetometer.setup();
+  iretn = imu.setup();
 
-  devices.setup_current();
-  devices.setup_gps();
+  current_sensors.setup();
+  gps.setup();
 
   threads.setSliceMillis(10);
 
@@ -76,11 +80,11 @@ void loop() {
     // Check if it's time to read the sensors
     if (deploymentbeacon >= readInterval) {
       Serial.println("Deployment beacons sending");
-      devices.read_temperature(uptime);
-      devices.read_current(uptime);
-      devices.read_imu(uptime);
-      devices.read_mag(uptime);
-      devices.read_gps(uptime);
+      temperature_sensors.read(uptime);
+      current_sensors.read(uptime);
+      imu.read(uptime);
+      magnetometer.read(uptime);
+      gps.read(uptime);
 
       // Get PDU Switches
       packet.header.type     = PacketComm::TypeId::CommandEpsSwitchStatus;
@@ -107,7 +111,7 @@ void loop() {
     } else if (packet.header.nodedest == (uint8_t)NODES::RPI_NODE_ID) {
       if (!digitalRead(UART6_RX)) {
         float curr_V =
-            devices.current_sensors["battery_board"]->getBusVoltage_V();
+            current_sensors.current_sensors["battery_board"]->getBusVoltage_V();
         if ((curr_V >= 7.0) || 1) {
           Serial.println("Turning on RPi");
           digitalWrite(RPI_ENABLE, HIGH);
@@ -152,8 +156,8 @@ void loop() {
           Devices::PDU::PDU_SW switchid = (Devices::PDU::PDU_SW)packet.data[0];
           switch (switchid) {
             case Devices::PDU::PDU_SW::RPI: {
-              float curr_V =
-                  devices.current_sensors["battery_board"]->getBusVoltage_V();
+              float curr_V = current_sensors.current_sensors["battery_board"]
+                                 ->getBusVoltage_V();
               if ((packet.data[1] == 1 && curr_V >= 7.0) ||
                   (packet.data[1] == 1 && packet.data[2] == 1)) {
                 digitalWrite(RPI_ENABLE, packet.data[1]);
@@ -197,11 +201,11 @@ void loop() {
           }
         } break;
         case PacketComm::TypeId::CommandObcSendBeacon: {
-          devices.read_temperature(uptime);
-          devices.read_current(uptime);
-          devices.read_imu(uptime);
-          devices.read_mag(uptime);
-          devices.read_gps(uptime);
+          temperature_sensors.read(uptime);
+          current_sensors.read(uptime);
+          imu.read(uptime);
+          magnetometer.read(uptime);
+          gps.read(uptime);
 
           // Get PDU Switches
           packet.header.type     = PacketComm::TypeId::CommandEpsSwitchStatus;
@@ -216,6 +220,6 @@ void loop() {
       }
     }
   }
-  devices.update_gps();
+  gps.update();
   threads.delay(100);
 }
