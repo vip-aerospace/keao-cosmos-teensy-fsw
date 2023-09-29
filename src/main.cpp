@@ -14,6 +14,12 @@
 extern "C" uint32_t set_arm_clock(uint32_t frequency);
 #endif
 
+void run_tests();
+void beacon_if_deployed();
+void route_packets();
+void setup_devices();
+void setup_threads();
+
 namespace {
   using namespace Artemis;
   Devices::IMU                imu;
@@ -42,15 +48,30 @@ void setup() {
 
   usb.begin();
   pinMode(RPI_ENABLE, OUTPUT);
-
   delay(3000);
+  setup_devices();
+  setup_threads();
+  threads.delay(5000);
+  Helpers::print_debug(Helpers::MAIN, "Teensy Flight Software Setup Complete");
+}
 
+void loop() {
+  pinMode(UART6_RX, INPUT);
+  run_tests();
+  beacon_if_deployed();
+  route_packets();
+  gps.update();
+  threads.delay(100);
+}
+
+void setup_devices() {
   iretn = magnetometer.setup();
   iretn = imu.setup();
-
   current_sensors.setup();
   gps.setup();
+}
 
+void setup_threads() {
   threads.setSliceMillis(10);
 
   // Threads
@@ -63,14 +84,9 @@ void setup() {
   // Only uncomment these when testing and you want to force the RPi to turn on
   // thread_list.push_back({threads.addThread(Channels::RPI::rpi_channel),
   // Channels::Channel_ID::RPI_CHANNEL}); pinMode(RPI_ENABLE, HIGH);
-
-  threads.delay(5000);
-  Helpers::print_debug(Helpers::MAIN, "Teensy Flight Software Setup Complete");
 }
 
-void loop() {
-  pinMode(UART6_RX, INPUT);
-
+void run_tests() {
 #ifdef TESTS
   run_test();
 #ifdef ENABLE_TEMPERATURESENSORS
@@ -94,7 +110,9 @@ void loop() {
 #endif
   threads.delay(10000);
 #endif
+}
 
+void beacon_if_deployed() {
   // During deployment mode send beacons every 5 minutes for 2 weeks.
   if (deploymentmode) {
     // Check if it's time to read the sensors
@@ -118,7 +136,9 @@ void loop() {
       deploymentbeacon = 0;
     }
   }
+}
 
+void route_packets() {
   if (PullQueue(packet, main_queue, main_queue_mtx)) {
     if (packet.header.nodedest == (uint8_t)NODES::GROUND_NODE_ID) {
       switch (packet.header.chanout) {
@@ -240,6 +260,4 @@ void loop() {
       }
     }
   }
-  gps.update();
-  threads.delay(100);
 }
