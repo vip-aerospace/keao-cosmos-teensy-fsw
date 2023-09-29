@@ -19,6 +19,11 @@ namespace Artemis {
       int                               checkinterval = 60000;
 
       void                              pdu_channel() {
+        setup();
+        loop();
+      }
+
+      void setup() {
         while (!Serial1)
           ;
         threads.delay(5000); // Give the PDU some time to warm up...
@@ -61,7 +66,7 @@ namespace Artemis {
             if (file) {
               file.close();
               Helpers::print_debug(Helpers::PDU,
-                                                                "Deployment recorded on SD card.");
+                                   "Deployment recorded on SD card.");
             } else {
               Helpers::print_debug(Helpers::PDU, "Error closing file");
               return;
@@ -80,8 +85,8 @@ namespace Artemis {
               handle_pdu_queue();
               if ((heatertimer >= 60000)) // check every minute
               {
-                int   reading = analogRead(A6);
-                float voltage = reading * MV_PER_ADC_UNIT;
+                int   reading      = analogRead(A6);
+                float voltage      = reading * MV_PER_ADC_UNIT;
                 float temperatureF = (voltage - OFFSET_F) / MV_PER_DEGREE_F;
                 float temperatureC = (temperatureF - 32) * 5 / 9;
 
@@ -100,19 +105,22 @@ namespace Artemis {
           } else {
             // issue
             Helpers::print_debug(Helpers::PDU,
-                                                              "Satellite was already deployed");
+                                 "Satellite was already deployed");
           }
         }
 
         deploymentmode = false;
         Helpers::print_debug(Helpers::PDU,
-                                                          "Satellite is now in passive state.");
+                             "Satellite is now in passive state.");
+      }
+
+      void loop() {
         while (true) {
           handle_pdu_queue();
           if (heaterinterval > static_cast<unsigned long>(checkinterval)) {
-            heaterinterval = 0;
-            int   reading  = analogRead(A6);
-            float voltage = reading * MV_PER_ADC_UNIT;
+            heaterinterval     = 0;
+            int   reading      = analogRead(A6);
+            float voltage      = reading * MV_PER_ADC_UNIT;
             float temperatureF = (voltage - OFFSET_F) / MV_PER_DEGREE_F;
             float temperatureC = (temperatureF - 32) * 5 / 9;
             // Turn heater on or off based on temperature

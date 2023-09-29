@@ -14,15 +14,21 @@ namespace Artemis {
 
     namespace RFM23 {
       void rfm23_channel();
+      void setup();
+      void loop();
     } // namespace RFM23
 
     namespace PDU {
       void pdu_channel();
+      void setup();
+      void loop();
       void handle_pdu_queue();
     } // namespace PDU
 
     namespace RPI {
       void rpi_channel();
+      void setup();
+      void loop();
       void sendToPi();
     } // namespace RPI
 

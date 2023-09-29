@@ -8,13 +8,20 @@ namespace Artemis {
       PacketComm packet;
 
       void       rpi_channel() {
+        setup();
+        loop();
+      }
+
+      void setup() {
         Helpers::print_debug(Helpers::RPI, "RPI Thread starting..");
         Serial2.begin(9600);
+      }
 
+      void loop() {
         while (true) {
           if (PullQueue(packet, rpi_queue, rpi_queue_mtx)) {
             Helpers::print_debug(Helpers::RPI, "packet.header.type: ",
-                                       (u_int32_t)packet.header.type);
+                                 (u_int32_t)packet.header.type);
             switch (packet.header.type) {
               case PacketComm::TypeId::CommandEpsSwitchName:
                 if ((Devices::PDU::PDU_SW)packet.data[0] ==

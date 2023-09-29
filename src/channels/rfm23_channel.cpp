@@ -24,8 +24,16 @@ namespace Artemis {
       PacketComm              packet;
 
       void                    rfm23_channel() {
+        setup();
+        loop();
+      }
+
+      void setup() {
         while (radio.init(config, &spi1_mtx) < 0)
           ;
+      }
+
+      void loop() {
         while (true) {
           if (PullQueue(packet, rfm23_queue, rfm23_queue_mtx)) {
             switch (packet.header.type) {
@@ -49,10 +57,10 @@ namespace Artemis {
             timeout = 100;
           if (radio.recv(packet, (uint16_t)timeout) >= 0) {
             Helpers::print_hexdump(Helpers::RFM23,
-                                                      "Radio received :", &packet.wrapped[0],
-                                                      packet.wrapped.size());
+                                   "Radio received :", &packet.wrapped[0],
+                                   packet.wrapped.size());
             Helpers::print_debug(Helpers::RFM23, "Bytes received: ",
-                                                    (int32_t)packet.wrapped.size());
+                                 (int32_t)packet.wrapped.size());
 
             threads.delay(2000);
             PushQueue(packet, main_queue, main_queue_mtx);
