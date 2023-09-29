@@ -2,7 +2,7 @@
 #include "channels/artemis_channels.h"
 
 namespace Artemis {
-  int32_t Devices::setup_magnetometer(void) {
+  int32_t DevicesClass::setup_magnetometer(void) {
     if (!magnetometer->begin_I2C()) {
       return -1;
     }
@@ -15,7 +15,7 @@ namespace Artemis {
     return 0;
   }
 
-  int32_t Devices::read_mag(uint32_t uptime) {
+  int32_t DevicesClass::read_mag(uint32_t uptime) {
     PacketComm packet;
     magbeacon  beacon;
     beacon.deci = uptime;
@@ -38,7 +38,7 @@ namespace Artemis {
     return 0;
   }
 
-  int32_t Devices::setup_imu(void) {
+  int32_t DevicesClass::setup_imu(void) {
     if (!imu->begin_I2C()) {
       return -1;
     }
@@ -50,7 +50,7 @@ namespace Artemis {
     return 0;
   }
 
-  int32_t Devices::read_imu(uint32_t uptime) {
+  int32_t DevicesClass::read_imu(uint32_t uptime) {
     PacketComm packet;
     imubeacon  beacon;
     beacon.deci = uptime;
@@ -80,8 +80,9 @@ namespace Artemis {
     return 0;
   }
 
-  int32_t Devices::setup_current(void) // TODO: Go through library and see what
-                                       // we need to configure and callibrate
+  int32_t
+  DevicesClass::setup_current(void) // TODO: Go through library and see what
+                                    // we need to configure and callibrate
   {
     for (auto &it : current_sensors) {
       if (it.second->begin(&Wire2)) {
@@ -92,7 +93,7 @@ namespace Artemis {
     return 0;
   }
 
-  int32_t Devices::read_current(uint32_t uptime) {
+  int32_t DevicesClass::read_current(uint32_t uptime) {
     PacketComm     packet;
     currentbeacon1 beacon1;
     currentbeacon2 beacon2;
@@ -131,7 +132,7 @@ namespace Artemis {
     return 0;
   }
 
-  int32_t Devices::setup_temperature(void) {
+  int32_t DevicesClass::setup_temperature(void) {
     for (auto &it : temp_sensors) {
       pinMode(it.second, INPUT);
     }
@@ -139,7 +140,7 @@ namespace Artemis {
     return 0;
   }
 
-  int32_t Devices::read_temperature(uint32_t uptime) {
+  int32_t DevicesClass::read_temperature(uint32_t uptime) {
     PacketComm        packet;
     temperaturebeacon beacon;
     beacon.deci = uptime;
@@ -168,7 +169,7 @@ namespace Artemis {
     return 0;
   }
 
-  int32_t Devices::setup_gps(void) {
+  int32_t DevicesClass::setup_gps(void) {
     gps->begin(9600);
     threads.delay(100);
     gps->sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
@@ -179,7 +180,7 @@ namespace Artemis {
     return 0;
   }
 
-  int32_t Devices::update_gps(void) {
+  int32_t DevicesClass::update_gps(void) {
     if (gps->available()) {
       while (gps->read()) // Clear any data from the GPS module
         ;
@@ -197,7 +198,7 @@ namespace Artemis {
     return 0;
   }
 
-  int32_t Devices::read_gps(uint32_t uptime) {
+  int32_t DevicesClass::read_gps(uint32_t uptime) {
     PacketComm packet;
     gpsbeacon  beacon;
     beacon.deci = uptime;

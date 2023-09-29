@@ -17,8 +17,8 @@ void Artemis::Channels::rpi_channel() {
       Serial.println((uint16_t)packet.header.type);
       switch (packet.header.type) {
         case PacketComm::TypeId::CommandEpsSwitchName:
-          if ((Artemis::Teensy::PDU::PDU_SW)packet.data[0] ==
-                  Artemis::Teensy::PDU::PDU_SW::RPI &&
+          if ((Devices::PDU::PDU_SW)packet.data[0] ==
+                  Devices::PDU::PDU_SW::RPI &&
               packet.data[1] == 0) {
             packet.header.type = PacketComm::TypeId::CommandObcHalt;
             sendToPi();

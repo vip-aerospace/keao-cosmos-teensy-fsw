@@ -13,7 +13,7 @@
 #include <support/configCosmosKernel.h>
 
 namespace Artemis {
-  class Devices {
+  class DevicesClass {
   public:
     Adafruit_LIS3MDL  *magnetometer = new Adafruit_LIS3MDL();
     Adafruit_LSM6DSOX *imu          = new Adafruit_LSM6DSOX();

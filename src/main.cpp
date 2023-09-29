@@ -15,16 +15,16 @@ extern "C" uint32_t set_arm_clock(uint32_t frequency);
 
 namespace {
   using namespace Artemis;
-  Artemis::Devices    devices;
-  PacketComm          packet;
-  USBHost             usb;
-  elapsedMillis       uptime;
-  int32_t             iretn = 0;
+  Artemis::DevicesClass devices;
+  PacketComm            packet;
+  USBHost               usb;
+  elapsedMillis         uptime;
+  int32_t               iretn = 0;
 
   // Deployment variables
-  elapsedMillis       deploymentbeacon;
+  elapsedMillis         deploymentbeacon;
   // const unsigned long readInterval = 300000; // Flight
-  const unsigned long readInterval = 20000; // Testing
+  const unsigned long   readInterval = 20000; // Testing
 } // namespace
 
 void setup() {
@@ -86,7 +86,7 @@ void loop() {
       packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
       packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
       packet.data.clear();
-      packet.data.push_back((uint8_t)Artemis::Teensy::PDU::PDU_SW::All);
+      packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::All);
       PushQueue(packet, pdu_queue, pdu_queue_mtx);
 
       // Reset the timer
@@ -118,7 +118,7 @@ void loop() {
           packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
           packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
           packet.data.clear();
-          packet.data.push_back((uint8_t)Artemis::Teensy::PDU::PDU_SW::All);
+          packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::All);
           PushQueue(packet, pdu_queue, pdu_queue_mtx);
         }
       }
@@ -147,9 +147,9 @@ void loop() {
           PushQueue(packet, pdu_queue, pdu_queue_mtx);
         } break;
         case PacketComm::TypeId::CommandEpsSwitchName: {
-          PDU::PDU_SW switchid = (PDU::PDU_SW)packet.data[0];
+          Devices::PDU::PDU_SW switchid = (Devices::PDU::PDU_SW)packet.data[0];
           switch (switchid) {
-            case PDU::PDU_SW::RPI: {
+            case Devices::PDU::PDU_SW::RPI: {
               float curr_V =
                   devices.current_sensors["battery_board"]->getBusVoltage_V();
               if ((packet.data[1] == 1 && curr_V >= 7.0) ||
@@ -166,7 +166,7 @@ void loop() {
                 packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
                 packet.data.clear();
                 packet.data.push_back(
-                    (uint8_t)Artemis::Teensy::PDU::PDU_SW::All);
+                    (uint8_t)Artemis::Devices::PDU::PDU_SW::All);
                 PushQueue(packet, pdu_queue, pdu_queue_mtx);
               }
               break;
@@ -178,9 +178,9 @@ void loop() {
           break;
         }
         case PacketComm::TypeId::CommandEpsSwitchStatus: {
-          PDU::PDU_SW switchid = (PDU::PDU_SW)packet.data[0];
+          Devices::PDU::PDU_SW switchid = (Devices::PDU::PDU_SW)packet.data[0];
           switch (switchid) {
-            case PDU::PDU_SW::RPI: {
+            case Devices::PDU::PDU_SW::RPI: {
               packet.data.resize(1);
               packet.data.push_back(digitalRead(RPI_ENABLE));
               packet.header.type     = PacketComm::TypeId::DataEpsResponse;
@@ -205,7 +205,7 @@ void loop() {
           packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
           packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
           packet.data.clear();
-          packet.data.push_back((uint8_t)Artemis::Teensy::PDU::PDU_SW::All);
+          packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::All);
           PushQueue(packet, pdu_queue, pdu_queue_mtx);
         }
         default:

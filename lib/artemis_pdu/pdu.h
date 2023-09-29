@@ -9,7 +9,7 @@
 #define PDU_CMD_OFFSET 48
 
 namespace Artemis {
-  namespace Teensy {
+  namespace Devices {
     class PDU {
     public:
       enum class PDU_Type : uint8_t {
@@ -81,7 +81,7 @@ namespace Artemis {
     private:
       HardwareSerial *serial;
     };
-  } // namespace Teensy
+  } // namespace Devices
 } // namespace Artemis
 
 #endif

@@ -1,7 +1,7 @@
 #include <pdu.h>
 
 namespace Artemis {
-  namespace Teensy {
+  namespace Devices {
     PDU::PDU(HardwareSerial *hw_serial, int baud_rate) {
       serial = hw_serial;
       serial->begin(baud_rate);
@@ -124,5 +124,5 @@ namespace Artemis {
 
       return response[3] - PDU_CMD_OFFSET;
     }
-  } // namespace Teensy
+  } // namespace Devices
 } // namespace Artemis

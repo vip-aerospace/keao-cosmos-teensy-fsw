@@ -4,12 +4,13 @@
 #include <pdu.h>
 
 namespace {
-  Artemis::Teensy::PDU             pdu(&Serial1, 115200);
-  PacketComm                       packet;
-  Artemis::Teensy::PDU::pdu_packet pdu_packet;
-  std::string                      response;
-  unsigned long                    timeoutStart;
-  elapsedMillis                    uptime;
+  using namespace Artemis::Devices;
+  PDU             pdu(&Serial1, 115200);
+  PacketComm      packet;
+  PDU::pdu_packet pdu_packet;
+  std::string     response;
+  unsigned long   timeoutStart;
+  elapsedMillis   uptime;
   elapsedMillis
       heaterinterval;        // Create a new elapsedMillis object for the heater
   int checkinterval = 60000; // Time in milliseconds. Set this to the desired
@@ -45,10 +46,10 @@ void Artemis::Channels::pdu_channel() {
 
       // Enable burn wire
       Serial.println("Starting Deployment Sequence");
-      pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::BURN1, true);
+      pdu.set_switch(Artemis::Devices::PDU::PDU_SW::BURN1, true);
       Serial.println("Burn switch on");
       threads.delay(5000); // burn wire on time
-      pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::BURN1, false);
+      pdu.set_switch(Artemis::Devices::PDU::PDU_SW::BURN1, false);
       Serial.println("Burn switch off");
 
       SD.begin(BUILTIN_SDCARD);
@@ -81,10 +82,10 @@ void Artemis::Channels::pdu_channel() {
 
           // Turn heater on or off based on temperature
           if (temperatureC <= heater_threshold) {
-            pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::SW_5V_2,
+            pdu.set_switch(PDU::PDU_SW::SW_5V_2,
                            true); // turn heater on
           } else {
-            pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::SW_5V_2,
+            pdu.set_switch(PDU::PDU_SW::SW_5V_2,
                            false); // turn heater off
           }
           heatertimer = 0;
@@ -108,11 +109,11 @@ void Artemis::Channels::pdu_channel() {
       float temperatureC = (temperatureF - 32) * 5 / 9;
       // Turn heater on or off based on temperature
       if (temperatureC <= heater_threshold) {
-        pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::SW_5V_2,
+        pdu.set_switch(PDU::PDU_SW::SW_5V_2,
                        true); // turn heater on
         Serial.println("Heater turned on");
       } else {
-        pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::SW_5V_2,
+        pdu.set_switch(PDU::PDU_SW::SW_5V_2,
                        false); // turn heater off
         Serial.println("Heater turned off");
       }
@@ -155,14 +156,13 @@ void Artemis::Channels::handle_pdu_queue() {
         break;
       }
       case PacketComm::TypeId::CommandEpsSwitchName: {
-        Artemis::Teensy::PDU::PDU_SW switchid =
-            (Artemis::Teensy::PDU::PDU_SW)packet.data[0];
+        PDU::PDU_SW switchid = (PDU::PDU_SW)packet.data[0];
         pdu.set_switch(switchid, packet.data[1]);
         break;
       }
       case PacketComm::TypeId::CommandEpsSwitchStatus: {
         string response;
-        pdu.get_switch(Artemis::Teensy::PDU::PDU_SW::All, response);
+        pdu.get_switch(PDU::PDU_SW::All, response);
         switchbeacon beacon;
         beacon.deci = uptime;
         for (size_t i = 1; i < response.length() - 2; i++) {
