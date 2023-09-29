@@ -12,10 +12,20 @@ namespace Artemis {
       RPI_CHANNEL,
     };
 
-    void rfm23_channel();
-    void pdu_channel();
-    void rpi_channel();
-    void handle_pdu_queue();
+    namespace RFM23 {
+      void rfm23_channel();
+    } // namespace RFM23
+
+    namespace PDU {
+      void pdu_channel();
+      void handle_pdu_queue();
+    } // namespace PDU
+
+    namespace RPI {
+      void rpi_channel();
+      void sendToPi();
+    } // namespace RPI
+
   } // namespace Channels
 } // namespace Artemis
 

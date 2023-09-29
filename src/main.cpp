@@ -49,13 +49,14 @@ void setup() {
   threads.setSliceMillis(10);
 
   // Threads
-  thread_list.push_back({threads.addThread(Channels::rfm23_channel, 0, 4096),
-                         Channels::Channel_ID::RFM23_CHANNEL});
-  thread_list.push_back({threads.addThread(Channels::pdu_channel, 0, 8192),
+  thread_list.push_back(
+      {threads.addThread(Channels::RFM23::rfm23_channel, 0, 4096),
+       Channels::Channel_ID::RFM23_CHANNEL});
+  thread_list.push_back({threads.addThread(Channels::PDU::pdu_channel, 0, 8192),
                          Channels::Channel_ID::PDU_CHANNEL});
 
   // Only uncomment these when testing and you want to force the RPi to turn on
-  // thread_list.push_back({threads.addThread(Channels::rpi_channel),
+  // thread_list.push_back({threads.addThread(Channels::RPI::rpi_channel),
   // Channels::Channel_ID::RPI_CHANNEL}); pinMode(RPI_ENABLE, HIGH);
 
   threads.delay(5000);
@@ -110,8 +111,9 @@ void loop() {
         if ((curr_V >= 7.0) || 1) {
           Serial.println("Turning on RPi");
           digitalWrite(RPI_ENABLE, HIGH);
-          thread_list.push_back({threads.addThread(Channels::rpi_channel, 9000),
-                                 Channels::Channel_ID::RPI_CHANNEL});
+          thread_list.push_back(
+              {threads.addThread(Channels::RPI::rpi_channel, 9000),
+               Channels::Channel_ID::RPI_CHANNEL});
           threads.delay(5000);
         } else {
           packet.header.type     = PacketComm::TypeId::CommandEpsSwitchStatus;
@@ -155,8 +157,9 @@ void loop() {
               if ((packet.data[1] == 1 && curr_V >= 7.0) ||
                   (packet.data[1] == 1 && packet.data[2] == 1)) {
                 digitalWrite(RPI_ENABLE, packet.data[1]);
-                thread_list.push_back({threads.addThread(Channels::rpi_channel),
-                                       Channels::Channel_ID::RPI_CHANNEL});
+                thread_list.push_back(
+                    {threads.addThread(Channels::RPI::rpi_channel),
+                     Channels::Channel_ID::RPI_CHANNEL});
                 threads.delay(5000);
               } else if (packet.data[1] == 0) {
                 PushQueue(packet, rpi_queue, rpi_queue_mtx);
