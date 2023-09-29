@@ -58,8 +58,11 @@ namespace Helpers {
     std::ostringstream oss;
     oss << msg;
     for (uint8_t i = 0; i < size; i++) {
-      oss << std::hex << std::setw(2) << std::setfill('0')
-          << static_cast<int>(src[i]) << " ";
+      if (channel == Short_Name::PDU && src[i] != 0x20 && src[i] != 0x0D &&
+          src[i] != 0x0A) {
+        oss << std::hex << std::setw(2) << std::setfill('0')
+            << static_cast<int>(src[i]) << " ";
+      }
     }
     print_debug(channel, oss.str().c_str());
 #endif

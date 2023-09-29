@@ -28,7 +28,10 @@ namespace Artemis {
         String UART1_RX = serial->readString();
         if (UART1_RX.length() > 0) {
           for (unsigned int i = 0; i < UART1_RX.length(); i++) {
-            UART1_RX[i] = UART1_RX[i] - PDU_CMD_OFFSET;
+            if (UART1_RX[i] != 0x20 && UART1_RX[i] != 0x0D &&
+                UART1_RX[i] != 0x0A) {
+              UART1_RX[i] = UART1_RX[i] - PDU_CMD_OFFSET;
+            }
           }
           Helpers::print_hexdump(Helpers::PDU,
                                  "UART received: ", (uint8_t *)UART1_RX.c_str(),
