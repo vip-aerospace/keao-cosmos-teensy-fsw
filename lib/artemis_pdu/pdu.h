@@ -7,7 +7,8 @@
 #include <TeensyThreads.h>
 #include <stdint.h>
 
-#define PDU_CMD_OFFSET 48
+#define PDU_CMD_OFFSET     48
+#define NUMBER_OF_SWITCHES 12
 
 namespace Artemis {
   namespace Devices {
@@ -43,6 +44,11 @@ namespace Artemis {
         RPI,
       };
 
+      enum class PDU_SW_State : bool {
+        SWITCH_OFF,
+        SWITCH_ON,
+      };
+
       std::map<std::string, PDU_SW> PDU_SW_Type = {
           {     "all",      PDU_SW::All},
           {   "3v3_1", PDU_SW::SW_3V3_1},
@@ -70,17 +76,25 @@ namespace Artemis {
 
       struct __attribute__((packed)) pdu_telem {
         PDU_Type type = PDU_Type::DataSwitchTelem;
-        uint8_t  sw_state[12];
+        uint8_t  sw_state[NUMBER_OF_SWITCHES];
       };
 
       PDU(HardwareSerial *hw_serial, int baud_rate);
-      int32_t set_switch(PDU_SW sw, uint8_t enable);
-      int32_t get_switch(PDU_SW sw, string &ret);
-      int32_t send(pdu_packet packet);
-      int32_t recv(std::string &response);
+
+      bool         ping();
+      bool         set_switch(PDU_SW sw, PDU_SW_State state);
+      bool         set_heater(PDU_SW_State state);
+      bool         set_burn_wire(PDU_SW_State state);
+      bool         get_all_switch_states();
+
+      PDU_SW_State switch_states[NUMBER_OF_SWITCHES];
 
     private:
       HardwareSerial *serial;
+
+      bool            send(pdu_packet packet);
+      bool            recv(pdu_packet packet);
+      bool            recv(pdu_telem packet);
     };
   } // namespace Devices
 } // namespace Artemis

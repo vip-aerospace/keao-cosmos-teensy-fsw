@@ -21,8 +21,11 @@ namespace Artemis {
     namespace PDU {
       void pdu_channel();
       void setup();
+      void deploy();
       void loop();
       void handle_pdu_queue();
+      void regulate_temperature();
+      void update_watchdog_timer();
     } // namespace PDU
 
     namespace RPI {
