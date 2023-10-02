@@ -6,7 +6,7 @@ namespace Artemis {
                  RHGenericSPI &spi)
         : rfm23(slaveSelectPin, interruptPin, spi) {}
 
-    int32_t RFM23::init(rfm23_config cfg, Threads::Mutex *mtx) {
+    bool RFM23::init(rfm23_config cfg, Threads::Mutex *mtx) {
       config  = cfg;
       spi_mtx = mtx;
 
@@ -21,79 +21,75 @@ namespace Artemis {
       while (!rfm23.init()) {
         if (timeout > 10000) {
           print_debug(Helpers::RFM23, "Radio failed to initialize");
-          return -1;
+          return false;
         }
       }
-      rfm23.setFrequency(config.freq);
+      if (!rfm23.setFrequency(config.freq)) {
+        print_debug(Helpers::RFM23, "Failed to set config: frequency");
+        return false;
+      }
+
       rfm23.setTxPower(config.tx_power);
 
-      /* RFM23 modulation     schemes and data rates
-       * <FSK_Rb125Fd125>     highest FSK data rate (125kbs)
-                 * <FSK_Rb2Fd5>         lowe FSK data rate (2kbs)
-                 * <GFSK_Rb125Fd125>    highest GFSK rate GFSK (125kbs)
-                 * <GFSK_Rb2Fd5>        lowest GFSK data rate (2kbs)
-                 * <FSK_Rb_512Fd2_5>    original FSK test modulation (0.512kbs)
-       */
-
-      rfm23.sleep();
       timeout = 0;
       while (!rfm23.setModemConfig(RH_RF22::FSK_Rb2Fd5)) {
         if (timeout > 10000) {
-          Helpers::print_debug(Helpers::RFM23,
-                               "Radio failed to set FSK modulation");
-          return -1;
+          print_debug(Helpers::RFM23,
+                      "Failed to set config: modem configuration");
+          return false;
         }
       }
-      rfm23.sleep();
+      // TODO: Assuming this is a *test* of whether we can go into sleep mode.
+      if (!rfm23.sleep()) {
+        print_debug(Helpers::RFM23, "Failed to set radio in sleep mode");
+        return false;
+      }
 
-      Helpers::print_debug(Helpers::RFM23, "Radio initialized");
+      print_debug(Helpers::RFM23, "Radio initialized");
       rfm23.setModeIdle();
-      return 0;
+      return true;
     }
 
-    int32_t RFM23::reset() {
+    bool RFM23::reset() {
       Threads::Scope lock(*spi_mtx);
       rfm23.reset();
-      return 0;
+      return true;
     }
 
-    int32_t RFM23::send(PacketComm &packet) {
-      int32_t iretn = 0;
-
+    bool RFM23::send(PacketComm &packet) {
       digitalWrite(config.pins.rx_on, HIGH);
       digitalWrite(config.pins.tx_on, LOW);
 
       packet.wrapped.resize(0);
-      iretn = packet.Wrap();
-      if (iretn < 0) {
-        Helpers::print_debug(Helpers::RFM23, "Wrap fail", iretn);
-        return -1;
+      if (!packet.Wrap()) {
+        print_debug(Helpers::RFM23, "Failed to wrap packet");
+        return false;
       }
       if (packet.wrapped.size() > RH_RF22_MAX_MESSAGE_LEN) {
-        Helpers::print_debug(Helpers::RFM23, "Radio oversize");
-        return COSMOS_GENERAL_ERROR_OVERSIZE;
+        print_debug(Helpers::RFM23, "Wrapped packet exceeds size limits");
+        return false;
       }
 
+      print_hexdump(Helpers::RFM23, "Radio Sending: ", &packet.wrapped[0],
+                    packet.wrapped.size());
       Threads::Scope lock(*spi_mtx);
-      rfm23.send(packet.wrapped.data(), packet.wrapped.size());
-      iretn = rfm23.waitPacketSent(1000);
-
-      if (iretn == false) {
-        return -1;
+      if (!rfm23.send(packet.wrapped.data(), packet.wrapped.size())) {
+        print_debug(Helpers::RFM23, "Failed to queue outgoing packet to radio");
+        return false;
+      }
+      if (!rfm23.waitPacketSent(1000)) {
+        print_debug(Helpers::RFM23,
+                    "Timed out waiting for packet transmission");
+        return false;
       }
 
+      // TODO: Do we want to set the radio to sleep mode, or idle?
       rfm23.sleep();
       rfm23.setModeIdle();
-      Helpers::print_hexdump(Helpers::RFM23,
-                             "Radio Sending: ", &packet.wrapped[0],
-                             packet.wrapped.size());
-
-      return 0;
+      return true;
     }
 
     int32_t RFM23::recv(PacketComm &packet, uint16_t timeout) {
-      int32_t iretn = 0;
-
       digitalWrite(config.pins.rx_on, LOW);
       digitalWrite(config.pins.tx_on, HIGH);
 
@@ -104,33 +100,17 @@ namespace Artemis {
         uint8_t bytes_recieved = packet.wrapped.size();
         if (rfm23.recv(packet.wrapped.data(), &bytes_recieved)) {
           packet.wrapped.resize(bytes_recieved);
-          iretn = packet.Unwrap();
-          rfm23.setModeIdle();
-
-          if (iretn < 0) {
-            Helpers::print_debug(
-                Helpers::RFM23,
-                "Data was received, but not in packetcomm format.");
+          if (packet.Unwrap() < 0) {
+            print_debug(Helpers::RFM23,
+                        "Data was received, but not in packetcomm format.");
             return -1;
           }
-
+          rfm23.setModeIdle();
           return packet.wrapped.size();
         }
       }
       rfm23.setModeIdle();
       return -1;
     }
-
-    int32_t RFM23::set_tx_power(uint8_t power) {
-      if (power > 20)
-        power = 20;
-      else if (power < 1)
-        power = 1;
-
-      config.tx_power = power;
-      return 0;
-    }
-
-    int32_t RFM23::read_rssi() { return rfm23.rssiRead(); }
   } // namespace Devices
 } // namespace Artemis
