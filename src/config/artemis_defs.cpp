@@ -39,24 +39,22 @@ int                    kill_thread(uint8_t channel_id) {
   return -1;
 }
 
-int32_t PushQueue(PacketComm &packet, std::deque<PacketComm> &queue,
-                  Threads::Mutex &mtx) {
+void PushQueue(PacketComm &packet, std::deque<PacketComm> &queue,
+               Threads::Mutex &mtx) {
   Threads::Scope lock(mtx);
-  if (queue.size() > MAXQUEUESIZE) {
+  if (queue.size() == MAXQUEUESIZE) {
     queue.pop_front();
   }
   queue.push_back(packet);
-  return 1;
 }
 
-int32_t PullQueue(PacketComm &packet, std::deque<PacketComm> &queue,
-                  Threads::Mutex &mtx) {
+bool PullQueue(PacketComm &packet, std::deque<PacketComm> &queue,
+               Threads::Mutex &mtx) {
   Threads::Scope lock(mtx);
   if (queue.size() > 0) {
     packet = queue.front();
     queue.pop_front();
-    return 1;
-  } else {
-    return 0;
+    return true;
   }
+  return false;
 }

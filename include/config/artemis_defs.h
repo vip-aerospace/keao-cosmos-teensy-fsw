@@ -102,9 +102,9 @@ extern Threads::Mutex               i2c1_mtx;
 
 // Utility Functions
 int                                 kill_thread(uint8_t channel_id);
-int32_t     PushQueue(PacketComm &packet, std::deque<PacketComm> &queue,
+void        PushQueue(PacketComm &packet, std::deque<PacketComm> &queue,
                       Threads::Mutex &mtx);
-int32_t     PullQueue(PacketComm &packet, std::deque<PacketComm> &queue,
+bool        PullQueue(PacketComm &packet, std::deque<PacketComm> &queue,
                       Threads::Mutex &mtx);
 
 extern bool deploymentmode;
