@@ -70,7 +70,7 @@ namespace Artemis {
         return false;
       }
 
-      print_hexdump(Helpers::RFM23, "Radio Sending: ", &packet.wrapped[0],
+      print_hexdump(Helpers::RFM23, "Radio Sending: ", packet.wrapped.data(),
                     packet.wrapped.size());
       Threads::Scope lock(*spi_mtx);
       if (!rfm23.send(packet.wrapped.data(), packet.wrapped.size())) {
