@@ -49,6 +49,7 @@ void setup() {
   usb.begin();
   pinMode(RPI_ENABLE, OUTPUT);
   pinMode(UART6_TX, INPUT);
+  pinMode(UART6_RX, INPUT);
   delay(3000);
   setup_devices();
   setup_threads();
@@ -57,7 +58,6 @@ void setup() {
 }
 
 void loop() {
-  pinMode(UART6_RX, INPUT);
   run_tests();
   beacon_if_deployed();
   route_packets();
