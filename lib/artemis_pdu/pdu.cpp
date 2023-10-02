@@ -34,7 +34,7 @@ namespace Artemis {
       return true;
     }
 
-    bool PDU::recv(pdu_packet packet) {
+    bool PDU::recv(pdu_packet *packet) {
       if (serial->available() <= 0) {
         print_debug(Helpers::PDU, "Nothing in serial buffer to receive");
         return false;
@@ -44,16 +44,16 @@ namespace Artemis {
         print_debug(Helpers::PDU, "Received serial string empty or corrupted");
         return false;
       }
-      packet.type     = (PDU_Type)(UART1_RX[0] - PDU_CMD_OFFSET);
-      packet.sw       = (PDU_SW)(UART1_RX[1] - PDU_CMD_OFFSET);
-      packet.sw_state = (uint8_t)(UART1_RX[2] - PDU_CMD_OFFSET);
+      packet->type     = (PDU_Type)(UART1_RX[0] - PDU_CMD_OFFSET);
+      packet->sw       = (PDU_SW)(UART1_RX[1] - PDU_CMD_OFFSET);
+      packet->sw_state = (uint8_t)(UART1_RX[2] - PDU_CMD_OFFSET);
 
       print_hexdump(Helpers::PDU, "UART received: ", (uint8_t *)&packet,
                     sizeof(packet));
       return true;
     }
 
-    bool PDU::recv(pdu_telem packet) {
+    bool PDU::recv(pdu_telem *packet) {
       if (serial->available() <= 0) {
         print_debug(Helpers::PDU, "Nothing in serial buffer to receive");
         return false;
@@ -63,9 +63,9 @@ namespace Artemis {
         print_debug(Helpers::PDU, "Received serial string empty or corrupted");
         return false;
       }
-      packet.type = (PDU_Type)(UART1_RX[0] - PDU_CMD_OFFSET);
+      packet->type = (PDU_Type)(UART1_RX[0] - PDU_CMD_OFFSET);
       for (int i = 0; i < NUMBER_OF_SWITCHES; i++) {
-        packet.sw_state[i] = (uint8_t)(UART1_RX[i + 1] - PDU_CMD_OFFSET);
+        packet->sw_state[i] = (uint8_t)(UART1_RX[i + 1] - PDU_CMD_OFFSET);
       }
 
       print_hexdump(Helpers::PDU, "UART received: ", (uint8_t *)&packet,
@@ -81,10 +81,11 @@ namespace Artemis {
         print_debug(Helpers::PDU, "Failed to send ping packet to PDU");
         return false;
       }
-      if (!recv(pingPacket)) {
+      if (!recv(&pingPacket)) {
         print_debug(Helpers::PDU, "Failed to receive pong reply from PDU");
         return false;
       }
+      print_debug(Helpers::PDU, "pingPacket.type=", (u_int32_t)pingPacket.type);
       return pingPacket.type == PDU_Type::DataPong;
     }
 
@@ -103,7 +104,7 @@ namespace Artemis {
         return false;
       }
       if (sw != PDU_SW::All) {
-        if (!recv(packet)) {
+        if (!recv(&packet)) {
           print_debug(Helpers::PDU,
                       "Failed to receive set switch reply from PDU");
           return false;
@@ -111,7 +112,7 @@ namespace Artemis {
         switch_states[(uint8_t)packet.sw - 2] = (PDU_SW_State)packet.sw_state;
       } else {
         pdu_telem replyPacket;
-        if (!recv(replyPacket)) {
+        if (!recv(&replyPacket)) {
           print_debug(Helpers::PDU,
                       "Failed to receive set all switches reply from PDU");
           return false;
@@ -143,7 +144,7 @@ namespace Artemis {
         return false;
       }
 
-      if (!recv(replyPacket)) {
+      if (!recv(&replyPacket)) {
         print_debug(Helpers::PDU,
                     "Failed to receive all switch states reply from PDU");
         return false;

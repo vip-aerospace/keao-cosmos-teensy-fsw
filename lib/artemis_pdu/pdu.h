@@ -104,8 +104,8 @@ namespace Artemis {
       HardwareSerial *serial;
 
       bool            send(pdu_packet packet);
-      bool            recv(pdu_packet packet);
-      bool            recv(pdu_telem packet);
+      bool            recv(pdu_packet *packet);
+      bool            recv(pdu_telem *packet);
     };
   } // namespace Devices
 } // namespace Artemis
