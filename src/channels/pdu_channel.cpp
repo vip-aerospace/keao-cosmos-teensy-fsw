@@ -14,8 +14,6 @@ namespace Artemis {
       elapsedMillis uptime;
       // Create a new elapsedMillis object for the heater
       elapsedMillis heaterinterval;
-      // Time in milliseconds. Set this to the desired time between code runs.
-      int           checkinterval = 60000;
 
       void          pdu_channel() {
         setup();
@@ -26,18 +24,18 @@ namespace Artemis {
         while (!Serial1)
           ;
         // Give the PDU some time to warm up...
-        threads.delay(5000);
+        threads.delay(PDU_WARMUP_TIME);
 
         // Ensure PDU is communicating with Teensy
         while (!pdu.ping()) {
           print_debug(Helpers::PDU, "Unable to ping PDU");
-          threads.delay(1000);
+          threads.delay(PDU_RETRY_INTERVAL);
         }
         print_debug(Helpers::PDU, "PDU connection established");
 
-        while (!pdu.get_all_switch_states()) {
+        while (!pdu.refresh_switch_states()) {
           print_debug(Helpers::PDU, "Unable to refresh PDU switch states");
-          threads.delay(1000);
+          threads.delay(PDU_RETRY_INTERVAL);
         }
         print_debug(Helpers::PDU, "PDU switch states refreshed");
         threads.delay(100);
@@ -58,15 +56,18 @@ namespace Artemis {
         if (SD.begin(BUILTIN_SDCARD)) {
           if (!SD.exists("/deployed.txt")) {
             deploymentmode = true;
-            // Deployment delay (set to desired delay length)
-            threads.delay(5000);
+            threads.delay(DEPLOYMENT_DELAY);
 
             // Enable burn wire
             print_debug(Helpers::PDU, "Starting Deployment Sequence");
-            pdu.set_burn_wire(PDU::PDU_SW_State::SWITCH_ON);
+            if (!pdu.set_burn_wire(PDU::PDU_SW_State::SWITCH_ON)) {
+              print_debug(Helpers::PDU, "Failed to enable burn wire switch");
+            }
             print_debug(Helpers::PDU, "Burn switch on");
-            threads.delay(5000); // burn wire on time
-            pdu.set_burn_wire(PDU::PDU_SW_State::SWITCH_OFF);
+            threads.delay(BURN_WIRE_ON_TIME);
+            if (!pdu.set_burn_wire(PDU::PDU_SW_State::SWITCH_OFF)) {
+              print_debug(Helpers::PDU, "Failed to disable burn wire switch");
+            }
             print_debug(Helpers::PDU, "Burn switch off");
 
             SD.begin(BUILTIN_SDCARD);
@@ -75,21 +76,15 @@ namespace Artemis {
               file.close();
               print_debug(Helpers::PDU, "Deployment recorded on SD card.");
             } else {
-              print_debug(Helpers::PDU, "Error closing file");
+              print_debug(Helpers::PDU, "Error opening file");
               return;
             }
 
-            // Define elapsedMillis variable
             elapsedMillis timeElapsed;
-            // unsigned long twoWeeksMillis = 14 * 24 * 60 * 60 * 1000;  //
-            // Flight: two weeks in milliseconds
-            // Testing: set desired deployment length in milliseconds
-            unsigned long twoWeeksMillis = 60000;
-
-            while (timeElapsed <= twoWeeksMillis) {
+            while (timeElapsed <= DEPLOYMENT_LENGTH) {
               handle_queue();
               regulate_temperature();
-              threads.delay(10000);
+              threads.delay(DEPLOYMENT_LOOP_INTERVAL);
             }
           } else {
             // issue
@@ -112,10 +107,11 @@ namespace Artemis {
           switch (packet.header.type) {
             case PacketComm::TypeId::CommandEpsCommunicate: {
               timeoutStart = millis();
-              while (!pdu.ping() && (millis() - timeoutStart) < 5000) {
-                threads.delay(100);
+              while (!pdu.ping() &&
+                     (millis() - timeoutStart) < PDU_COMMUNICATION_TIMEOUT) {
+                threads.delay(PDU_RETRY_INTERVAL);
               }
-              if ((millis() - timeoutStart) >= 5000) {
+              if ((millis() - timeoutStart) >= PDU_COMMUNICATION_TIMEOUT) {
                 print_debug(Helpers::PDU, "Timed out trying to ping PDU");
               } else {
                 packet.header.nodedest = packet.header.nodeorig;
@@ -130,24 +126,24 @@ namespace Artemis {
 
               timeoutStart                  = millis();
               while (!pdu.set_switch(switchID, switchState) &&
-                     (millis() - timeoutStart) < 5000) {
-                threads.delay(100);
+                     (millis() - timeoutStart) < PDU_COMMUNICATION_TIMEOUT) {
+                threads.delay(PDU_RETRY_INTERVAL);
               }
-              if ((millis() - timeoutStart) >= 5000) {
+              if ((millis() - timeoutStart) >= PDU_COMMUNICATION_TIMEOUT) {
                 print_debug(Helpers::PDU, "Timed out trying to set switch");
               }
             }
             case PacketComm::TypeId::CommandEpsSwitchStatus: {
               timeoutStart = millis();
-              while (!pdu.get_all_switch_states() &&
-                     (millis() - timeoutStart) < 5000) {
-                threads.delay(1000);
+              while (!pdu.refresh_switch_states() &&
+                     (millis() - timeoutStart) < PDU_COMMUNICATION_TIMEOUT) {
+                threads.delay(PDU_RETRY_INTERVAL);
               }
-              if ((millis() - timeoutStart) >= 5000) {
+              if ((millis() - timeoutStart) >= PDU_COMMUNICATION_TIMEOUT) {
                 print_debug(Helpers::PDU,
                             "Timed out trying to refresh PDU switch states");
               } else {
-                Artemis::Devices::Switches::switchbeacon beacon;
+                Devices::Switches::switchbeacon beacon;
                 beacon.deci = uptime;
                 for (int i = 0; i < NUMBER_OF_SWITCHES; i++) {
                   beacon.sw[i] = (uint8_t)pdu.switch_states[i];
@@ -159,9 +155,8 @@ namespace Artemis {
                 packet.header.nodedest = (uint8_t)NODES::GROUND_NODE_ID;
                 packet.data.resize(sizeof(beacon));
                 memcpy(packet.data.data(), &beacon, sizeof(beacon));
-                packet.header.chanin = 0;
-                packet.header.chanout =
-                    Artemis::Channels::Channel_ID::RFM23_CHANNEL;
+                packet.header.chanin  = 0;
+                packet.header.chanout = Channel_ID::RFM23_CHANNEL;
                 PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
               }
               break;
@@ -173,7 +168,7 @@ namespace Artemis {
       }
 
       void regulate_temperature() {
-        if (heaterinterval > static_cast<unsigned long>(checkinterval)) {
+        if (heaterinterval > HEATER_CHECK_INTERVAL) {
           heaterinterval     = 0;
           int   reading      = analogRead(A6);
           float voltage      = reading * MV_PER_ADC_UNIT;

@@ -11,14 +11,25 @@ namespace Artemis {
 
     bool PDU::send(pdu_packet packet) {
       char *ptr = (char *)&packet;
-      for (size_t i = 0; i < sizeof(packet); i++) {
-        serial->print((char)(*(ptr + i) + PDU_CMD_OFFSET));
-      }
-      serial->write('\0');
-      serial->print('\n');
 
       print_hexdump(Helpers::PDU, "Sending to PDU: ", (uint8_t *)ptr,
                     sizeof(packet));
+      for (size_t i = 0; i < sizeof(packet); i++) {
+        if (!serial->print((char)(*(ptr + i) + PDU_CMD_OFFSET))) {
+          print_debug(Helpers::PDU, "Failed to send character to PDU",
+                      (u_int32_t)i);
+          return false;
+        }
+      }
+      if (!serial->write('\0')) {
+        print_debug(Helpers::PDU, "Failed to send null character to PDU");
+        return false;
+      }
+      if (!serial->write('\n')) {
+        print_debug(Helpers::PDU, "Failed to send newline to PDU");
+        return false;
+      }
+
       threads.delay(100);
       return true;
     }
@@ -120,7 +131,7 @@ namespace Artemis {
       return set_switch(PDU_SW::BURN1, state);
     }
 
-    bool PDU::get_all_switch_states() {
+    bool PDU::refresh_switch_states() {
       pdu_packet requestPacket;
       pdu_telem  replyPacket;
       requestPacket.type = PDU_Type::CommandGetSwitchStatus;

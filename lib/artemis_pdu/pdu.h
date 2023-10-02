@@ -7,8 +7,19 @@
 #include <TeensyThreads.h>
 #include <stdint.h>
 
-#define PDU_CMD_OFFSET     48
-#define NUMBER_OF_SWITCHES 12
+#define PDU_CMD_OFFSET            48
+#define NUMBER_OF_SWITCHES        12
+
+#define PDU_WARMUP_TIME           5000
+#define PDU_RETRY_INTERVAL        1000
+#define BURN_WIRE_ON_TIME         5000
+#define DEPLOYMENT_DELAY          5000
+// Flight: two weeks in milliseconds = 14 * 24 * 60 * 60 * 1000;
+// Testing: set desired deployment length in milliseconds
+#define DEPLOYMENT_LENGTH         60000
+#define DEPLOYMENT_LOOP_INTERVAL  10000
+#define HEATER_CHECK_INTERVAL     60000
+#define PDU_COMMUNICATION_TIMEOUT 5000
 
 namespace Artemis {
   namespace Devices {
@@ -85,7 +96,7 @@ namespace Artemis {
       bool         set_switch(PDU_SW sw, PDU_SW_State state);
       bool         set_heater(PDU_SW_State state);
       bool         set_burn_wire(PDU_SW_State state);
-      bool         get_all_switch_states();
+      bool         refresh_switch_states();
 
       PDU_SW_State switch_states[NUMBER_OF_SWITCHES];
 
