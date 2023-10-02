@@ -68,8 +68,8 @@ namespace Artemis {
         packet->sw_state[i] = (uint8_t)(UART1_RX[i + 1] - PDU_CMD_OFFSET);
       }
 
-      print_hexdump(Helpers::PDU, "UART received: ", (uint8_t *)&packet,
-                    sizeof(packet));
+      print_hexdump(Helpers::PDU, "UART received: ", (uint8_t *)packet,
+                    sizeof(pdu_telem));
       return true;
     }
 
