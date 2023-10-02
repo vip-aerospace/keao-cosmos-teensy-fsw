@@ -15,6 +15,7 @@ extern "C" uint32_t set_arm_clock(uint32_t frequency);
 #endif
 
 void run_tests();
+void beacon_artemis_devices();
 void beacon_if_deployed();
 void route_packets();
 void setup_devices();
@@ -58,6 +59,7 @@ void setup() {
 }
 
 void loop() {
+  Helpers::print_free_memory();
   run_tests();
   beacon_if_deployed();
   route_packets();
@@ -90,6 +92,12 @@ void setup_threads() {
 void run_tests() {
 #ifdef TESTS
   run_test();
+  beacon_artemis_devices();
+  threads.delay(10000);
+#endif
+}
+
+void beacon_artemis_devices() {
 #ifdef ENABLE_TEMPERATURESENSORS
   temperature_sensors.read(uptime);
 #endif
@@ -109,8 +117,6 @@ void run_tests() {
 #ifdef ENABLE_GPS
   gps.read(uptime);
 #endif
-  threads.delay(10000);
-#endif
 }
 
 void beacon_if_deployed() {
@@ -119,11 +125,7 @@ void beacon_if_deployed() {
     // Check if it's time to read the sensors
     if (deploymentbeacon >= readInterval) {
       Helpers::print_debug(Helpers::MAIN, "Deployment beacons sending");
-      temperature_sensors.read(uptime);
-      current_sensors.read(uptime);
-      imu.read(uptime);
-      magnetometer.read(uptime);
-      gps.read(uptime);
+      beacon_artemis_devices();
 
       // Get PDU Switches
       packet.header.type     = PacketComm::TypeId::CommandEpsSwitchStatus;
@@ -242,11 +244,7 @@ void route_packets() {
           }
         } break;
         case PacketComm::TypeId::CommandObcSendBeacon: {
-          temperature_sensors.read(uptime);
-          current_sensors.read(uptime);
-          imu.read(uptime);
-          magnetometer.read(uptime);
-          gps.read(uptime);
+          beacon_artemis_devices();
 
           // Get PDU Switches
           packet.header.type     = PacketComm::TypeId::CommandEpsSwitchStatus;
