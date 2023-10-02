@@ -16,6 +16,8 @@ namespace Artemis {
       void rfm23_channel();
       void setup();
       void loop();
+      void handle_queue();
+      void receive_from_radio();
     } // namespace RFM23
 
     namespace PDU {

@@ -61,8 +61,8 @@ namespace Artemis {
         if (SD.begin(BUILTIN_SDCARD)) {
           if (!SD.exists("/deployed.txt")) {
             deploymentmode = true;
-            threads.delay(
-                5000); // Deployment delay (set to desired delay length)
+            // Deployment delay (set to desired delay length)
+            threads.delay(5000);
 
             // Enable burn wire
             Helpers::print_debug(Helpers::PDU, "Starting Deployment Sequence");
@@ -87,8 +87,8 @@ namespace Artemis {
             elapsedMillis timeElapsed;
             // unsigned long twoWeeksMillis = 14 * 24 * 60 * 60 * 1000;  //
             // Flight: two weeks in milliseconds
-            unsigned long twoWeeksMillis =
-                60000; // Testing: set desired deployment length in milliseconds
+            // Testing: set desired deployment length in milliseconds
+            unsigned long twoWeeksMillis = 60000;
 
             while (timeElapsed <= twoWeeksMillis) {
               handle_queue();
