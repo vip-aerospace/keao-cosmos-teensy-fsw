@@ -13,7 +13,7 @@ namespace Artemis {
       }
 
       void setup() {
-        Helpers::print_debug(Helpers::RPI, "RPI Thread starting..");
+        print_debug(Helpers::RPI, "RPI Thread starting..");
         Serial2.begin(9600);
       }
 
@@ -27,8 +27,8 @@ namespace Artemis {
 
       void handle_queue() {
         if (PullQueue(packet, rpi_queue, rpi_queue_mtx)) {
-          Helpers::print_debug(Helpers::RPI, "packet.header.type: ",
-                               (u_int32_t)packet.header.type);
+          print_debug(Helpers::RPI,
+                      "packet.header.type: ", (u_int32_t)packet.header.type);
           switch (packet.header.type) {
             case PacketComm::TypeId::CommandEpsSwitchName:
               if ((PDU::PDU_SW)packet.data[0] == PDU::PDU_SW::RPI &&
@@ -43,7 +43,7 @@ namespace Artemis {
                 while (!rpi_queue.empty())
                   rpi_queue.pop_front();
 
-                Helpers::print_debug(Helpers::RPI, "Killing RPi thread");
+                print_debug(Helpers::RPI, "Killing RPi thread");
                 kill_thread(Channel_ID::RPI_CHANNEL);
                 return;
               }
@@ -57,9 +57,9 @@ namespace Artemis {
 
       void send_to_pi() {
         packet.SLIPPacketize();
-        Helpers::print_hexdump(Helpers::RPI,
-                               "Forwarding to RPi: ", &packet.packetized[0],
-                               packet.packetized.size());
+        print_hexdump(Helpers::RPI,
+                      "Forwarding to RPi: ", &packet.packetized[0],
+                      packet.packetized.size());
         for (size_t i = 0; i < packet.packetized.size(); i++) {
           Serial2.write(packet.packetized[i]);
         }

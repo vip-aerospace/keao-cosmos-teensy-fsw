@@ -30,17 +30,16 @@ namespace Artemis {
 
         // Ensure PDU is communicating with Teensy
         while (!pdu.ping()) {
-          Helpers::print_debug(Helpers::PDU, "Unable to ping PDU");
+          print_debug(Helpers::PDU, "Unable to ping PDU");
           threads.delay(1000);
         }
-        Helpers::print_debug(Helpers::PDU, "PDU connection established");
+        print_debug(Helpers::PDU, "PDU connection established");
 
         while (!pdu.get_all_switch_states()) {
-          Helpers::print_debug(Helpers::PDU,
-                               "Unable to refresh PDU switch states");
+          print_debug(Helpers::PDU, "Unable to refresh PDU switch states");
           threads.delay(1000);
         }
-        Helpers::print_debug(Helpers::PDU, "PDU switch states refreshed");
+        print_debug(Helpers::PDU, "PDU switch states refreshed");
         threads.delay(100);
 
         // The radio is connected to the 3V3_2 switch however it is still
@@ -52,8 +51,7 @@ namespace Artemis {
         deploy();
 
         deploymentmode = false;
-        Helpers::print_debug(Helpers::PDU,
-                             "Satellite is now in passive state.");
+        print_debug(Helpers::PDU, "Satellite is now in passive state.");
       }
 
       void deploy() {
@@ -64,21 +62,20 @@ namespace Artemis {
             threads.delay(5000);
 
             // Enable burn wire
-            Helpers::print_debug(Helpers::PDU, "Starting Deployment Sequence");
+            print_debug(Helpers::PDU, "Starting Deployment Sequence");
             pdu.set_burn_wire(PDU::PDU_SW_State::SWITCH_ON);
-            Helpers::print_debug(Helpers::PDU, "Burn switch on");
+            print_debug(Helpers::PDU, "Burn switch on");
             threads.delay(5000); // burn wire on time
             pdu.set_burn_wire(PDU::PDU_SW_State::SWITCH_OFF);
-            Helpers::print_debug(Helpers::PDU, "Burn switch off");
+            print_debug(Helpers::PDU, "Burn switch off");
 
             SD.begin(BUILTIN_SDCARD);
             File file = SD.open("/deployed.txt", FILE_WRITE);
             if (file) {
               file.close();
-              Helpers::print_debug(Helpers::PDU,
-                                   "Deployment recorded on SD card.");
+              print_debug(Helpers::PDU, "Deployment recorded on SD card.");
             } else {
-              Helpers::print_debug(Helpers::PDU, "Error closing file");
+              print_debug(Helpers::PDU, "Error closing file");
               return;
             }
 
@@ -96,8 +93,7 @@ namespace Artemis {
             }
           } else {
             // issue
-            Helpers::print_debug(Helpers::PDU,
-                                 "Satellite was already deployed");
+            print_debug(Helpers::PDU, "Satellite was already deployed");
           }
         }
       }
@@ -120,8 +116,7 @@ namespace Artemis {
                 threads.delay(100);
               }
               if ((millis() - timeoutStart) >= 5000) {
-                Helpers::print_debug(Helpers::PDU,
-                                     "Timed out trying to ping PDU");
+                print_debug(Helpers::PDU, "Timed out trying to ping PDU");
               } else {
                 packet.header.nodedest = packet.header.nodeorig;
                 packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
@@ -139,8 +134,7 @@ namespace Artemis {
                 threads.delay(100);
               }
               if ((millis() - timeoutStart) >= 5000) {
-                Helpers::print_debug(Helpers::PDU,
-                                     "Timed out trying to set switch");
+                print_debug(Helpers::PDU, "Timed out trying to set switch");
               }
             }
             case PacketComm::TypeId::CommandEpsSwitchStatus: {
@@ -150,9 +144,8 @@ namespace Artemis {
                 threads.delay(1000);
               }
               if ((millis() - timeoutStart) >= 5000) {
-                Helpers::print_debug(
-                    Helpers::PDU,
-                    "Timed out trying to refresh PDU switch states");
+                print_debug(Helpers::PDU,
+                            "Timed out trying to refresh PDU switch states");
               } else {
                 Artemis::Devices::Switches::switchbeacon beacon;
                 beacon.deci = uptime;
@@ -190,11 +183,11 @@ namespace Artemis {
           if (temperatureC <= heater_threshold) {
             // turn heater on
             pdu.set_heater(PDU::PDU_SW_State::SWITCH_ON);
-            Helpers::print_debug(Helpers::PDU, "Heater turned on");
+            print_debug(Helpers::PDU, "Heater turned on");
           } else {
             // turn heater off
             pdu.set_heater(PDU::PDU_SW_State::SWITCH_OFF);
-            Helpers::print_debug(Helpers::PDU, "Heater turned off");
+            print_debug(Helpers::PDU, "Heater turned off");
           }
         }
       }

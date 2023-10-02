@@ -17,43 +17,39 @@ namespace Artemis {
       serial->write('\0');
       serial->print('\n');
 
-      Helpers::print_hexdump(Helpers::PDU, "Sending to PDU: ", (uint8_t *)ptr,
-                             sizeof(packet));
+      print_hexdump(Helpers::PDU, "Sending to PDU: ", (uint8_t *)ptr,
+                    sizeof(packet));
       threads.delay(100);
       return true;
     }
 
     bool PDU::recv(pdu_packet packet) {
       if (serial->available() <= 0) {
-        Helpers::print_debug(Helpers::PDU,
-                             "Nothing in serial buffer to receive");
+        print_debug(Helpers::PDU, "Nothing in serial buffer to receive");
         return false;
       }
       String UART1_RX = serial->readString();
       if (UART1_RX.length() <= 0) {
-        Helpers::print_debug(Helpers::PDU,
-                             "Received serial string empty or corrupted");
+        print_debug(Helpers::PDU, "Received serial string empty or corrupted");
         return false;
       }
       packet.type     = (PDU_Type)(UART1_RX[0] - PDU_CMD_OFFSET);
       packet.sw       = (PDU_SW)(UART1_RX[1] - PDU_CMD_OFFSET);
       packet.sw_state = (uint8_t)(UART1_RX[2] - PDU_CMD_OFFSET);
 
-      Helpers::print_hexdump(
-          Helpers::PDU, "UART received: ", (uint8_t *)&packet, sizeof(packet));
+      print_hexdump(Helpers::PDU, "UART received: ", (uint8_t *)&packet,
+                    sizeof(packet));
       return true;
     }
 
     bool PDU::recv(pdu_telem packet) {
       if (serial->available() <= 0) {
-        Helpers::print_debug(Helpers::PDU,
-                             "Nothing in serial buffer to receive");
+        print_debug(Helpers::PDU, "Nothing in serial buffer to receive");
         return false;
       }
       String UART1_RX = serial->readString();
       if (UART1_RX.length() <= 0) {
-        Helpers::print_debug(Helpers::PDU,
-                             "Received serial string empty or corrupted");
+        print_debug(Helpers::PDU, "Received serial string empty or corrupted");
         return false;
       }
       packet.type = (PDU_Type)(UART1_RX[0] - PDU_CMD_OFFSET);
@@ -61,8 +57,8 @@ namespace Artemis {
         packet.sw_state[i] = (uint8_t)(UART1_RX[i + 1] - PDU_CMD_OFFSET);
       }
 
-      Helpers::print_hexdump(
-          Helpers::PDU, "UART received: ", (uint8_t *)&packet, sizeof(packet));
+      print_hexdump(Helpers::PDU, "UART received: ", (uint8_t *)&packet,
+                    sizeof(packet));
       return true;
     }
 
@@ -71,12 +67,11 @@ namespace Artemis {
       pingPacket.type = PDU_Type::CommandPing;
 
       if (!send(pingPacket)) {
-        Helpers::print_debug(Helpers::PDU, "Failed to send ping packet to PDU");
+        print_debug(Helpers::PDU, "Failed to send ping packet to PDU");
         return false;
       }
       if (!recv(pingPacket)) {
-        Helpers::print_debug(Helpers::PDU,
-                             "Failed to receive pong reply from PDU");
+        print_debug(Helpers::PDU, "Failed to receive pong reply from PDU");
         return false;
       }
       return pingPacket.type == PDU_Type::DataPong;
@@ -84,8 +79,7 @@ namespace Artemis {
 
     bool PDU::set_switch(PDU_SW sw, PDU_SW_State state) {
       if (switch_states[(uint8_t)sw - 2] == state) {
-        Helpers::print_debug(Helpers::PDU,
-                             "Switch already set to desired state");
+        print_debug(Helpers::PDU, "Switch already set to desired state");
         return true;
       }
       pdu_packet packet;
@@ -94,23 +88,21 @@ namespace Artemis {
       packet.sw_state = (uint8_t)state;
 
       if (!send(packet)) {
-        Helpers::print_debug(Helpers::PDU,
-                             "Failed to send set switch command to PDU");
+        print_debug(Helpers::PDU, "Failed to send set switch command to PDU");
         return false;
       }
       if (sw != PDU_SW::All) {
         if (!recv(packet)) {
-          Helpers::print_debug(Helpers::PDU,
-                               "Failed to receive set switch reply from PDU");
+          print_debug(Helpers::PDU,
+                      "Failed to receive set switch reply from PDU");
           return false;
         }
         switch_states[(uint8_t)packet.sw - 2] = (PDU_SW_State)packet.sw_state;
       } else {
         pdu_telem replyPacket;
         if (!recv(replyPacket)) {
-          Helpers::print_debug(
-              Helpers::PDU,
-              "Failed to receive set all switches reply from PDU");
+          print_debug(Helpers::PDU,
+                      "Failed to receive set all switches reply from PDU");
           return false;
         }
         for (int i = 0; i < NUMBER_OF_SWITCHES; i++) {
@@ -135,14 +127,14 @@ namespace Artemis {
       requestPacket.sw   = PDU_SW::All;
 
       if (!send(requestPacket)) {
-        Helpers::print_debug(Helpers::PDU,
-                             "Failed to send all switch states request to PDU");
+        print_debug(Helpers::PDU,
+                    "Failed to send all switch states request to PDU");
         return false;
       }
 
       if (!recv(replyPacket)) {
-        Helpers::print_debug(
-            Helpers::PDU, "Failed to receive all switch states reply from PDU");
+        print_debug(Helpers::PDU,
+                    "Failed to receive all switch states reply from PDU");
         return false;
       }
 
