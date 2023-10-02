@@ -48,6 +48,7 @@ void setup() {
 
   usb.begin();
   pinMode(RPI_ENABLE, OUTPUT);
+  pinMode(UART6_TX, INPUT);
   delay(3000);
   setup_devices();
   setup_threads();
