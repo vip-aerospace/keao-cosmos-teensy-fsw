@@ -4,7 +4,7 @@
 namespace Artemis {
   namespace Channels {
     namespace RPI {
-      using namespace Artemis;
+      using Artemis::Devices::PDU;
       PacketComm packet;
 
       void       rpi_channel() {
@@ -19,39 +19,43 @@ namespace Artemis {
 
       void loop() {
         while (true) {
-          if (PullQueue(packet, rpi_queue, rpi_queue_mtx)) {
-            Helpers::print_debug(Helpers::RPI, "packet.header.type: ",
-                                 (u_int32_t)packet.header.type);
-            switch (packet.header.type) {
-              case PacketComm::TypeId::CommandEpsSwitchName:
-                if ((Devices::PDU::PDU_SW)packet.data[0] ==
-                        Devices::PDU::PDU_SW::RPI &&
-                    packet.data[1] == 0) {
-                  packet.header.type = PacketComm::TypeId::CommandObcHalt;
-                  sendToPi();
-                  threads.delay(
-                      20000); // Wait 20s to give the rpi time to turn off
-                  digitalWrite(RPI_ENABLE, LOW);
-
-                  // Empty RPI Queue
-                  while (!rpi_queue.empty())
-                    rpi_queue.pop_front();
-
-                  Helpers::print_debug(Helpers::RPI, "Killing RPi thread");
-                  kill_thread(Artemis::Channels::Channel_ID::RPI_CHANNEL);
-                  return;
-                }
-                break;
-              default:
-                sendToPi();
-                break;
-            }
-          }
+          handle_queue();
+          receive_from_pi();
           threads.delay(100);
         }
       }
 
-      void sendToPi() {
+      void handle_queue() {
+        if (PullQueue(packet, rpi_queue, rpi_queue_mtx)) {
+          Helpers::print_debug(Helpers::RPI, "packet.header.type: ",
+                               (u_int32_t)packet.header.type);
+          switch (packet.header.type) {
+            case PacketComm::TypeId::CommandEpsSwitchName:
+              if ((PDU::PDU_SW)packet.data[0] == PDU::PDU_SW::RPI &&
+                  packet.data[1] == 0) {
+                packet.header.type = PacketComm::TypeId::CommandObcHalt;
+                send_to_pi();
+                threads.delay(
+                    20000); // Wait 20s to give the rpi time to turn off
+                digitalWrite(RPI_ENABLE, LOW);
+
+                // Empty RPI Queue
+                while (!rpi_queue.empty())
+                  rpi_queue.pop_front();
+
+                Helpers::print_debug(Helpers::RPI, "Killing RPi thread");
+                kill_thread(Channel_ID::RPI_CHANNEL);
+                return;
+              }
+              break;
+            default:
+              send_to_pi();
+              break;
+          }
+        }
+      }
+
+      void send_to_pi() {
         packet.SLIPPacketize();
         Helpers::print_hexdump(Helpers::RPI,
                                "Forwarding to RPi: ", &packet.packetized[0],
@@ -59,6 +63,13 @@ namespace Artemis {
         for (size_t i = 0; i < packet.packetized.size(); i++) {
           Serial2.write(packet.packetized[i]);
         }
+      }
+
+      void receive_from_pi() {
+        // TODO: Complete this.
+        // If data is available from the serial connection, read in the data and
+        // store it in a PacketComm packet. Add that packet to the main_queue
+        // for routing.
       }
     } // namespace RPI
   }   // namespace Channels

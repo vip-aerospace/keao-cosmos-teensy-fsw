@@ -91,7 +91,7 @@ namespace Artemis {
                 60000; // Testing: set desired deployment length in milliseconds
 
             while (timeElapsed <= twoWeeksMillis) {
-              handle_pdu_queue();
+              handle_queue();
               regulate_temperature();
               threads.delay(10000);
             }
@@ -105,14 +105,14 @@ namespace Artemis {
 
       void loop() {
         while (true) {
-          handle_pdu_queue();
+          handle_queue();
           regulate_temperature();
           update_watchdog_timer();
           threads.delay(100);
         }
       }
 
-      void handle_pdu_queue() {
+      void handle_queue() {
         if (PullQueue(packet, pdu_queue, pdu_queue_mtx)) {
           switch (packet.header.type) {
             case PacketComm::TypeId::CommandEpsCommunicate: {

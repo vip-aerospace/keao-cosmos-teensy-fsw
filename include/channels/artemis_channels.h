@@ -23,7 +23,7 @@ namespace Artemis {
       void setup();
       void deploy();
       void loop();
-      void handle_pdu_queue();
+      void handle_queue();
       void regulate_temperature();
       void update_watchdog_timer();
     } // namespace PDU
@@ -32,7 +32,9 @@ namespace Artemis {
       void rpi_channel();
       void setup();
       void loop();
-      void sendToPi();
+      void handle_queue();
+      void send_to_pi();
+      void receive_from_pi();
     } // namespace RPI
 
   } // namespace Channels
