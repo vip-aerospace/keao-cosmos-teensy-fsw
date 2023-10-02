@@ -9,123 +9,150 @@ namespace Artemis {
       serial->flush();
     }
 
-    int32_t PDU::send(pdu_packet packet) {
+    bool PDU::send(pdu_packet packet) {
       char *ptr = (char *)&packet;
+
+      print_hexdump(Helpers::PDU, "Sending to PDU: ", (uint8_t *)ptr,
+                    sizeof(packet));
       for (size_t i = 0; i < sizeof(packet); i++) {
-        serial->print((char)(*(ptr + i) + PDU_CMD_OFFSET));
+        if (!serial->print((char)(*(ptr + i) + PDU_CMD_OFFSET))) {
+          print_debug(Helpers::PDU, "Failed to send character to PDU",
+                      (u_int32_t)i);
+          return false;
+        }
       }
-      serial->write('\0');
-      serial->print('\n');
+      if (!serial->write('\0')) {
+        print_debug(Helpers::PDU, "Failed to send null character to PDU");
+        return false;
+      }
+      if (!serial->write('\n')) {
+        print_debug(Helpers::PDU, "Failed to send newline to PDU");
+        return false;
+      }
 
-      Helpers::print_hexdump(Helpers::PDU, "Sending to PDU: ", (uint8_t *)ptr,
-                             sizeof(packet));
       threads.delay(100);
-      return 0;
+      return true;
     }
 
-    int32_t PDU::recv(std::string &response) {
-      if (serial->available() > 0) {
-        String UART1_RX = serial->readString();
-        if (UART1_RX.length() > 0) {
-          for (unsigned int i = 0; i < UART1_RX.length(); i++) {
-            if (UART1_RX[i] != 0x20 && UART1_RX[i] != 0x0D &&
-                UART1_RX[i] != 0x0A) {
-              UART1_RX[i] = UART1_RX[i] - PDU_CMD_OFFSET;
-            }
-          }
-          Helpers::print_hexdump(Helpers::PDU,
-                                 "UART received: ", (uint8_t *)UART1_RX.c_str(),
-                                 UART1_RX.length());
-          response = UART1_RX.c_str();
-          return UART1_RX.length();
-        }
+    bool PDU::recv(pdu_packet packet) {
+      if (serial->available() <= 0) {
+        print_debug(Helpers::PDU, "Nothing in serial buffer to receive");
+        return false;
       }
-      return -1;
+      String UART1_RX = serial->readString();
+      if (UART1_RX.length() <= 0) {
+        print_debug(Helpers::PDU, "Received serial string empty or corrupted");
+        return false;
+      }
+      packet.type     = (PDU_Type)(UART1_RX[0] - PDU_CMD_OFFSET);
+      packet.sw       = (PDU_SW)(UART1_RX[1] - PDU_CMD_OFFSET);
+      packet.sw_state = (uint8_t)(UART1_RX[2] - PDU_CMD_OFFSET);
+
+      print_hexdump(Helpers::PDU, "UART received: ", (uint8_t *)&packet,
+                    sizeof(packet));
+      return true;
     }
 
-    int32_t PDU::set_switch(PDU_SW sw, uint8_t _enable) {
-      std::string response;
-      pdu_packet  packet;
-      packet.type            = PDU_Type::CommandSetSwitch;
-      packet.sw              = sw;
-      packet.sw_state        = _enable > 0 ? 1 : 0;
-
-      uint8_t       attempts = 1;
-      elapsedMillis timeout;
-      while (1) {
-        send(packet);
-        while (recv(response) < 0) {
-          if (timeout > 5000) {
-            Helpers::print_debug(
-                Helpers::PDU,
-                "Failed to send CMD to PDU. Attempt: ", (u_int32_t)attempts);
-            timeout = 0;
-
-            if (++attempts == 5) {
-              return -1;
-            }
-            break;
-          }
-        }
-        if ((response[1] == (uint8_t)sw) ||
-            (sw == PDU_SW::All &&
-             response[0] == (uint8_t)PDU::PDU_Type::DataSwitchTelem)) {
-          break;
-        }
-
-        threads.delay(100);
+    bool PDU::recv(pdu_telem packet) {
+      if (serial->available() <= 0) {
+        print_debug(Helpers::PDU, "Nothing in serial buffer to receive");
+        return false;
       }
-      Helpers::print_hexdump(Helpers::PDU,
-                             "UART received: ", (uint8_t *)response.c_str(),
-                             response.length());
-      return 0;
+      String UART1_RX = serial->readString();
+      if (UART1_RX.length() <= 0) {
+        print_debug(Helpers::PDU, "Received serial string empty or corrupted");
+        return false;
+      }
+      packet.type = (PDU_Type)(UART1_RX[0] - PDU_CMD_OFFSET);
+      for (int i = 0; i < NUMBER_OF_SWITCHES; i++) {
+        packet.sw_state[i] = (uint8_t)(UART1_RX[i + 1] - PDU_CMD_OFFSET);
+      }
+
+      print_hexdump(Helpers::PDU, "UART received: ", (uint8_t *)&packet,
+                    sizeof(packet));
+      return true;
     }
 
-    int32_t PDU::get_switch(PDU_SW sw, string &ret) {
-      std::string response;
-      pdu_packet  packet;
-      packet.type            = PDU_Type::CommandGetSwitchStatus;
-      packet.sw              = sw;
+    bool PDU::ping() {
+      pdu_packet pingPacket;
+      pingPacket.type = PDU_Type::CommandPing;
 
-      uint8_t       attempts = 1;
-      elapsedMillis timeout;
-      while (1) {
-        send(packet);
-        while (recv(response) < 0) {
-          if (timeout > 5000) {
-            Helpers::print_debug(
-                Helpers::PDU,
-                "Failed to send CMD to PDU. Attempt: ", (u_int32_t)attempts);
-            timeout = 0;
-
-            if (++attempts == 5) {
-              return -1;
-            }
-            break;
-          }
-        }
-        if ((response[1] == (uint8_t)sw) ||
-            (sw == PDU_SW::All &&
-             response[0] == (uint8_t)PDU::PDU_Type::DataSwitchTelem)) {
-          break;
-        }
-        threads.delay(100);
+      if (!send(pingPacket)) {
+        print_debug(Helpers::PDU, "Failed to send ping packet to PDU");
+        return false;
       }
-      Helpers::print_hexdump(Helpers::PDU,
-                             "UART received: ", (uint8_t *)response.c_str(),
-                             response.length());
-      ret = response;
+      if (!recv(pingPacket)) {
+        print_debug(Helpers::PDU, "Failed to receive pong reply from PDU");
+        return false;
+      }
+      return pingPacket.type == PDU_Type::DataPong;
+    }
 
-      if (sw == PDU_SW::All) {
-        for (size_t i = 2; i < response.length(); i++) {
-          if (response[i] == '0') {
-            return 0;
-          }
+    bool PDU::set_switch(PDU_SW sw, PDU_SW_State state) {
+      if (switch_states[(uint8_t)sw - 2] == state) {
+        print_debug(Helpers::PDU, "Switch already set to desired state");
+        return true;
+      }
+      pdu_packet packet;
+      packet.type     = PDU_Type::CommandSetSwitch;
+      packet.sw       = sw;
+      packet.sw_state = (uint8_t)state;
+
+      if (!send(packet)) {
+        print_debug(Helpers::PDU, "Failed to send set switch command to PDU");
+        return false;
+      }
+      if (sw != PDU_SW::All) {
+        if (!recv(packet)) {
+          print_debug(Helpers::PDU,
+                      "Failed to receive set switch reply from PDU");
+          return false;
         }
-        return 1;
+        switch_states[(uint8_t)packet.sw - 2] = (PDU_SW_State)packet.sw_state;
+      } else {
+        pdu_telem replyPacket;
+        if (!recv(replyPacket)) {
+          print_debug(Helpers::PDU,
+                      "Failed to receive set all switches reply from PDU");
+          return false;
+        }
+        for (int i = 0; i < NUMBER_OF_SWITCHES; i++) {
+          switch_states[i] = (PDU_SW_State)replyPacket.sw_state[i];
+        }
+      }
+      return true;
+    }
+
+    bool PDU::set_heater(PDU_SW_State state) {
+      return set_switch(PDU_SW::SW_5V_2, state);
+    }
+
+    bool PDU::set_burn_wire(PDU_SW_State state) {
+      return set_switch(PDU_SW::BURN1, state);
+    }
+
+    bool PDU::refresh_switch_states() {
+      pdu_packet requestPacket;
+      pdu_telem  replyPacket;
+      requestPacket.type = PDU_Type::CommandGetSwitchStatus;
+      requestPacket.sw   = PDU_SW::All;
+
+      if (!send(requestPacket)) {
+        print_debug(Helpers::PDU,
+                    "Failed to send all switch states request to PDU");
+        return false;
       }
 
-      return response[3] - PDU_CMD_OFFSET;
+      if (!recv(replyPacket)) {
+        print_debug(Helpers::PDU,
+                    "Failed to receive all switch states reply from PDU");
+        return false;
+      }
+
+      for (int i = 0; i < NUMBER_OF_SWITCHES; i++) {
+        switch_states[i] = (PDU_SW_State)replyPacket.sw_state[i];
+      }
+      return true;
     }
   } // namespace Devices
 } // namespace Artemis

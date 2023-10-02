@@ -7,18 +7,15 @@
 namespace Artemis {
   namespace Channels {
     namespace PDU {
-      Artemis::Devices::PDU             pdu(&Serial1, 115200);
-      PacketComm                        packet;
-      Artemis::Devices::PDU::pdu_packet pdu_packet;
-      std::string                       response;
-      unsigned long                     timeoutStart;
-      elapsedMillis                     uptime;
+      using Artemis::Devices::PDU;
+      PDU           pdu(&Serial1, 115200);
+      PacketComm    packet;
+      unsigned long timeoutStart;
+      elapsedMillis uptime;
       // Create a new elapsedMillis object for the heater
-      elapsedMillis                     heaterinterval;
-      // Time in milliseconds. Set this to the desired time between code runs.
-      int                               checkinterval = 60000;
+      elapsedMillis heaterinterval;
 
-      void                              pdu_channel() {
+      void          pdu_channel() {
         setup();
         loop();
       }
@@ -26,181 +23,174 @@ namespace Artemis {
       void setup() {
         while (!Serial1)
           ;
-        threads.delay(5000); // Give the PDU some time to warm up...
+        // Give the PDU some time to warm up...
+        threads.delay(PDU_WARMUP_TIME);
 
         // Ensure PDU is communicating with Teensy
-        pdu_packet.type = Artemis::Devices::PDU::PDU_Type::CommandPing;
-        while (1) {
-          pdu.send(pdu_packet);
-          pdu.recv(response);
-          if (response[0] ==
-              (uint8_t)Artemis::Devices::PDU::PDU_Type::DataPong) {
-            Helpers::print_debug(Helpers::PDU, "PDU connection established");
-            break;
-          }
-          threads.delay(100);
+        while (!pdu.ping()) {
+          print_debug(Helpers::PDU, "Unable to ping PDU");
+          threads.delay(PDU_RETRY_INTERVAL);
         }
+        print_debug(Helpers::PDU, "PDU connection established");
+
+        while (!pdu.refresh_switch_states()) {
+          print_debug(Helpers::PDU, "Unable to refresh PDU switch states");
+          threads.delay(PDU_RETRY_INTERVAL);
+        }
+        print_debug(Helpers::PDU, "PDU switch states refreshed");
+        threads.delay(100);
+
         // The radio is connected to the 3V3_2 switch however it is still
         // getting power from somewhere else. Uncommenting these two lines
         // crashes the flight software. TODO: troubleshoot harwdare & software.
         // pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::SW_3V3_2, true);
         // threads.delay(1000);
 
+        deploy();
+
+        deploymentmode = false;
+        print_debug(Helpers::PDU, "Satellite is now in passive state.");
+      }
+
+      void deploy() {
         if (SD.begin(BUILTIN_SDCARD)) {
           if (!SD.exists("/deployed.txt")) {
             deploymentmode = true;
-            threads.delay(
-                5000); // Deployment delay (set to desired delay length)
+            threads.delay(DEPLOYMENT_DELAY);
 
             // Enable burn wire
-            Helpers::print_debug(Helpers::PDU, "Starting Deployment Sequence");
-            pdu.set_switch(Artemis::Devices::PDU::PDU_SW::BURN1, true);
-            Helpers::print_debug(Helpers::PDU, "Burn switch on");
-            threads.delay(5000); // burn wire on time
-            pdu.set_switch(Artemis::Devices::PDU::PDU_SW::BURN1, false);
-            Helpers::print_debug(Helpers::PDU, "Burn switch off");
+            print_debug(Helpers::PDU, "Starting Deployment Sequence");
+            if (!pdu.set_burn_wire(PDU::PDU_SW_State::SWITCH_ON)) {
+              print_debug(Helpers::PDU, "Failed to enable burn wire switch");
+            }
+            print_debug(Helpers::PDU, "Burn switch on");
+            threads.delay(BURN_WIRE_ON_TIME);
+            if (!pdu.set_burn_wire(PDU::PDU_SW_State::SWITCH_OFF)) {
+              print_debug(Helpers::PDU, "Failed to disable burn wire switch");
+            }
+            print_debug(Helpers::PDU, "Burn switch off");
 
             SD.begin(BUILTIN_SDCARD);
             File file = SD.open("/deployed.txt", FILE_WRITE);
             if (file) {
               file.close();
-              Helpers::print_debug(Helpers::PDU,
-                                   "Deployment recorded on SD card.");
+              print_debug(Helpers::PDU, "Deployment recorded on SD card.");
             } else {
-              Helpers::print_debug(Helpers::PDU, "Error closing file");
+              print_debug(Helpers::PDU, "Error opening file");
               return;
             }
 
-            // Define elapsedMillis variable
             elapsedMillis timeElapsed;
-            // unsigned long twoWeeksMillis = 14 * 24 * 60 * 60 * 1000;  //
-            // Flight: two weeks in milliseconds
-            unsigned long twoWeeksMillis =
-                60000; // Testing: set desired deployment length in milliseconds
-
-            elapsedMillis heatertimer;
-
-            while (timeElapsed <= twoWeeksMillis) {
-              handle_pdu_queue();
-              if ((heatertimer >= 60000)) // check every minute
-              {
-                int   reading      = analogRead(A6);
-                float voltage      = reading * MV_PER_ADC_UNIT;
-                float temperatureF = (voltage - OFFSET_F) / MV_PER_DEGREE_F;
-                float temperatureC = (temperatureF - 32) * 5 / 9;
-
-                // Turn heater on or off based on temperature
-                if (temperatureC <= heater_threshold) {
-                  // turn heater on
-                  pdu.set_switch(Artemis::Devices::PDU::PDU_SW::SW_5V_2, true);
-                } else {
-                  // turn heater off
-                  pdu.set_switch(Artemis::Devices::PDU::PDU_SW::SW_5V_2, false);
-                }
-                heatertimer = 0;
-              }
-              threads.delay(10000);
+            while (timeElapsed <= DEPLOYMENT_LENGTH) {
+              handle_queue();
+              regulate_temperature();
+              threads.delay(DEPLOYMENT_LOOP_INTERVAL);
             }
           } else {
             // issue
-            Helpers::print_debug(Helpers::PDU,
-                                 "Satellite was already deployed");
+            print_debug(Helpers::PDU, "Satellite was already deployed");
           }
         }
-
-        deploymentmode = false;
-        Helpers::print_debug(Helpers::PDU,
-                             "Satellite is now in passive state.");
       }
 
       void loop() {
         while (true) {
-          handle_pdu_queue();
-          if (heaterinterval > static_cast<unsigned long>(checkinterval)) {
-            heaterinterval     = 0;
-            int   reading      = analogRead(A6);
-            float voltage      = reading * MV_PER_ADC_UNIT;
-            float temperatureF = (voltage - OFFSET_F) / MV_PER_DEGREE_F;
-            float temperatureC = (temperatureF - 32) * 5 / 9;
-            // Turn heater on or off based on temperature
-            if (temperatureC <= heater_threshold) {
-              // turn heater on
-              pdu.set_switch(Artemis::Devices::PDU::PDU_SW::SW_5V_2, true);
-              Helpers::print_debug(Helpers::PDU, "Heater turned on");
-            } else {
-              // turn heater off
-              pdu.set_switch(Artemis::Devices::PDU::PDU_SW::SW_5V_2, false);
-              Helpers::print_debug(Helpers::PDU, "Heater turned off");
-            }
-          }
-
-          // Update WDT
-          // pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::WDT, 1);
-          // pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::WDT, 0);
-
+          handle_queue();
+          regulate_temperature();
+          update_watchdog_timer();
           threads.delay(100);
         }
       }
 
-      void handle_pdu_queue() {
+      void handle_queue() {
         if (PullQueue(packet, pdu_queue, pdu_queue_mtx)) {
           switch (packet.header.type) {
             case PacketComm::TypeId::CommandEpsCommunicate: {
-              pdu_packet.type = Artemis::Devices::PDU::PDU_Type::CommandPing;
-
-              timeoutStart    = millis();
-              while (1) {
-                pdu.send(pdu_packet);
-                pdu.recv(response);
-                if (response[0] ==
-                    (uint8_t)Artemis::Devices::PDU::PDU_Type::DataPong) {
-                  pdu_packet.type = Artemis::Devices::PDU::PDU_Type::DataPong;
-                  packet.header.nodedest = packet.header.nodeorig;
-                  packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
-                  PushQueue(packet, main_queue, main_queue_mtx);
-                  break;
-                }
-
-                if (millis() - timeoutStart > 5000) {
-                  Helpers::print_debug(Helpers::PDU, "Unable to Ping PDU");
-                  break;
-                }
-
-                threads.delay(100);
+              timeoutStart = millis();
+              while (!pdu.ping() &&
+                     (millis() - timeoutStart) < PDU_COMMUNICATION_TIMEOUT) {
+                threads.delay(PDU_RETRY_INTERVAL);
+              }
+              if ((millis() - timeoutStart) >= PDU_COMMUNICATION_TIMEOUT) {
+                print_debug(Helpers::PDU, "Timed out trying to ping PDU");
+              } else {
+                packet.header.nodedest = packet.header.nodeorig;
+                packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
+                PushQueue(packet, main_queue, main_queue_mtx);
               }
               break;
             }
             case PacketComm::TypeId::CommandEpsSwitchName: {
-              Artemis::Devices::PDU::PDU_SW switchid =
-                  (Artemis::Devices::PDU::PDU_SW)packet.data[0];
-              pdu.set_switch(switchid, packet.data[1]);
-              break;
+              PDU::PDU_SW       switchID    = (PDU::PDU_SW)packet.data[0];
+              PDU::PDU_SW_State switchState = (PDU::PDU_SW_State)packet.data[1];
+
+              timeoutStart                  = millis();
+              while (!pdu.set_switch(switchID, switchState) &&
+                     (millis() - timeoutStart) < PDU_COMMUNICATION_TIMEOUT) {
+                threads.delay(PDU_RETRY_INTERVAL);
+              }
+              if ((millis() - timeoutStart) >= PDU_COMMUNICATION_TIMEOUT) {
+                print_debug(Helpers::PDU, "Timed out trying to set switch");
+              }
             }
             case PacketComm::TypeId::CommandEpsSwitchStatus: {
-              string response;
-              pdu.get_switch(Artemis::Devices::PDU::PDU_SW::All, response);
-              Artemis::Devices::Switches::switchbeacon beacon;
-              beacon.deci = uptime;
-              for (size_t i = 1; i < response.length() - 2; i++) {
-                beacon.sw[i - 1] = response[i] - PDU_CMD_OFFSET;
+              timeoutStart = millis();
+              while (!pdu.refresh_switch_states() &&
+                     (millis() - timeoutStart) < PDU_COMMUNICATION_TIMEOUT) {
+                threads.delay(PDU_RETRY_INTERVAL);
               }
-              beacon.sw[12]          = digitalRead(UART6_TX);
+              if ((millis() - timeoutStart) >= PDU_COMMUNICATION_TIMEOUT) {
+                print_debug(Helpers::PDU,
+                            "Timed out trying to refresh PDU switch states");
+              } else {
+                Devices::Switches::switchbeacon beacon;
+                beacon.deci = uptime;
+                for (int i = 0; i < NUMBER_OF_SWITCHES; i++) {
+                  beacon.sw[i] = (uint8_t)pdu.switch_states[i];
+                }
+                beacon.sw[NUMBER_OF_SWITCHES] = digitalRead(UART6_TX);
 
-              packet.header.type     = PacketComm::TypeId::DataObcBeacon;
-              packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
-              packet.header.nodedest = (uint8_t)NODES::GROUND_NODE_ID;
-              packet.data.resize(sizeof(beacon));
-              memcpy(packet.data.data(), &beacon, sizeof(beacon));
-              packet.header.chanin = 0;
-              packet.header.chanout =
-                  Artemis::Channels::Channel_ID::RFM23_CHANNEL;
-              PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
+                packet.header.type     = PacketComm::TypeId::DataObcBeacon;
+                packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
+                packet.header.nodedest = (uint8_t)NODES::GROUND_NODE_ID;
+                packet.data.resize(sizeof(beacon));
+                memcpy(packet.data.data(), &beacon, sizeof(beacon));
+                packet.header.chanin  = 0;
+                packet.header.chanout = Channel_ID::RFM23_CHANNEL;
+                PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
+              }
               break;
             }
             default:
               break;
           }
         }
+      }
+
+      void regulate_temperature() {
+        if (heaterinterval > HEATER_CHECK_INTERVAL) {
+          heaterinterval     = 0;
+          int   reading      = analogRead(A6);
+          float voltage      = reading * MV_PER_ADC_UNIT;
+          float temperatureF = (voltage - OFFSET_F) / MV_PER_DEGREE_F;
+          float temperatureC = (temperatureF - 32) * 5 / 9;
+          // Turn heater on or off based on temperature
+          if (temperatureC <= heater_threshold) {
+            // turn heater on
+            pdu.set_heater(PDU::PDU_SW_State::SWITCH_ON);
+            print_debug(Helpers::PDU, "Heater turned on");
+          } else {
+            // turn heater off
+            pdu.set_heater(PDU::PDU_SW_State::SWITCH_OFF);
+            print_debug(Helpers::PDU, "Heater turned off");
+          }
+        }
+      }
+
+      void update_watchdog_timer() {
+        // Update WDT
+        // pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::WDT, 1);
+        // pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::WDT, 0);
       }
     } // namespace PDU
   }   // namespace Channels
