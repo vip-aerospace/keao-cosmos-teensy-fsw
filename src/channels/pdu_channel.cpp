@@ -8,17 +8,16 @@ namespace Artemis {
   namespace Channels {
     namespace PDU {
       using Artemis::Devices::PDU;
-      PDU             pdu(&Serial1, 115200);
-      PacketComm      packet;
-      PDU::pdu_packet pdu_packet;
-      unsigned long   timeoutStart;
-      elapsedMillis   uptime;
+      PDU           pdu(&Serial1, 115200);
+      PacketComm    packet;
+      unsigned long timeoutStart;
+      elapsedMillis uptime;
       // Create a new elapsedMillis object for the heater
-      elapsedMillis   heaterinterval;
+      elapsedMillis heaterinterval;
       // Time in milliseconds. Set this to the desired time between code runs.
-      int             checkinterval = 60000;
+      int           checkinterval = 60000;
 
-      void            pdu_channel() {
+      void          pdu_channel() {
         setup();
         loop();
       }
