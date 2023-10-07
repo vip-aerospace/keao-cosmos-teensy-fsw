@@ -68,21 +68,41 @@ void loop() {
 }
 
 void setup_devices() {
-  iretn = magnetometer.setup();
-  iretn = imu.setup();
-  current_sensors.setup();
-  gps.setup();
+  if (!magnetometer.setup()) {
+    print_debug(Helpers::MAIN, "Failed to setup magnetometer");
+  }
+  if (!imu.setup()) {
+    print_debug(Helpers::MAIN, "Failed to setup IMU");
+  }
+  if (!current_sensors.setup()) {
+    print_debug(Helpers::MAIN, "Failed to setup at least one current sensor");
+  }
+  if (!gps.setup()) {
+    print_debug(Helpers::MAIN, "Failed to setup GPS");
+  }
 }
 
 void setup_threads() {
-  threads.setSliceMillis(10);
+  if (threads.setSliceMillis(10) != 1) {
+    print_debug(Helpers::MAIN,
+                "Failed to assign computing time to all threads");
+  }
 
   // Threads
-  thread_list.push_back(
-      {threads.addThread(Channels::RFM23::rfm23_channel, 0, 4096),
-       Channels::Channel_ID::RFM23_CHANNEL});
-  thread_list.push_back({threads.addThread(Channels::PDU::pdu_channel, 0, 8192),
-                         Channels::Channel_ID::PDU_CHANNEL});
+  int thread_id = 0;
+  if ((thread_id =
+           threads.addThread(Channels::RFM23::rfm23_channel, 0, 4096)) == -1) {
+    print_debug(Helpers::MAIN, "Failed to start rfm23_channel");
+  } else {
+    thread_list.push_back({thread_id, Channels::Channel_ID::RFM23_CHANNEL});
+  }
+
+  if ((thread_id = threads.addThread(Channels::PDU::pdu_channel, 0, 8192)) ==
+      -1) {
+    print_debug(Helpers::MAIN, "Failed to start pdu_channel");
+  } else {
+    thread_list.push_back({thread_id, Channels::Channel_ID::PDU_CHANNEL});
+  }
 
   // Only uncomment these when testing and you want to force the RPi to turn on
   // thread_list.push_back({threads.addThread(Channels::RPI::rpi_channel),
@@ -107,11 +127,15 @@ void beacon_artemis_devices() {
 #endif
 
 #ifdef ENABLE_IMU
-  imu.read(uptime);
+  if (!imu.read(uptime)) {
+    print_debug(Helpers::MAIN, "Failed to read IMU");
+  }
 #endif
 
 #ifdef ENABLE_MAGNETOMETER
-  magnetometer.read(uptime);
+  if (!magnetometer.read(uptime)) {
+    print_debug(Helpers::MAIN, "Failed to read magnetometer");
+  }
 #endif
 
 #ifdef ENABLE_GPS
@@ -204,9 +228,14 @@ void route_packets() {
               if ((packet.data[1] == 1 && curr_V >= 7.0) ||
                   (packet.data[1] == 1 && packet.data[2] == 1)) {
                 digitalWrite(RPI_ENABLE, packet.data[1]);
-                thread_list.push_back(
-                    {threads.addThread(Channels::RPI::rpi_channel),
-                     Channels::Channel_ID::RPI_CHANNEL});
+                int thread_id = 0;
+                if ((thread_id =
+                         threads.addThread(Channels::RPI::rpi_channel)) == -1) {
+                  print_debug(Helpers::MAIN, "Failed to start rpi_channel");
+                } else {
+                  thread_list.push_back(
+                      {thread_id, Channels::Channel_ID::RPI_CHANNEL});
+                }
                 threads.delay(5000);
               } else if (packet.data[1] == 0) {
                 PushQueue(packet, rpi_queue, rpi_queue_mtx);
