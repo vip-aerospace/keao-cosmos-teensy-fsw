@@ -101,7 +101,7 @@ extern Threads::Mutex               spi1_mtx;
 extern Threads::Mutex               i2c1_mtx;
 
 // Utility Functions
-int                                 kill_thread(uint8_t channel_id);
+bool                                kill_thread(uint8_t channel_id);
 void        PushQueue(PacketComm &packet, std::deque<PacketComm> &queue,
                       Threads::Mutex &mtx);
 bool        PullQueue(PacketComm &packet, std::deque<PacketComm> &queue,

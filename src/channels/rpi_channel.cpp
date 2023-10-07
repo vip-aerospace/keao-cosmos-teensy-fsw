@@ -44,7 +44,9 @@ namespace Artemis {
                   rpi_queue.pop_front();
 
                 print_debug(Helpers::RPI, "Killing RPi thread");
-                kill_thread(Channel_ID::RPI_CHANNEL);
+                if (!kill_thread(Channel_ID::RPI_CHANNEL)) {
+                  print_debug(Helpers::RPI, "Failed to kill RPi thread");
+                }
                 return;
               }
               break;
@@ -56,12 +58,17 @@ namespace Artemis {
       }
 
       void send_to_pi() {
-        packet.SLIPPacketize();
+        if (!packet.SLIPPacketize()) {
+          print_debug(Helpers::RPI, "Failed to wrap and SLIP packetize");
+        }
         print_hexdump(Helpers::RPI,
                       "Forwarding to RPi: ", &packet.packetized[0],
                       packet.packetized.size());
         for (size_t i = 0; i < packet.packetized.size(); i++) {
-          Serial2.write(packet.packetized[i]);
+          if (Serial2.write(packet.packetized[i]) != 1) {
+            print_debug(Helpers::RPI,
+                        "Failed to send byte to RPi: ", (u_int32_t)i);
+          }
         }
       }
 

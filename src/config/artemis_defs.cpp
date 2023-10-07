@@ -27,16 +27,16 @@ Threads::Mutex         i2c1_mtx;
 bool                   deploymentmode = false;
 
 // Utility Functions
-int                    kill_thread(uint8_t channel_id) {
-  for (auto it = thread_list.begin(); it != thread_list.end(); it++) {
-    if (it->channel_id == channel_id) {
-      int ret = it->thread_id;
-      threads.kill(it->thread_id);
-      thread_list.erase(it);
-      return ret;
+bool                   kill_thread(uint8_t target_channel_id) {
+  for (auto thread_list_iterator = thread_list.begin();
+       thread_list_iterator != thread_list.end(); thread_list_iterator++) {
+    if (thread_list_iterator->channel_id == target_channel_id) {
+      threads.kill(thread_list_iterator->thread_id);
+      thread_list.erase(thread_list_iterator);
+      return true;
     }
   }
-  return -1;
+  return false;
 }
 
 void PushQueue(PacketComm &packet, std::deque<PacketComm> &queue,
