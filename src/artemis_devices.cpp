@@ -3,9 +3,9 @@
 
 namespace Artemis {
   namespace Devices {
-    int32_t Magnetometer::setup(void) {
+    bool Magnetometer::setup(void) {
       if (!magnetometer->begin_I2C()) {
-        return -1;
+        return false;
       }
 
       magnetometer->setPerformanceMode(LIS3MDL_LOWPOWERMODE);
@@ -13,16 +13,18 @@ namespace Artemis {
       magnetometer->setRange(LIS3MDL_RANGE_16_GAUSS);
       magnetometer->setOperationMode(LIS3MDL_CONTINUOUSMODE);
 
-      return 0;
+      return true;
     }
 
-    int32_t Magnetometer::read(uint32_t uptime) {
+    bool Magnetometer::read(uint32_t uptime) {
       PacketComm packet;
       magbeacon  beacon;
       beacon.deci = uptime;
 
       sensors_event_t event;
-      magnetometer->getEvent(&event);
+      if (!magnetometer->getEvent(&event)) {
+        return false;
+      }
       beacon.magx            = (event.magnetic.x);
       beacon.magy            = (event.magnetic.y);
       beacon.magz            = (event.magnetic.z);
@@ -36,22 +38,22 @@ namespace Artemis {
       packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
       PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
 
-      return 0;
+      return true;
     }
 
-    int32_t IMU::setup(void) {
+    bool IMU::setup(void) {
       if (!imu->begin_I2C()) {
-        return -1;
+        return false;
       }
       imu->setAccelRange(LSM6DS_ACCEL_RANGE_16_G);
       imu->setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS);
       imu->setAccelDataRate(LSM6DS_RATE_6_66K_HZ);
       imu->setGyroDataRate(LSM6DS_RATE_6_66K_HZ);
 
-      return 0;
+      return true;
     }
 
-    int32_t IMU::read(uint32_t uptime) {
+    bool IMU::read(uint32_t uptime) {
       PacketComm packet;
       imubeacon  beacon;
       beacon.deci = uptime;
@@ -59,7 +61,9 @@ namespace Artemis {
       sensors_event_t accel;
       sensors_event_t gyro;
       sensors_event_t temp;
-      imu->getEvent(&accel, &gyro, &temp);
+      if (!imu->getEvent(&accel, &gyro, &temp)) {
+        return false;
+      }
 
       beacon.accelx          = (accel.acceleration.x);
       beacon.accely          = (accel.acceleration.y);
@@ -78,21 +82,21 @@ namespace Artemis {
       packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
       PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
 
-      return 0;
+      return true;
     }
 
     // TODO: Go through library and see what we need to configure and callibrate
-    int32_t CurrentSensors::setup(void) {
-      for (auto &it : current_sensors) {
-        if (it.second->begin(&Wire2)) {
-          return -1;
+    bool CurrentSensors::setup(void) {
+      for (auto &current_sensor : current_sensors) {
+        if (!current_sensor.second->begin(&Wire2)) {
+          return false;
         }
       }
 
-      return 0;
+      return true;
     }
 
-    int32_t CurrentSensors::read(uint32_t uptime) {
+    void CurrentSensors::read(uint32_t uptime) {
       PacketComm     packet;
       currentbeacon1 beacon1;
       currentbeacon2 beacon2;
@@ -128,19 +132,15 @@ namespace Artemis {
       packet.header.chanin  = 0;
       packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
       PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
-
-      return 0;
     }
 
-    int32_t TemperatureSensors::setup(void) {
-      for (auto &it : temp_sensors) {
-        pinMode(it.second, INPUT);
+    void TemperatureSensors::setup(void) {
+      for (auto &temperature_sensor : temp_sensors) {
+        pinMode(temperature_sensor.second, INPUT);
       }
-
-      return 0;
     }
 
-    int32_t TemperatureSensors::read(uint32_t uptime) {
+    void TemperatureSensors::read(uint32_t uptime) {
       PacketComm        packet;
       temperaturebeacon beacon;
       beacon.deci = uptime;
@@ -165,22 +165,22 @@ namespace Artemis {
       packet.header.chanin  = 0;
       packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
       PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
-
-      return 0;
     }
 
-    int32_t GPS::setup(void) {
-      gps->begin(9600);
+    bool GPS::setup(void) {
+      if (!gps->begin(9600)) {
+        return false;
+      }
       threads.delay(100);
       gps->sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
       threads.delay(100);
       gps->sendCommand(PMTK_SET_NMEA_UPDATE_1HZ); // 1 Hz update rate
       threads.delay(100);
 
-      return 0;
+      return true;
     }
 
-    int32_t GPS::update(void) {
+    void GPS::update(void) {
       if (gps->available()) {
         while (gps->read()) // Clear any data from the GPS module
           ;
@@ -194,11 +194,9 @@ namespace Artemis {
           Helpers::print_debug(Helpers::MAIN, "Parsed new NMEA sentence");
         }
       }
-
-      return 0;
     }
 
-    int32_t GPS::read(uint32_t uptime) {
+    void GPS::read(uint32_t uptime) {
       PacketComm packet;
       gpsbeacon  beacon;
       beacon.deci = uptime;
@@ -241,8 +239,6 @@ namespace Artemis {
         packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
         PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
       }
-
-      return 0;
     }
   } // namespace Devices
 

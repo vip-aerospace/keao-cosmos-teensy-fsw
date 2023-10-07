@@ -26,8 +26,8 @@ namespace Artemis {
       };
       Adafruit_LIS3MDL *magnetometer = new Adafruit_LIS3MDL();
 
-      int32_t           setup(void);
-      int32_t           read(uint32_t uptime);
+      bool              setup(void);
+      bool              read(uint32_t uptime);
 
     private:
       bool magnetometerSetup;
@@ -48,8 +48,8 @@ namespace Artemis {
       };
       Adafruit_LSM6DSOX *imu = new Adafruit_LSM6DSOX();
 
-      int32_t            setup(void);
-      int32_t            read(uint32_t uptime);
+      bool               setup(void);
+      bool               read(uint32_t uptime);
 
     private:
       bool imuSetup;
@@ -69,9 +69,9 @@ namespace Artemis {
       };
       Adafruit_GPS *gps = new Adafruit_GPS(&Serial7);
 
-      int32_t       setup(void);
-      int32_t       update(void);
-      int32_t       read(uint32_t uptime);
+      bool          setup(void);
+      void          update(void);
+      void          read(uint32_t uptime);
 
     private:
       bool gpsSetup;
@@ -102,8 +102,8 @@ namespace Artemis {
           {"battery_board", new Adafruit_INA219(0x44)},
       };
 
-      int32_t setup(void);
-      int32_t read(uint32_t uptime);
+      bool setup(void);
+      void read(uint32_t uptime);
 
     private:
       bool currentSetup;
@@ -129,8 +129,8 @@ namespace Artemis {
           {"solar_panel_4", A17},
       };
 
-      int32_t setup(void);
-      int32_t read(uint32_t uptime);
+      void setup(void);
+      void read(uint32_t uptime);
 
     private:
       bool temperatureSetup;
