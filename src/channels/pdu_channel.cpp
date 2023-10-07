@@ -40,16 +40,19 @@ namespace Artemis {
         print_debug(Helpers::PDU, "PDU switch states refreshed");
         threads.delay(100);
 
+        enableRFM23Radio();
+
+        deploy();
+
+        print_debug(Helpers::PDU, "Satellite is now in passive state.");
+      }
+
+      void enableRFM23Radio() {
         // The radio is connected to the 3V3_2 switch however it is still
         // getting power from somewhere else. Uncommenting these two lines
         // crashes the flight software. TODO: troubleshoot harwdare & software.
         // pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::SW_3V3_2, true);
         // threads.delay(1000);
-
-        deploy();
-
-        deploymentmode = false;
-        print_debug(Helpers::PDU, "Satellite is now in passive state.");
       }
 
       void deploy() {
@@ -91,6 +94,7 @@ namespace Artemis {
             print_debug(Helpers::PDU, "Satellite was already deployed");
           }
         }
+        deploymentmode = false;
       }
 
       void loop() {

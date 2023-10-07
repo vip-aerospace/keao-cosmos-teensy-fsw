@@ -23,6 +23,7 @@ namespace Artemis {
     namespace PDU {
       void pdu_channel();
       void setup();
+      void enableRFM23Radio();
       void deploy();
       void loop();
       void handle_queue();
