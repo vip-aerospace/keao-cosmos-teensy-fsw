@@ -10,6 +10,8 @@
 #undef RH_RF22_MAX_MESSAGE_LEN
 #define RH_RF22_MAX_MESSAGE_LEN 50
 
+#define MINIMUM_TIMEOUT         100
+
 namespace Artemis {
   namespace Devices {
     class RFM23 {

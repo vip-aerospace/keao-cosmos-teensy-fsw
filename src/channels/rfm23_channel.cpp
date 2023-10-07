@@ -50,26 +50,33 @@ namespace Artemis {
             case PacketComm::TypeId::DataRadioResponse:
             case PacketComm::TypeId::DataAdcsResponse:
             case PacketComm::TypeId::DataObcResponse: {
-              radio.send(packet);
+              if (!radio.send(packet)) {
+                print_debug(
+                    Helpers::RFM23,
+                    "Failed to send packet through RFM23. Dropping packet.");
+              }
               threads.delay(500);
               break;
             }
-            default:
+            default: {
+              print_debug(Helpers::RFM23, "Pulled packet from queue that is "
+                                          "not yet handled. Dropping packet.");
               break;
+            }
           }
         }
       }
 
       void receive_from_radio() {
-        int32_t timeout = 5000 - rfm23_queue.size() * 1000;
-        if (timeout < 100)
-          timeout = 100;
+        int32_t timeout = 5000 - (rfm23_queue.size() * 1000);
+        if (timeout < MINIMUM_TIMEOUT) {
+          timeout = MINIMUM_TIMEOUT;
+        }
         if (radio.recv(packet, (uint16_t)timeout) >= 0) {
           print_hexdump(Helpers::RFM23, "Radio received :", &packet.wrapped[0],
                         packet.wrapped.size());
           print_debug(Helpers::RFM23,
                       "Bytes received: ", (int32_t)packet.wrapped.size());
-
           threads.delay(2000);
           PushQueue(packet, main_queue, main_queue_mtx);
         }
