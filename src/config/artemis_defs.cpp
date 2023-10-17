@@ -58,3 +58,16 @@ bool PullQueue(PacketComm &packet, std::deque<PacketComm> &queue,
   }
   return false;
 }
+
+/** @brief Wrapper function to send a packet to the PDU. */
+void route_packet_to_pdu(PacketComm packet) {
+  PushQueue(packet, pdu_queue, pdu_queue_mtx);
+}
+/** @brief Wrapper function to send a packet to the Raspberry Pi. */
+void route_packet_to_rpi(PacketComm packet) {
+  PushQueue(packet, rpi_queue, rpi_queue_mtx);
+}
+/** @brief Wrapper function to send a packet to the RFM23. */
+void route_packet_to_rfm23(PacketComm packet) {
+  PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
+}
