@@ -27,7 +27,7 @@ namespace Artemis {
      * @brief Reads the satellite's magnetometer.
      *
      * This method of the Magnetometer class reads the magnetometer's values,
-     * stores it in a beacon, and transmits that beacon to the ground.
+     * stores it in a magbeacon, and transmits that beacon to the ground.
      *
      * @param uptime The time, in milliseconds, since the Teensy has been
      * powered on.
@@ -84,8 +84,8 @@ namespace Artemis {
     /**
      * @brief Reads the satellite's IMU.
      *
-     * This method of the IMU class reads the IMU's values, stores it in a
-     * beacon, and transmits that beacon to the ground.
+     * This method of the IMU class reads the IMU's values, stores it in an
+     * imubeacon, and transmits that beacon to the ground.
      *
      * @param uptime The time, in milliseconds, since the Teensy has been
      * powered on.
@@ -152,7 +152,8 @@ namespace Artemis {
      * @brief Reads the satellite's current sensors.
      *
      * This method of the CurrentSensors class reads the current sensor values,
-     * stores them in two beacons, and transmits those beacons to the ground.
+     * stores them in two beacons (currentbeacon1 and currentbeacon2), and
+     * transmits those beacons to the ground.
      *
      * @param uptime The time, in milliseconds, since the Teensy has been
      * powered on.
@@ -194,13 +195,32 @@ namespace Artemis {
       packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
       PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
     }
-
+    /**
+     * @brief Sets up the satellite's temperature sensors.
+     *
+     * This method of the TemperatureSensors class sets up the analog connection
+     * to the satellite's temperature sensors.
+     */
     void TemperatureSensors::setup(void) {
       for (auto &temperature_sensor : temp_sensors) {
         pinMode(temperature_sensor.second, INPUT);
       }
     }
 
+    /**
+     * @brief Reads the satellite's temperature sensors.
+     *
+     * This method of the TemperatureSensors class reads the temperature sensor
+     * values, stores them in a temperaturebeacon, and transmits that beacon to
+     * the ground.
+     *
+     * The temperature sensors are read as an analog voltage, then converted to
+     * a temperature in Celcius. The Teensy's internal temperature sensor is
+     * also read.
+     *
+     * @param uptime The time, in milliseconds, since the Teensy has been
+     * powered on.
+     */
     void TemperatureSensors::read(uint32_t uptime) {
       PacketComm        packet;
       temperaturebeacon beacon;
@@ -215,7 +235,6 @@ namespace Artemis {
             (temperatureF - 32) * 5 / 9;
       }
 
-      // Read temperature from Teensy 4.1 interal temperature sensor
       beacon.teensy_tempC    = InternalTemperature.readTemperatureC();
 
       packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
