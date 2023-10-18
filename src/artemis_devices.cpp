@@ -55,7 +55,7 @@ namespace Artemis {
       memcpy(packet.data.data(), &beacon, sizeof(beacon));
       packet.header.chanin  = 0;
       packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
-      PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
+      route_packet_to_rfm23(packet);
 
       return true;
     }
@@ -120,7 +120,7 @@ namespace Artemis {
       memcpy(packet.data.data(), &beacon, sizeof(beacon));
       packet.header.chanin  = 0;
       packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
-      PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
+      route_packet_to_rfm23(packet);
 
       return true;
     }
@@ -186,14 +186,14 @@ namespace Artemis {
       memcpy(packet.data.data(), &beacon1, sizeof(beacon1));
       packet.header.chanin  = 0;
       packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
-      PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
+      route_packet_to_rfm23(packet);
 
       beacon2.deci = uptime;
       packet.data.resize(sizeof(beacon2));
       memcpy(packet.data.data(), &beacon2, sizeof(beacon2));
       packet.header.chanin  = 0;
       packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
-      PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
+      route_packet_to_rfm23(packet);
     }
     /**
      * @brief Sets up the satellite's temperature sensors.
@@ -244,7 +244,7 @@ namespace Artemis {
       memcpy(packet.data.data(), &beacon, sizeof(beacon));
       packet.header.chanin  = 0;
       packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
-      PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
+      route_packet_to_rfm23(packet);
     }
 
     /**
@@ -340,8 +340,7 @@ namespace Artemis {
       memcpy(packet.data.data(), &beacon, sizeof(beacon));
       packet.header.chanin  = 0;
       packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
-      PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
+      route_packet_to_rfm23(packet);
     }
   } // namespace Devices
-
 } // namespace Artemis
