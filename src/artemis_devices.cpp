@@ -60,6 +60,15 @@ namespace Artemis {
       return true;
     }
 
+    /**
+     * @brief Sets up the satellite's IMU.
+     *
+     * This method of the IMU class sets up the I2C connection to the
+     * satellite's IMU and applies settings to it.
+     *
+     * @return true The IMU has been successfully set up.
+     * @return false The I2C connection to the IMU failed to start.
+     */
     bool IMU::setup(void) {
       if (!imu->begin_I2C()) {
         return false;
@@ -72,6 +81,18 @@ namespace Artemis {
       return true;
     }
 
+    /**
+     * @brief Reads the satellite's IMU.
+     *
+     * This method of the IMU class reads the IMU's values, stores it in a
+     * beacon, and transmits that beacon to the ground.
+     *
+     * @param uptime The time, in milliseconds, since the Teensy has been
+     * powered on.
+     * @return true The IMU has been sucessfully read and a packet carrying the
+     * reading has been queued for transmission.
+     * @return false The IMU could not be read.
+     */
     bool IMU::read(uint32_t uptime) {
       PacketComm packet;
       imubeacon  beacon;
