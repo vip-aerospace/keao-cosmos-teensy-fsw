@@ -125,7 +125,19 @@ namespace Artemis {
       return true;
     }
 
-    // TODO: Go through library and see what we need to configure and callibrate
+    /**
+     * @brief Sets up the satellite's current sensors.
+     *
+     * This method of the CurrentSensors class sets up the I2C connection to the
+     * satellite's current sensors.
+     *
+     * @todo Go through library and see what we need to configure and callibrate
+     *
+     * @return true All current sensors in current_sensors have been connected
+     * to over I2C.
+     * @return false At least one current sensor in current_sensors failed to
+     * initialize over I2C.
+     */
     bool CurrentSensors::setup(void) {
       for (auto &current_sensor : current_sensors) {
         if (!current_sensor.second->begin(&Wire2)) {
@@ -136,6 +148,15 @@ namespace Artemis {
       return true;
     }
 
+    /**
+     * @brief Reads the satellite's current sensors.
+     *
+     * This method of the CurrentSensors class reads the current sensor values,
+     * stores them in two beacons, and transmits those beacons to the ground.
+     *
+     * @param uptime The time, in milliseconds, since the Teensy has been
+     * powered on.
+     */
     void CurrentSensors::read(uint32_t uptime) {
       PacketComm     packet;
       currentbeacon1 beacon1;
