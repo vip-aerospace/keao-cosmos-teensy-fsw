@@ -326,22 +326,21 @@ namespace Artemis {
         // beacon.day = 0;
         // beacon.month = 0;
         // beacon.year = 0;
-        beacon.latitude        = 0;
-        beacon.longitude       = 0;
-        beacon.speed           = 0;
-        beacon.angle           = 0;
-        beacon.altitude        = 0;
-        beacon.satellites      = 0;
-
-        packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
-        packet.header.nodedest = (uint8_t)NODES::GROUND_NODE_ID;
-        packet.header.type     = PacketComm::TypeId::DataObcBeacon;
-        packet.data.resize(sizeof(beacon));
-        memcpy(packet.data.data(), &beacon, sizeof(beacon));
-        packet.header.chanin  = 0;
-        packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
-        PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
+        beacon.latitude   = 0;
+        beacon.longitude  = 0;
+        beacon.speed      = 0;
+        beacon.angle      = 0;
+        beacon.altitude   = 0;
+        beacon.satellites = 0;
       }
+      packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
+      packet.header.nodedest = (uint8_t)NODES::GROUND_NODE_ID;
+      packet.header.type     = PacketComm::TypeId::DataObcBeacon;
+      packet.data.resize(sizeof(beacon));
+      memcpy(packet.data.data(), &beacon, sizeof(beacon));
+      packet.header.chanin  = 0;
+      packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
+      PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
     }
   } // namespace Devices
 
