@@ -247,6 +247,15 @@ namespace Artemis {
       PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
     }
 
+    /**
+     * @brief Sets up the satellite's GPS.
+     *
+     * This method of the GPS class sets up the serial connection to the
+     * satellite's GPS and applies settings to it.
+     *
+     * @return true The GPS has been sucessfully set up.
+     * @return false The serial connection to the GPS failed to start.
+     */
     bool GPS::setup(void) {
       if (!gps->begin(9600)) {
         return false;
@@ -260,6 +269,12 @@ namespace Artemis {
       return true;
     }
 
+    /**
+     * @brief Update the satellite's GPS.
+     *
+     * This method of the GPS class checks the serial connection to see if there
+     * is more data to be read in. If there is, it is read in and parsed.
+     */
     void GPS::update(void) {
       if (gps->available()) {
         while (gps->read()) // Clear any data from the GPS module
@@ -275,7 +290,15 @@ namespace Artemis {
         }
       }
     }
-
+    /**
+     * @brief Reads the satellite's GPS data.
+     *
+     * This method of the GPS class reads the last known GPS data, stores it in
+     * a gpsbeacon, and transmits that beacon to ground.
+     *
+     * @param uptime The time, in milliseconds, since the Teensy has been
+     * powered on.
+     */
     void GPS::read(uint32_t uptime) {
       PacketComm packet;
       gpsbeacon  beacon;
