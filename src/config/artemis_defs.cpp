@@ -1,3 +1,10 @@
+/**
+ * @file artemis_defs.cpp
+ * @brief The Artemis definitions.
+ *
+ * This file defines global variables and functions used throughout the
+ * satellite.
+ */
 #include "config/artemis_defs.h"
 
 /**

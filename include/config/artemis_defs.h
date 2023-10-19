@@ -1,3 +1,9 @@
+/**
+ * @file artemis_defs.h
+ * @brief The Artemis definitions.
+ *
+ * This file declares constants and functions used throughout the satellite.
+ */
 #ifndef _ARTEMIS_DEFS_H
 #define _ARTEMIS_DEFS_H
 

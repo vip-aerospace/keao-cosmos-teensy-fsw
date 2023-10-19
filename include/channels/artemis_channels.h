@@ -1,11 +1,24 @@
+/**
+ * @file artemis_channels.h
+ * @brief Definitions for Artemis channels on the satellite.
+ *
+ * This file contains the definition of the Channels namespace and the
+ * declaration for each channel's namespace.
+ */
 #ifndef _ARTEMIS_CHANNELS_H
 #define _ARTEMIS_CHANNELS_H
 
 #include "config/artemis_defs.h"
 
 namespace Artemis {
+  /**
+   * @brief The channels on the satellite.
+   *
+   * This namespace defines all the channels on the satellite. Each channel is
+   * run in parallel as a thread by quickly switching between them.
+   */
   namespace Channels {
-    // Channel IDs
+    /** @brief Enumeration of channel ID. */
     enum Channel_ID : uint8_t {
       RFM23_CHANNEL = 1,
       PDU_CHANNEL,

@@ -1,3 +1,10 @@
+/**
+ * @file artemis_devices.cpp
+ * @author your name (you@domain.com)
+ * @brief Definitions of Artemis devices
+ *
+ * This file defines the methods for all Artemis device classes.
+ */
 #include "artemis_devices.h"
 #include "channels/artemis_channels.h"
 

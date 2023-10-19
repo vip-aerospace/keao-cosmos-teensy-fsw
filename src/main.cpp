@@ -3,8 +3,7 @@
  * @brief The main operating loop for the Teensy.
  *
  * This file contains the main oprerating loop that runs on the Teensy. Like an
- * Arduino sketch, it consists of a setup and loop function, the latter of which
- * constantly runs in a loop.
+ * Arduino sketch, it consists of a setup and loop function.
  */
 #include "artemis_devices.h"
 #include "artemisbeacons.h"
