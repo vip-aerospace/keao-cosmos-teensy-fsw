@@ -49,6 +49,7 @@ namespace Artemis {
       void setup();
       void loop();
       void handle_queue();
+      void shut_down_pi();
       void send_to_pi();
       void receive_from_pi();
     } // namespace RPI

@@ -55,10 +55,10 @@ namespace {
 } // namespace
 
 /**
- * @brief Initialization code.
+ * @brief Main setup function.
  *
- * Initializes the various sensors and connections on the Teensy. This function
- * is called once, upon powerup.
+ * This function is run once, when the Teensy is started. It initializes the
+ * various sensors and connections on the Teensy.
  *
  * The frequency of the Teensy's processor is also set here. Allowed
  * frequencies in MHz are: 24, 150, 396, 450, 528, 600.
@@ -76,11 +76,11 @@ void setup() {
 }
 
 /**
- * @brief Operating code.
+ * @brief Main loop function.
  *
- * This function runs in a loop forever, after setup() completes. It checks for
- * incoming packets, routes them, and periodically creates beacon packets when
- * in deployment mode. It also runs tests if they are enabled.
+ * This function runs in an infinite loop after setup() completes. It routes
+ * packets among the various channels and periodically creates beacon packets
+ * when in deployment mode. It also runs tests if they are enabled.
  */
 void loop() {
   Helpers::print_free_memory();
@@ -240,7 +240,7 @@ void beacon_if_deployed() {
 /**
  * @brief Helper function to route packets.
  *
- * This is a helper function called in setup() that routes incoming and outgoing
+ * This is a helper function called in loop() that routes incoming and outgoing
  * packets. Packets are checked for their destination, then handled
  * appropriately.
  */
