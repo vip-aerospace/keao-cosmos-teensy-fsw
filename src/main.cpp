@@ -91,15 +91,7 @@ void loop() {
   threads.delay(100);
 }
 
-/**
- * @brief Helper function to set up connections on the Teensy.
- *
- * This is a helper function called in setup() that:
- * - Connects to the serial monitor for debugging, if enabled
- * - Begins the USB host connection
- * - Sets up the RPI_ENABLE pin as an output
- * - Sets up the UART6_TX and UART6_RX pins as inputs
- */
+/** @brief Helper function to set up connections on the Teensy. */
 void setup_connections() {
   Helpers::connect_serial_debug(115200);
   usb.begin();
@@ -108,16 +100,7 @@ void setup_connections() {
   pinMode(UART6_RX, INPUT);
 }
 
-/**
- * @brief Helper function to set up devices on the Teensy.
- *
- * This is a helper function called in setup() that sets up the devices on the
- * satellite. These devices are:
- * - An instance of the Magnetometer object
- * - An instance of the IMU object
- * - An instance of the CurrentSensors object
- * - An instance of the GPS object
- */
+/** @brief Helper function to set up devices on the Teensy. */
 void setup_devices() {
   if (!magnetometer.setup()) {
     print_debug(Helpers::MAIN, "Failed to setup magnetometer");
@@ -133,22 +116,13 @@ void setup_devices() {
   }
 }
 
-/**
- * @brief Helper function to set up threads on the Teensy.
- *
- * This is a helper function called in setup() that sets up the threads for each
- * channel on the satellite. Each thread is assigned an amount of computing time
- * and memory. These threads are:
- * - An instance of the RFM23 channel
- * - An instance of the PDU channel
- */
+/** @brief Helper function to set up threads on the Teensy. */
 void setup_threads() {
   if (threads.setSliceMillis(10) != 1) {
     print_debug(Helpers::MAIN,
                 "Failed to assign computing time to all threads");
   }
 
-  // Threads
   int thread_id = 0;
   if ((thread_id =
            threads.addThread(Channels::RFM23::rfm23_channel, 0, 4096)) == -1) {
@@ -169,13 +143,7 @@ void setup_threads() {
   // Channels::Channel_ID::RPI_CHANNEL}); pinMode(RPI_ENABLE, HIGH);
 }
 
-/**
- * @brief Helper function to run tests on the satellite.
- *
- * This is a helper function called in loop() that periodically generates test
- * packets as defined by the build flags set in platformio.ini. It also beacons
- * all Artemis devices for their readings.
- */
+/** @brief Helper function to run tests on the satellite. */
 void run_tests() {
 #ifdef TESTS
   run_test();
@@ -184,13 +152,7 @@ void run_tests() {
 #endif
 }
 
-/**
- * @brief Helper function to poll Artemis devices for their readings.
- *
- * This is a helper function called in loop() that polls all Artemis devices for
- * their readings. Each poll generates an outgoing packet to ground with that
- * device's readings.
- */
+/** @brief Helper function to poll Artemis devices for their readings. */
 void beacon_artemis_devices() {
 #ifdef ENABLE_TEMPERATURESENSORS
   temperature_sensors.read(uptime);
@@ -217,12 +179,7 @@ void beacon_artemis_devices() {
 #endif
 }
 
-/**
- * @brief Helper function to beacon Artemis devices if in deployment mode.
- *
- * This is a helper function called in loop() that periodically beacons the
- * Artemis devices if the satellite is in deployment mode.
- */
+/** @brief Helper function to beacon Artemis devices if in deployment mode. */
 void beacon_if_deployed() {
   // During deployment mode send beacons every 5 minutes for 2 weeks.
   if (deploymentmode) {
@@ -237,13 +194,7 @@ void beacon_if_deployed() {
   }
 }
 
-/**
- * @brief Helper function to route packets.
- *
- * This is a helper function called in loop() that routes incoming and outgoing
- * packets. Packets are checked for their destination, then handled
- * appropriately.
- */
+/** @brief Helper function to route packets. */
 void route_packets() {
   if (PullQueue(packet, main_queue, main_queue_mtx)) {
     if (packet.header.nodedest == (uint8_t)NODES::GROUND_NODE_ID) {
@@ -309,12 +260,7 @@ void route_packets() {
   }
 }
 
-/**
- * @brief Helper function to route packets to ground.
- *
- * This is a helper function called in loop() that routes outgoing
- * packets to the ground.
- */
+/** @brief Helper function to route packets to ground. */
 void route_packet_to_ground() {
   switch (packet.header.chanout) {
     case Channels::Channel_ID::RFM23_CHANNEL: {
@@ -327,13 +273,7 @@ void route_packet_to_ground() {
   }
 }
 
-/**
- * @brief Helper function to ensure the Raspberry Pi is powered.
- *
- * This is a helper function called in loop() that checks if the Raspberry Pi is
- * powered. If it is not, and there is power available, then it is commanded to
- * turn on. Otherwise, the PDU is polled for its switch states.
- */
+/** @brief Helper function to ensure the Raspberry Pi is powered. */
 void ensure_rpi_is_powered() {
   if (!digitalRead(UART6_RX)) {
     float curr_V =
@@ -347,12 +287,7 @@ void ensure_rpi_is_powered() {
   }
 }
 
-/**
- * @brief Helper function to send a pong reply.
- *
- * This is a helper function called in loop() that constructs and sends a pong
- * reply in response to a ping command.
- */
+/** @brief Helper function to send a pong reply. */
 void send_pong_reply() {
   packet.header.nodedest = packet.header.nodeorig;
   packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
@@ -365,12 +300,7 @@ void send_pong_reply() {
   route_packet_to_ground();
 }
 
-/**
- * @brief Helper function to enable the Raspberry Pi.
- *
- * This is a helper function called in loop() that enables the Raspberry Pi and
- * starts its channel.
- */
+/** @brief Helper function to enable the Raspberry Pi. */
 void enable_rpi() {
   Helpers::print_debug(Helpers::MAIN, "Turning on RPi");
   digitalWrite(RPI_ENABLE, HIGH);
@@ -382,12 +312,7 @@ void enable_rpi() {
   }
 }
 
-/**
- * @brief Helper function to report if the Raspberry Pi is enabled.
- *
- * This is a helper function called in loop() that checks if the Raspberry Pi is
- * enabled and sends an outgoing packet with its status.
- */
+/** @brief Helper function to report if the Raspberry Pi is enabled. */
 void report_rpi_enabled() {
   packet.data.resize(1);
   packet.data.push_back(digitalRead(RPI_ENABLE));
@@ -397,12 +322,7 @@ void report_rpi_enabled() {
   route_packet_to_rfm23(packet);
 }
 
-/**
- * @brief Helper function to request PDU switch state update.
- *
- * This is a helper function called in loop() that sents a switch status command
- * to the PDU in order to update its switch status.
- */
+/** @brief Helper function to request PDU switch state update. */
 void update_pdu_switches() {
   packet.header.type     = PacketComm::TypeId::CommandEpsSwitchStatus;
   packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
