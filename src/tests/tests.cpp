@@ -82,9 +82,9 @@ void run_test() {
 #endif
 
   for (auto &t : thread_list) {
-    Helpers::print_debug(Helpers::MAIN, "thread_id: ", (int32_t)t.thread_id);
-    Helpers::print_debug(Helpers::MAIN,
-                         "state: ", (u_int32_t)threads.getState(t.thread_id));
+    Helpers::print_debug(Helpers::TEST, "thread_id:", t.thread_id,
+                         " channel_id:", (int)t.channel_id,
+                         " state:", threads.getState(t.thread_id));
   }
 
 // PDU Switch Status

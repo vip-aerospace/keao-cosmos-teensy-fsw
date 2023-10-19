@@ -16,8 +16,8 @@ namespace Artemis {
                     sizeof(packet));
       for (size_t i = 0; i < sizeof(packet); i++) {
         if (!serial->print((char)(*(ptr + i) + PDU_CMD_OFFSET))) {
-          print_debug(Helpers::PDU, "Failed to send character to PDU",
-                      (u_int32_t)i);
+          print_debug(Helpers::PDU,
+                      "Failed to send character to PDU:", (u_int32_t)i);
           return false;
         }
       }
@@ -36,7 +36,7 @@ namespace Artemis {
 
     bool PDU::recv(pdu_packet *packet) {
       if (serial->available() <= 0) {
-        print_debug(Helpers::PDU, "Nothing in serial buffer to receive");
+        print_debug_rapid(Helpers::PDU, "Nothing in serial buffer to receive");
         return false;
       }
       String UART1_RX = serial->readString();
