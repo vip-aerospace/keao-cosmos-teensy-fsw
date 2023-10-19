@@ -9,7 +9,6 @@
 #include "artemisbeacons.h"
 #include "channels/artemis_channels.h"
 #include "helpers.h"
-#include "tests/tests.h"
 #include <Arduino.h>
 #include <USBHost_t36.h>
 #include <pdu.h>
@@ -83,8 +82,6 @@ void setup() {
  * when in deployment mode. It also runs tests if they are enabled.
  */
 void loop() {
-  Helpers::print_free_memory();
-  run_tests();
   beacon_if_deployed();
   route_packets();
   gps.update();
@@ -137,19 +134,18 @@ void setup_threads() {
   } else {
     thread_list.push_back({thread_id, Channels::Channel_ID::PDU_CHANNEL});
   }
+#ifdef TESTS
+  if ((thread_id = threads.addThread(Channels::TEST::test_channel, 0, 4096)) ==
+      -1) {
+    print_debug(Helpers::MAIN, "Failed to start test_channel");
+  } else {
+    thread_list.push_back({thread_id, Channels::Channel_ID::TEST_CHANNEL});
+  }
+#endif
 
   // Only uncomment these when testing and you want to force the RPi to turn on
   // thread_list.push_back({threads.addThread(Channels::RPI::rpi_channel),
   // Channels::Channel_ID::RPI_CHANNEL}); pinMode(RPI_ENABLE, HIGH);
-}
-
-/** @brief Helper function to run tests on the satellite. */
-void run_tests() {
-#ifdef TESTS
-  run_test();
-  beacon_artemis_devices();
-  threads.delay(10000);
-#endif
 }
 
 /** @brief Helper function to poll Artemis devices for their readings. */
