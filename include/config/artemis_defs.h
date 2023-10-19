@@ -10,7 +10,6 @@
 /** @brief The number of current sensors in the satellite. */
 #define ARTEMIS_CURRENT_SENSOR_COUNT   5
 
-// Temperature Sensor Defs
 /** @brief The number of temperature sensors in the satellite. */
 #define ARTEMIS_TEMP_SENSOR_COUNT      7
 /**
@@ -42,20 +41,26 @@ const float heater_threshold = -10.0;
 /** @brief The maximum number of packets that a queue can hold. */
 #define MAXQUEUESIZE 50
 
-// Nodes
+/** @brief Enumeration of Node ID. */
 enum class NODES : uint8_t {
   GROUND_NODE_ID = 1,
   TEENSY_NODE_ID = 2,
   RPI_NODE_ID    = 3,
 };
 
+/**
+ * @brief The structure of a thread.
+ *
+ * This structure describes identifying information about an active thread. It
+ * correlates a running thread's ID with the type of channel it is running.
+ */
 struct thread_struct {
   int     thread_id;
   uint8_t channel_id;
 };
 
-enum TEENSY_PINS // Artemis OBC v4.23
-{
+/** @brief Enumeration of Teensy 4.1 pins, based on Artemis OBC v4.23.*/
+enum TEENSY_PINS {
   UART4_RXD,
   UART4_TXD,
   T_GPIO2,
@@ -100,72 +105,33 @@ enum TEENSY_PINS // Artemis OBC v4.23
   AIN2
 };
 
-// Max threads = 16
 extern vector<struct thread_struct> thread_list;
 
 extern std::map<string, NODES>      NodeType;
 
-// Mutex for Command Queues
-extern Threads::Mutex               main_queue_mtx;
-extern Threads::Mutex               rfm23_queue_mtx;
-extern Threads::Mutex               pdu_queue_mtx;
-extern Threads::Mutex               rpi_queue_mtx;
-
-// Command Queues
 extern std::deque<PacketComm>       main_queue;
 extern std::deque<PacketComm>       rfm23_queue;
 extern std::deque<PacketComm>       pdu_queue;
 extern std::deque<PacketComm>       rpi_queue;
 
-// Other Mutex
+extern Threads::Mutex               main_queue_mtx;
+extern Threads::Mutex               rfm23_queue_mtx;
+extern Threads::Mutex               pdu_queue_mtx;
+extern Threads::Mutex               rpi_queue_mtx;
+
 extern Threads::Mutex               spi1_mtx;
 extern Threads::Mutex               i2c1_mtx;
 
 extern bool                         deploymentmode;
 
-/**
- * @brief Kill a running thread.
- *
- * @todo Check return types here.
- *
- * @param target_channel_id The Channel_ID of the channel to kill.
- * @return true The first channel that matches the target Channel_ID has been
- * killed.
- * @return false The target Channel_ID has not been found in the thread_list.
- */
 bool                                kill_thread(uint8_t channel_id);
-/**
- * @brief Push a packet into a queue.
- *
- * This is a helper function to push a packet into a queue of packets. It will
- * push out the first packet in the queue if the queue is too large.
- *
- * @param packet The packet object that will be pushed into the queue.
- * @param queue The queue of packets to be pulled from.
- * @param mtx The mutex used to lock the queue.
- */
 void PushQueue(PacketComm &packet, std::deque<PacketComm> &queue,
                Threads::Mutex &mtx);
-/**
- * @brief Pull a packet from a queue.
- *
- * This is a helper function to check a queue of packets for a packet.
- *
- * @param packet The packet object that will carry the pulled packet, if there
- * is one.
- * @param queue The queue of packets to be pulled from.
- * @param mtx The mutex used to lock the queue.
- * @return true A packet has been pulled from the queue. The passed-in packet
- * now contains its contents.
- * @return false The queue does not contain any packets.
- */
 bool PullQueue(PacketComm &packet, std::deque<PacketComm> &queue,
                Threads::Mutex &mtx);
-/** @brief Wrapper function to send a packet to the PDU. */
+
 void route_packet_to_pdu(PacketComm packet);
-/** @brief Wrapper function to send a packet to the Raspberry Pi. */
 void route_packet_to_rpi(PacketComm packet);
-/** @brief Wrapper function to send a packet to the RFM23. */
 void route_packet_to_rfm23(PacketComm packet);
 
 #endif // _ARTEMIS_DEFS_H
