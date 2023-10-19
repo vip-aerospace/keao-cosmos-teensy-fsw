@@ -73,7 +73,7 @@ namespace Artemis {
           packet.data.resize(0);
           packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::RPI);
           packet.data.push_back(1);
-          PushQueue(packet, main_queue, main_queue_mtx);
+          route_packet_to_main(packet);
           piIsOff = false;
         }
 #endif
@@ -88,7 +88,7 @@ namespace Artemis {
           packet.data.clear();
           packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::RPI);
           packet.data.push_back(0);
-          PushQueue(packet, main_queue, main_queue_mtx);
+          route_packet_to_main(packet);
           piIsOff = true;
         }
 #endif
@@ -101,7 +101,7 @@ namespace Artemis {
           packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
           packet.header.nodedest = (uint8_t)NODES::RPI_NODE_ID;
           packet.data.resize(0);
-          PushQueue(packet, rpi_queue, rpi_queue_mtx);
+          route_packet_to_rpi(packet);
         }
 #endif
       }
@@ -112,7 +112,7 @@ namespace Artemis {
         packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
         packet.header.nodedest = (uint8_t)NODES::RPI_NODE_ID;
         packet.data.clear();
-        PushQueue(packet, main_queue, main_queue_mtx);
+        route_packet_to_main(packet);
 #endif
       }
 
@@ -124,7 +124,7 @@ namespace Artemis {
         packet.data.resize(0);
         packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::All);
         packet.data.push_back(1);
-        PushQueue(packet, main_queue, main_queue_mtx);
+        route_packet_to_main(packet);
 #endif
       }
 
@@ -135,7 +135,7 @@ namespace Artemis {
         packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
         packet.data.clear();
         packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::All);
-        PushQueue(packet, pdu_queue, pdu_queue_mtx);
+        route_packet_to_pdu(packet);
 #endif
       }
 
@@ -149,7 +149,7 @@ namespace Artemis {
 
         packet.data.resize(0);
         String data_str = "Hello World!" + String(packet_count);
-        Helpers::print_hexdump(Helpers::MAIN,
+        Helpers::print_hexdump(Helpers::TEST,
                                "data_str: ", (uint8_t *)data_str.c_str(),
                                data_str.length());
         for (size_t i = 0; i < data_str.length(); i++) {
@@ -157,7 +157,7 @@ namespace Artemis {
         }
         packet_count++;
 
-        PushQueue(packet, main_queue, main_queue_mtx);
+        route_packet_to_main(packet);
 #endif
       }
 

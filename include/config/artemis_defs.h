@@ -136,8 +136,9 @@ void PushQueue(PacketComm &packet, std::deque<PacketComm> &queue,
 bool PullQueue(PacketComm &packet, std::deque<PacketComm> &queue,
                Threads::Mutex &mtx);
 
+void route_packet_to_main(PacketComm packet);
+void route_packet_to_rfm23(PacketComm packet);
 void route_packet_to_pdu(PacketComm packet);
 void route_packet_to_rpi(PacketComm packet);
-void route_packet_to_rfm23(PacketComm packet);
 
 #endif // _ARTEMIS_DEFS_H
