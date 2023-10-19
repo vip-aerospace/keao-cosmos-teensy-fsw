@@ -45,7 +45,7 @@ const float MV_PER_ADC_UNIT  = 3300.0 / 1024.0;
 const float heater_threshold = -10.0;
 
 /** @brief The maximum number of packets that a queue can hold. */
-#define MAXQUEUESIZE 50
+#define MAXQUEUESIZE 8
 
 /** @brief Enumeration of Node ID. */
 enum class NODES : uint8_t {
