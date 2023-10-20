@@ -19,14 +19,13 @@ namespace Artemis {
      * @return false The I2C connection to the magnetometer failed to start.
      */
     bool Magnetometer::setup(void) {
-      if (!magnetometer->begin_I2C()) {
-        return false;
+      if (magnetometerSetup = magnetometer->begin_I2C()) {
+        magnetometer->setPerformanceMode(LIS3MDL_LOWPOWERMODE);
+        magnetometer->setDataRate(LIS3MDL_DATARATE_0_625_HZ);
+        magnetometer->setRange(LIS3MDL_RANGE_16_GAUSS);
+        magnetometer->setOperationMode(LIS3MDL_CONTINUOUSMODE);
       }
-      magnetometer->setPerformanceMode(LIS3MDL_LOWPOWERMODE);
-      magnetometer->setDataRate(LIS3MDL_DATARATE_0_625_HZ);
-      magnetometer->setRange(LIS3MDL_RANGE_16_GAUSS);
-      magnetometer->setOperationMode(LIS3MDL_CONTINUOUSMODE);
-      return true;
+      return magnetometerSetup;
     }
 
     /**
@@ -39,7 +38,7 @@ namespace Artemis {
      * powered on.
      * @return true The magnetometer has been sucessfully read and a packet
      * carrying the reading has been queued for transmission.
-     * @return false The magnetometer could not be read.
+     * @return false The magnetometer could not be read or hasn't been set up.
      */
     bool Magnetometer::read(uint32_t uptime) {
       PacketComm packet;
@@ -47,7 +46,7 @@ namespace Artemis {
       beacon.deci = uptime;
 
       sensors_event_t event;
-      if (!magnetometer->getEvent(&event)) {
+      if (!magnetometer->getEvent(&event) || !magnetometerSetup) {
         return false;
       }
       beacon.magx            = (event.magnetic.x);

@@ -14,22 +14,48 @@
 #include <support/configCosmosKernel.h>
 
 namespace Artemis {
+  /** @brief The devices and sensors in the satellite. */
   namespace Devices {
+    /** @brief The satellite's magnetometer. */
     class Magnetometer {
     public:
+      /** @brief The structure of a magnetometer beacon. */
       struct __attribute__((packed)) magbeacon {
+        /** @brief The type of beacon. */
         BeaconType type = BeaconType::MagnetometerBeacon;
+        /** @brief A decimal identifier for the beacon. */
         uint32_t   deci = 0;
+        /** @brief The magnetometer reading for the x axis. */
         float      magx = 0;
+        /** @brief The magnetometer reading for the y axis. */
         float      magy = 0;
+        /** @brief The magnetometer reading for the z axis. */
         float      magz = 0;
       };
+      /**<  A diagram of the struct is included below.
+       *
+       * @verbatim
+ 1 byte   4 bytes  4 bytes  4 bytes  4 bytes
++--------+--------+--------+--------+--------+
+|  type  |  deci  |  magx  |  magy  |  magz  |
++--------+--------+--------+--------+--------+
+         @endverbatim
+      */
+
+      /**
+       * @brief The core sensor object.
+       *
+       * The Magnetometer class is a wrapper around the [Adafruit
+       * LIS3MDL](https://github.com/adafruit/Adafruit_LIS3MDL) magnetometer
+       * object.
+       */
       Adafruit_LIS3MDL *magnetometer = new Adafruit_LIS3MDL();
 
       bool              setup(void);
       bool              read(uint32_t uptime);
 
     private:
+      /** @brief Whether the I2C connection has been set up. */
       bool magnetometerSetup;
     };
 
