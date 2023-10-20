@@ -48,8 +48,8 @@ namespace Artemis {
        */
       void loop() {
         while (true) {
-          handle_queue();
           receive_from_pi();
+          handle_queue();
           threads.delay(100);
           if (kill_channel) {
             return;
