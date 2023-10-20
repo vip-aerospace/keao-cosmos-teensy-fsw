@@ -19,7 +19,7 @@ namespace Artemis {
      * @return false The I2C connection to the magnetometer failed to start.
      */
     bool Magnetometer::setup(void) {
-      if (magnetometerSetup = magnetometer->begin_I2C()) {
+      if ((magnetometerSetup = magnetometer->begin_I2C())) {
         magnetometer->setPerformanceMode(LIS3MDL_LOWPOWERMODE);
         magnetometer->setDataRate(LIS3MDL_DATARATE_0_625_HZ);
         magnetometer->setRange(LIS3MDL_RANGE_16_GAUSS);
@@ -75,7 +75,7 @@ namespace Artemis {
      * @return false The I2C connection to the IMU failed to start.
      */
     bool IMU::setup(void) {
-      if (imuSetup = imu->begin_I2C()) {
+      if ((imuSetup = imu->begin_I2C())) {
         imu->setAccelRange(LSM6DS_ACCEL_RANGE_16_G);
         imu->setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS);
         imu->setAccelDataRate(LSM6DS_RATE_6_66K_HZ);
@@ -261,7 +261,7 @@ namespace Artemis {
      * @return false The serial connection to the GPS failed to start.
      */
     bool GPS::setup(void) {
-      if (gpsSetup = gps->begin(9600)) {
+      if ((gpsSetup = gps->begin(9600))) {
         threads.delay(100);
         gps->sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
         threads.delay(100);

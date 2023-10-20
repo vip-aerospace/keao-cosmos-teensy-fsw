@@ -38,7 +38,7 @@ namespace Artemis {
        * This function is run once, when the channel is started. It connects to
        * the Raspberry Pi over a serial connection.
        */
-      void setup() { print_debug(Helpers::TEST, "Test Thread starting.."); }
+      void setup() { print_debug(Helpers::TEST, "Test channel starting..."); }
 
       /**
        * @brief The test loop function.

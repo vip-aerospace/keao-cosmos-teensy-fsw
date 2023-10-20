@@ -36,7 +36,7 @@ namespace Artemis {
        * the Raspberry Pi over a serial connection.
        */
       void setup() {
-        print_debug(Helpers::RPI, "RPI Thread starting..");
+        print_debug(Helpers::RPI, "RPI channel starting...");
         Serial2.begin(9600);
       }
 
@@ -56,6 +56,15 @@ namespace Artemis {
           }
         }
       }
+
+      /**
+       * @brief Helper function to receive a packet from the Raspberry Pi.
+       *
+       * @todo Complete this. If data is available from the serial connection,
+       * read in the data and store it in a PacketComm packet. Add that packet
+       * to the main_queue for routing.
+       */
+      void receive_from_pi() {}
 
       /**
        * @brief Helper function to handle packet queue.
@@ -117,15 +126,6 @@ namespace Artemis {
           }
         }
       }
-
-      /**
-       * @brief Helper function to receive a packet from the Raspberry Pi.
-       *
-       * @todo Complete this. If data is available from the serial connection,
-       * read in the data and store it in a PacketComm packet. Add that packet
-       * to the main_queue for routing.
-       */
-      void receive_from_pi() {}
     } // namespace RPI
   }   // namespace Channels
 } // namespace Artemis
