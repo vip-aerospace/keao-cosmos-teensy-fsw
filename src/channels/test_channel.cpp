@@ -11,7 +11,7 @@ namespace Artemis {
   namespace Channels {
     /** @brief The tests channel. */
     namespace TEST {
-      /** @brief The packet used in the tests. */
+      /** @brief The packet used throughout the tests. */
       PacketComm    packet;
       /** @brief The time since the Raspberry Pi has been turned on. */
       elapsedMillis piShutdownTimer = 0;
