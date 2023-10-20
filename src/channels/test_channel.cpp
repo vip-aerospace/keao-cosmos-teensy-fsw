@@ -11,9 +11,13 @@ namespace Artemis {
   namespace Channels {
     /** @brief The tests channel. */
     namespace TEST {
+      /** @brief The packet used in the tests. */
       PacketComm    packet;
+      /** @brief The time since the Raspberry Pi has been turned on. */
       elapsedMillis piShutdownTimer = 0;
+      /** @brief Whether the Raspberry Pi is off. */
       bool          piIsOff         = false;
+      /** @brief The number of packets transmitted by the RFM23. */
       uint32_t      packet_count    = 0;
 
       /**
@@ -47,25 +51,44 @@ namespace Artemis {
           report_threads_status();
           report_memory_usage();
           report_queue_size();
+#ifdef ENABLE_RASPBERRYPI
           turn_on_rpi();
+#endif
           threads.delay(500);
+#ifdef ENABLE_PDU
           pdu_switch_all_on();
+#endif
           threads.delay(500);
+#ifdef ENABLE_PDU
           pdu_switch_status();
+#endif
           threads.delay(500);
+#ifdef ENABLE_RFM23
           rfm23_transmit();
+#endif
           threads.delay(500);
+#ifdef ENABLE_RASPBERRYPI
           rpi_take_picture_from_teensy();
+#endif
           threads.delay(500);
+#ifdef ENABLE_RASPBERRYPI
           rpi_take_picture_from_ground();
+#endif
           threads.delay(500);
+#ifdef ENABLE_RASPBERRYPI
           turn_off_rpi();
+#endif
           threads.delay(500);
         }
       }
 
+      /**
+       * @brief Test turning on the Raspberry Pi.
+       *
+       * This function simulates a packet sent from the ground to the satellite
+       * commanding the Teensy to turn on the Raspberry Pi.
+       */
       void turn_on_rpi() {
-#ifdef ENABLE_RASPBERRYPI
         if (piIsOff) {
           packet.header.type     = PacketComm::TypeId::CommandEpsSwitchName;
           packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
@@ -74,13 +97,19 @@ namespace Artemis {
           packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::RPI);
           packet.data.push_back(1);
           route_packet_to_main(packet);
-          piIsOff = false;
+          piIsOff         = false;
+          piShutdownTimer = 0;
         }
-#endif
       }
 
+      /**
+       * @brief Test turning off the Raspberry Pi.
+       *
+       * This function simulates a packet sent from the ground to the satellite
+       * commanding the Teensy to turn off the Raspberry Pi. A minimum of 10
+       * seconds must have passed since the Raspberry Pi was turned on.
+       */
       void turn_off_rpi() {
-#ifdef ENABLE_RASPBERRYPI
         if (piShutdownTimer > 10000 && !piIsOff) {
           packet.header.type     = PacketComm::TypeId::CommandEpsSwitchName;
           packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
@@ -91,11 +120,15 @@ namespace Artemis {
           route_packet_to_main(packet);
           piIsOff = true;
         }
-#endif
       }
 
+      /**
+       * @brief Test taking a picture (from the Teensy).
+       *
+       * This function simulates a packet sent from the Teensy to the Raspberry
+       * Pi commanding it to take a picture.
+       */
       void rpi_take_picture_from_teensy() {
-#ifdef ENABLE_RASPBERRYPI
         if (!piIsOff) {
           packet.header.type     = (PacketComm::TypeId)0x800;
           packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
@@ -103,21 +136,29 @@ namespace Artemis {
           packet.data.resize(0);
           route_packet_to_rpi(packet);
         }
-#endif
       }
 
+      /**
+       * @brief Test taking a picture (from the ground).
+       *
+       * This function simulates a packet sent from the ground to the satellite
+       * commanding it to take a picture.
+       */
       void rpi_take_picture_from_ground() {
-#ifdef ENABLE_RASPBERRYPI
         packet.header.type     = PacketComm::TypeId::CommandCameraCapture;
         packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
         packet.header.nodedest = (uint8_t)NODES::RPI_NODE_ID;
         packet.data.clear();
         route_packet_to_main(packet);
-#endif
       }
 
+      /**
+       * @brief Test enabling all PDU switches.
+       *
+       * This function simulates a packet sent from the ground to the satellite
+       * commanding it to enable all PDU switches.
+       */
       void pdu_switch_all_on() {
-#ifdef ENABLE_PDU
         packet.header.type     = PacketComm::TypeId::CommandEpsSwitchName;
         packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
         packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
@@ -125,22 +166,30 @@ namespace Artemis {
         packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::All);
         packet.data.push_back(1);
         route_packet_to_main(packet);
-#endif
       }
 
+      /**
+       * @brief Test requesting status of all PDU switches.
+       *
+       * This function simulates a packet sent from the ground to the satellite
+       * commanding it to report the status of all PDU switches.
+       */
       void pdu_switch_status() {
-#ifdef ENABLE_PDU
         packet.header.type     = PacketComm::TypeId::CommandEpsSwitchStatus;
         packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
         packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
         packet.data.clear();
         packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::All);
         route_packet_to_pdu(packet);
-#endif
       }
 
+      /**
+       * @brief Test transmitting from the RFM23.
+       *
+       * This function simulates a packet sent from the Teensy to the RFM23
+       * commanding it to send a packet of data to the ground.
+       */
       void rfm23_transmit() {
-#ifdef ENABLE_RFM23
         packet.header.type     = PacketComm::TypeId::DataObcResponse;
         packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
         packet.header.nodedest = (uint8_t)NODES::GROUND_NODE_ID;
@@ -158,9 +207,9 @@ namespace Artemis {
         packet_count++;
 
         route_packet_to_main(packet);
-#endif
       }
 
+      /** @brief Report on the status of all currently running threads. */
       void report_threads_status() {
         for (auto &t : thread_list) {
           Helpers::print_debug(Helpers::TEST, "thread_id:", t.thread_id,
@@ -169,6 +218,7 @@ namespace Artemis {
         }
       }
 
+      /** @brief Report on the current memory untilization. */
       void report_memory_usage() {
         long  totalMemory = &_heap_end - &_heap_start;
         long  freeMemory  = &_heap_end - (unsigned long *)__brkval;
@@ -180,6 +230,7 @@ namespace Artemis {
                              "% utilization)");
       }
 
+      /** @brief Report on the size of each of the queues. */
       void report_queue_size() {
         Helpers::print_debug(Helpers::TEST, "main_queue contains ",
                              main_queue.size(), " packets, with a size of ",
