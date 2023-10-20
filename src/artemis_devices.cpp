@@ -75,15 +75,13 @@ namespace Artemis {
      * @return false The I2C connection to the IMU failed to start.
      */
     bool IMU::setup(void) {
-      if (!imu->begin_I2C()) {
-        return false;
+      if (imuSetup = imu->begin_I2C()) {
+        imu->setAccelRange(LSM6DS_ACCEL_RANGE_16_G);
+        imu->setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS);
+        imu->setAccelDataRate(LSM6DS_RATE_6_66K_HZ);
+        imu->setGyroDataRate(LSM6DS_RATE_6_66K_HZ);
       }
-      imu->setAccelRange(LSM6DS_ACCEL_RANGE_16_G);
-      imu->setGyroRange(LSM6DS_GYRO_RANGE_2000_DPS);
-      imu->setAccelDataRate(LSM6DS_RATE_6_66K_HZ);
-      imu->setGyroDataRate(LSM6DS_RATE_6_66K_HZ);
-
-      return true;
+      return imuSetup;
     }
 
     /**

@@ -59,25 +59,58 @@ namespace Artemis {
       bool magnetometerSetup;
     };
 
+    /** @brief The satellite's Inertial Measurement Unit (IMU). */
     class IMU {
     public:
+      /** @brief The structure of an IMU beacon. */
       struct __attribute__((packed)) imubeacon {
+        /** @brief The type of beacon. */
         BeaconType type    = BeaconType::IMUBeacon;
+        /** @brief A decimal identifier for the beacon. */
         uint32_t   deci    = 0;
+        /** @brief The accelerometer reading for the x axis. */
         float      accelx  = 0;
+        /** @brief The accelerometer reading for the y axis. */
         float      accely  = 0;
+        /** @brief The accelerometer reading for the z axis. */
         float      accelz  = 0;
+        /** @brief The gyroscope reading for the x axis. */
         float      gyrox   = 0;
+        /** @brief The gyroscope reading for the x axis. */
         float      gyroy   = 0;
+        /** @brief The gyroscope reading for the y axis. */
         float      gyroz   = 0;
+        /** @brief The temperature, in Celcius, of the IMU. */
         float      imutemp = 0;
       };
+      /**<  A diagram of the struct is included below.
+ *
+ * @verbatim
+ 1 byte   4 bytes  4 bytes    4 bytes    4 bytes    4 bytes   4 bytes
++--------+--------+----------+----------+----------+---------+---------+
+|  type  |  deci  |  accelx  |  accely  | accelz   |  gyrox  |  gyroy  |
++--------+--------+----------+----------+----------+---------+---------+
+ 4 bytes   4 bytes
++--------+---------+
+| gyroz  | imutemp |
++--------+---------+
+@endverbatim
+*/
+
+      /**
+       * @brief The core sensor object.
+       *
+       * The IMU class is a wrapper around the [Adafruit
+       * LSM6DSOX](https://learn.adafruit.com/lsm6dsox-and-ism330dhc-6-dof-imu/)
+       * Inertial Measurement Unit (IMU) object.
+       */
       Adafruit_LSM6DSOX *imu = new Adafruit_LSM6DSOX();
 
       bool               setup(void);
       bool               read(uint32_t uptime);
 
     private:
+      /** @brief Whether the I2C connection has been set up. */
       bool imuSetup;
     };
 
