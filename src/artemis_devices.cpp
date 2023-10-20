@@ -104,7 +104,7 @@ namespace Artemis {
       sensors_event_t accel;
       sensors_event_t gyro;
       sensors_event_t temp;
-      if (!imu->getEvent(&accel, &gyro, &temp)) {
+      if (!imu->getEvent(&accel, &gyro, &temp) || !imuSetup) {
         return false;
       }
 
@@ -198,6 +198,7 @@ namespace Artemis {
       packet.header.chanout = Artemis::Channels::Channel_ID::RFM23_CHANNEL;
       route_packet_to_rfm23(packet);
     }
+
     /**
      * @brief Sets up the satellite's temperature sensors.
      *
@@ -260,16 +261,14 @@ namespace Artemis {
      * @return false The serial connection to the GPS failed to start.
      */
     bool GPS::setup(void) {
-      if (!gps->begin(9600)) {
-        return false;
+      if (gpsSetup = gps->begin(9600)) {
+        threads.delay(100);
+        gps->sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
+        threads.delay(100);
+        gps->sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);
+        threads.delay(100);
       }
-      threads.delay(100);
-      gps->sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);
-      threads.delay(100);
-      gps->sendCommand(PMTK_SET_NMEA_UPDATE_1HZ); // 1 Hz update rate
-      threads.delay(100);
-
-      return true;
+      return gpsSetup;
     }
 
     /**
@@ -279,6 +278,9 @@ namespace Artemis {
      * is more data to be read in. If there is, it is read in and parsed.
      */
     void GPS::update(void) {
+      if (!gpsSetup) {
+        return;
+      }
       if (gps->available()) {
         while (gps->read()) // Clear any data from the GPS module
           ;
@@ -303,6 +305,10 @@ namespace Artemis {
      * powered on.
      */
     void GPS::read(uint32_t uptime) {
+      if (!gpsSetup) {
+        return;
+      }
+
       PacketComm packet;
       gpsbeacon  beacon;
       beacon.deci = uptime;
