@@ -25,18 +25,4 @@ namespace Helpers {
     print_debug(channel, oss.str().c_str());
 #endif
   }
-
-  void print_free_memory() {
-#ifdef DEBUG_PRINT
-    std::ostringstream oss;
-    long               totalMemory = &_heap_end - &_heap_start;
-    long               freeMemory  = &_heap_end - (unsigned long *)__brkval;
-    long               usedMemory  = totalMemory - freeMemory;
-    float              memoryUtilization =
-        ((float)(usedMemory) / (float)totalMemory) * 100.0;
-    oss << "Memory usage: " << usedMemory << "/" << totalMemory << " bytes (";
-    oss << memoryUtilization << "% utilization)";
-    print_debug(TEST, oss.str().c_str());
-#endif
-  }
 } // namespace Helpers
