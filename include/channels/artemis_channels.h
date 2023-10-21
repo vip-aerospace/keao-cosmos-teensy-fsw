@@ -1,9 +1,9 @@
 /**
  * @file artemis_channels.h
- * @brief Declarations of Artemis channels on the satellite.
+ * @brief Definitions for Artemis channels on the satellite.
  *
  * This file contains the definition of the Channels namespace and the
- * declarations of each channel's namespace.
+ * declaration for each channel's namespace.
  */
 #ifndef _ARTEMIS_CHANNELS_H
 #define _ARTEMIS_CHANNELS_H
@@ -44,6 +44,7 @@ namespace Artemis {
       void handle_queue();
       void test_communicating_with_pdu();
       void set_switch_on_pdu();
+      void report_pdu_switch_status();
       void regulate_temperature();
       void update_watchdog_timer();
     } // namespace PDU
