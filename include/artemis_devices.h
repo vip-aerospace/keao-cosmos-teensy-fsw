@@ -1,3 +1,11 @@
+/**
+ * @file artemis_devices.h
+ * @brief The declarations of the Artemis devices on the satellite.
+ *
+ * This file contains declarations of Artemis device classes and definitions of
+ * beacons used by those devices.
+ *
+ */
 #ifndef _ARTEMIS_DEVICES_H
 #define _ARTEMIS_DEVICES_H
 

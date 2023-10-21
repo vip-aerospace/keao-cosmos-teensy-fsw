@@ -1,9 +1,9 @@
 /**
  * @file artemis_channels.h
- * @brief Definitions for Artemis channels on the satellite.
+ * @brief Declarations of Artemis channels on the satellite.
  *
  * This file contains the definition of the Channels namespace and the
- * declaration for each channel's namespace.
+ * declarations of each channel's namespace.
  */
 #ifndef _ARTEMIS_CHANNELS_H
 #define _ARTEMIS_CHANNELS_H
