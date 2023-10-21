@@ -39,8 +39,11 @@ namespace Artemis {
       void setup();
       void enableRFM23Radio();
       void deploy();
+      void deploy_burn_wire();
       void loop();
       void handle_queue();
+      void test_communicating_with_pdu();
+      void set_switch_on_pdu();
       void regulate_temperature();
       void update_watchdog_timer();
     } // namespace PDU

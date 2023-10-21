@@ -38,6 +38,8 @@ namespace Artemis {
       void setup() {
         print_debug(Helpers::RPI, "RPI channel starting...");
         Serial2.begin(9600);
+        while (!Serial2) {
+        }
       }
 
       /**
@@ -74,8 +76,8 @@ namespace Artemis {
        */
       void handle_queue() {
         if (PullQueue(packet, rpi_queue, rpi_queue_mtx)) {
-          print_debug(Helpers::RPI,
-                      "packet.header.type: ", (u_int32_t)packet.header.type);
+          print_debug(Helpers::RPI, "Pulled packet of type ",
+                      (uint16_t)packet.header.type, " from queue.");
           switch (packet.header.type) {
             case PacketComm::TypeId::CommandEpsSwitchName: {
               if ((PDU::PDU_SW)packet.data[0] == PDU::PDU_SW::RPI &&
