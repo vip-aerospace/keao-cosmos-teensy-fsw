@@ -1,6 +1,18 @@
+/**
+ * @file helpers.cpp
+ * @brief The helper functions.
+ *
+ * This file contains definitions of helper functions used for debugging the
+ * flight software.
+ */
 #include <helpers.h>
 
 namespace Helpers {
+  /**
+   * @brief Connects to a computer over USB Serial for debugging.
+   *
+   * @param baud The baud rate of the Serial connection to the host computer.
+   */
   void connect_serial_debug(long baud) {
 #if defined(DEBUG_PRINT) || defined(DEBUG_PRINT_RAPID) ||                      \
     defined(DEBUG_PRINT_HEXDUMP)
@@ -9,6 +21,14 @@ namespace Helpers {
 #endif
   }
 
+  /**
+   * @brief Prints the hexdump of a region of memory.
+   *
+   * @param channel The Short_Name of the channel calling this function.
+   * @param msg A message to accompany the hexdump.
+   * @param src A pointer to the start of the region to be printed.
+   * @param size The number of bytes to be printed.
+   */
   void print_hexdump(Short_Name channel, const char *msg, uint8_t *src,
                      uint8_t size) {
 #ifdef DEBUG_PRINT_HEXDUMP
