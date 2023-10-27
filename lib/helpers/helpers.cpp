@@ -22,7 +22,7 @@ namespace Helpers {
   }
 
   /**
-   * @brief Prints the hexdump of a region of memory.
+   * @brief Helper function to print the hexdump of a region of memory.
    *
    * @param channel The Short_Name of the channel calling this function.
    * @param msg A message to accompany the hexdump.

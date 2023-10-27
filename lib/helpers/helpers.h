@@ -19,6 +19,7 @@ extern unsigned long _heap_start;
 extern unsigned long _heap_end;
 extern char         *__brkval;
 
+/** @brief Helper functions and debugging tools. */
 namespace Helpers {
   /** @brief Enumeration of channels calling helper functions. */
   enum Short_Name : uint8_t {
@@ -55,15 +56,14 @@ namespace Helpers {
    * the function. This repeats until the base case is reached and the complete
    * output stream is built.
    *
-   * Practically, this function can be called with an arbirary number of
+   * Practically, this function can be called with an arbitrary number of
    * arguments. The arguments are appended to each other as if they were each
    * passed into std::ostream.
    *
    * For example,
-   * `print_args("Hello World! int=", int);`
-   * and
-   * `print_args("This ", "is ", "a ", "test ");
-   * are both valid uses of this function.
+   * `print_args("Hello World! int=", int)` and
+   * `print_args("This ", "is ", "a ", "test ")` are both valid uses of this
+   * function.
    *
    * @tparam Arg The generic type of the argument to be appended to the stream.
    * @tparam Args The generic type of the remaining arguments.
@@ -78,7 +78,7 @@ namespace Helpers {
   }
 
   /**
-   * @brief The helper function used to print debug messages.
+   * @brief Helper function to print debug messages.
    *
    * @tparam Args The generic type of arguments to be appended to the stream.
    * @param channel The Short_Name of the channel calling this function.
@@ -117,7 +117,7 @@ namespace Helpers {
   }
 
   /**
-   * @brief Helper function used to print debug messages quickly.
+   * @brief Helper function to print debug messages quickly.
    *
    * @tparam Args The generic type of arguments to be appended to the stream.
    * @param channel The Short_Name of the channel calling this function.
