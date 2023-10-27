@@ -24,7 +24,6 @@ void setup_connections();
 void setup_devices();
 void setup_threads();
 
-void run_tests();
 void beacon_artemis_devices();
 void beacon_if_deployed();
 void route_packets();
