@@ -1,7 +1,19 @@
+/**
+ * @file pdu.cpp
+ * @brief The PDU class.
+ *
+ * This file contains definitions for the PDU class.
+ */
 #include <pdu.h>
 
 namespace Artemis {
   namespace Devices {
+    /**
+     * @brief Construct a new PDU object.
+     *
+     * @param hw_serial The HardwareSerial connection unique to this instance.
+     * @param baud_rate The baud rate of the serial connection to the PDU.
+     */
     PDU::PDU(HardwareSerial *hw_serial, int baud_rate) {
       serial = hw_serial;
       serial->begin(baud_rate);
@@ -9,6 +21,13 @@ namespace Artemis {
       serial->flush();
     }
 
+    /**
+     * @brief Send a packet to the PDU.
+     *
+     * @param packet The pdu_packet to be sent to the PDU.
+     * @return true All bytes of the packet were sucessfully sent to the PDU.
+     * @return false There was an error sending a packet to the PDU.
+     */
     bool PDU::send(pdu_packet packet) {
       char *ptr = (char *)&packet;
 
@@ -34,6 +53,14 @@ namespace Artemis {
       return true;
     }
 
+    /**
+     * @brief Receive a packet from the PDU.
+     *
+     * @param packet A pointer to the packet that will carry the received data.
+     * @return true A packet has been received successfully.
+     * @return false No packet is available from the PDU, or the received packet
+     * is invalid.
+     */
     bool PDU::recv(pdu_packet *packet) {
       if (serial->available() <= 0) {
         print_debug_rapid(Helpers::PDU, "Nothing in serial buffer to receive");
@@ -53,6 +80,15 @@ namespace Artemis {
       return true;
     }
 
+    /**
+     * @brief Receive a telemetry packet from the PDU.
+     *
+     * @param packet A pointer to the telemetry packet that will carry the
+     * received data.
+     * @return true A telemetry packet has been received successfully.
+     * @return false No telemetry packet is available from the PDU, or the
+     * received packet is invalid.
+     */
     bool PDU::recv(pdu_telem *packet) {
       if (serial->available() <= 0) {
         print_debug(Helpers::PDU, "Nothing in serial buffer to receive");
@@ -73,6 +109,13 @@ namespace Artemis {
       return true;
     }
 
+    /**
+     * @brief Ping the PDU.
+     *
+     * @return true The PDU replied to the ping request with a pong reply.
+     * @return false There was an error in sending the ping request or receiving
+     * the pong reply.
+     */
     bool PDU::ping() {
       pdu_packet pingPacket;
       pingPacket.type = PDU_Type::CommandPing;
@@ -89,6 +132,20 @@ namespace Artemis {
       return pingPacket.type == PDU_Type::DataPong;
     }
 
+    /**
+     * @brief Set a switch on the PDU.
+     *
+     * @param sw The PDU_SW representing the switch on the PDU to be set.
+     * @param state The desired switch state.
+     * @return true The switch has been successfully set to the desired state.
+     * @return false There was an issue setting the switch or receiving the
+     * reply, or the switch was not set.
+     *
+     * @todo This function should check the switch state and ensure it matches
+     * what we expect. However, the reply from the PDU with the switch state
+     * should still be used to update the internal PDU class switch state, even
+     * if the switch hasn't been set.
+     */
     bool PDU::set_switch(PDU_SW sw, PDU_SW_State state) {
       if (switch_states[(uint8_t)sw - 2] == state) {
         print_debug(Helpers::PDU, "Switch already set to desired state");
@@ -124,14 +181,35 @@ namespace Artemis {
       return true;
     }
 
+    /**
+     * @brief Wrapper function to set the heater switch.
+     *
+     * @param state The desired state of the heater.
+     * @return true The heater switch has been successfully set.
+     * @return false The heater switch failed to be set.
+     */
     bool PDU::set_heater(PDU_SW_State state) {
       return set_switch(PDU_SW::SW_5V_2, state);
     }
 
+    /**
+     * @brief Wrapper function to set the burn wire switch.
+     *
+     * @param state The desired state of the burn wire.
+     * @return true The burn wire switch has been successfully set.
+     * @return false The burn wire switch failed to be set.
+     */
     bool PDU::set_burn_wire(PDU_SW_State state) {
       return set_switch(PDU_SW::BURN1, state);
     }
 
+    /**
+     * @brief Refresh the internal PDU class's switch states.
+     *
+     * @return true The switch states have been updated successfully and can be
+     * trusted.
+     * @return false The switch state request failed to be sent or replied to.
+     */
     bool PDU::refresh_switch_states() {
       pdu_packet requestPacket;
       pdu_telem  replyPacket;
