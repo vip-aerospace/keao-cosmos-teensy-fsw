@@ -72,7 +72,7 @@ namespace Artemis {
 
       /** @brief Helper function to receive a packet from the RFM23 radio. */
       void receive_from_radio() {
-        int32_t timeout = 5000 - (rfm23_queue.size() * 1000);
+        int32_t timeout = (5 - rfm23_queue.size()) * SECONDS;
         if (timeout < MINIMUM_TIMEOUT) {
           timeout = MINIMUM_TIMEOUT;
         }
@@ -81,7 +81,7 @@ namespace Artemis {
                       (int32_t)packet.wrapped.size(), " bytes from radio.");
           print_hexdump(Helpers::RFM23, "Raw bytes: ", &packet.wrapped[0],
                         packet.wrapped.size());
-          threads.delay(2000);
+          threads.delay(2 * SECONDS);
           route_packet_to_main(packet);
         }
       }

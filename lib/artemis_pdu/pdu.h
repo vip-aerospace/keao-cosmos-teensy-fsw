@@ -38,7 +38,7 @@
 /** @brief The interval at which to check the satellite's temperature. */
 #define HEATER_CHECK_INTERVAL     60 * SECONDS
 /** @brief The maximum time given to send a packet to the PDU. */
-#define PDU_COMMUNICATION_TIMEOUT 5000
+#define PDU_COMMUNICATION_TIMEOUT 5 * SECONDS
 
 namespace Artemis {
   namespace Devices {

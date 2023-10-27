@@ -110,7 +110,7 @@ namespace Artemis {
        * seconds must have passed since the Raspberry Pi was turned on.
        */
       void turn_off_rpi() {
-        if (piShutdownTimer > 10000 && !piIsOff) {
+        if (piShutdownTimer > (10 * SECONDS) && !piIsOff) {
           packet.header.type     = PacketComm::TypeId::CommandEpsSwitchName;
           packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
           packet.header.nodedest = (uint8_t)NODES::RPI_NODE_ID;

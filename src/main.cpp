@@ -49,8 +49,8 @@ namespace {
 
   // Deployment variables
   elapsedMillis               deploymentbeacon;
-  // const unsigned long readInterval = 300000; // Flight
-  const unsigned long         readInterval = 20000; // Testing
+  // const unsigned long readInterval = 300 * SECONDS; // Flight
+  const unsigned long         readInterval = 20 * SECONDS; // Testing
 } // namespace
 
 /**
@@ -67,10 +67,10 @@ void setup() {
   set_arm_clock(450000000);
 #endif
   setup_connections();
-  delay(3000);
+  delay(3 * SECONDS);
   setup_devices();
   setup_threads();
-  threads.delay(5000);
+  threads.delay(5 * SECONDS);
   Helpers::print_debug(Helpers::MAIN, "Teensy Flight Software Setup Complete");
 }
 
@@ -216,7 +216,7 @@ void route_packets() {
                 route_packet_to_rpi(packet);
               } else if (packet.data[2] == 1) {
                 enable_rpi();
-                threads.delay(5000);
+                threads.delay(5 * SECONDS);
               } else {
                 ensure_rpi_is_powered();
               }
@@ -276,7 +276,7 @@ void ensure_rpi_is_powered() {
         current_sensors.current_sensors["battery_board"]->getBusVoltage_V();
     if (curr_V >= 7.0) {
       enable_rpi();
-      threads.delay(5000);
+      threads.delay(5 * SECONDS);
     } else {
       update_pdu_switches();
     }

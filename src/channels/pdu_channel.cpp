@@ -82,7 +82,7 @@ namespace Artemis {
        */
       void enableRFM23Radio() {
         // pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::SW_3V3_2, true);
-        // threads.delay(1000);
+        // threads.delay(1 * SECONDS);
       }
 
       /**

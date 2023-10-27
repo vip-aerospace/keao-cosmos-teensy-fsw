@@ -99,7 +99,7 @@ namespace Artemis {
         packet.header.type = PacketComm::TypeId::CommandObcHalt;
         send_to_pi();
         // Wait 20s to give the rpi time to turn off
-        threads.delay(20000);
+        threads.delay(20 * SECONDS);
         digitalWrite(RPI_ENABLE, LOW);
 
         // Empty RPI Queue

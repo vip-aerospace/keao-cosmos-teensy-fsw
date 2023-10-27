@@ -8,9 +8,16 @@
 #ifndef _HELPERS_H
 #define _HELPERS_H
 
+/** @brief The number of milliseconds in a second. */
+#define SECONDS 1000
+
 #include "support/configCosmosKernel.h"
 #include <Arduino.h>
 #include <stdint.h>
+
+extern unsigned long _heap_start;
+extern unsigned long _heap_end;
+extern char         *__brkval;
 
 namespace Helpers {
   /** @brief Enumeration of channels calling helper functions. */
