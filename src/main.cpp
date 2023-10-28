@@ -83,7 +83,9 @@ void setup() {
 void loop() {
   beacon_if_deployed();
   route_packets();
+#ifdef ENABLE_GPS
   gps.update();
+#endif
   threads.delay(100);
 }
 
@@ -98,18 +100,26 @@ void setup_connections() {
 
 /** @brief Helper function to set up devices on the Teensy. */
 void setup_devices() {
+#ifdef ENABLE_MAGNETOMETER
   if (!magnetometer.setup()) {
     print_debug(Helpers::MAIN, "Failed to setup magnetometer");
   }
+#endif
+#ifdef ENABLE_IMU
   if (!imu.setup()) {
     print_debug(Helpers::MAIN, "Failed to setup IMU");
   }
+#endif
+#ifdef ENABLE_CURRENTSENSORS
   if (!current_sensors.setup()) {
     print_debug(Helpers::MAIN, "Failed to setup at least one current sensor");
   }
+#endif
+#ifdef ENABLE_GPS
   if (!gps.setup()) {
     print_debug(Helpers::MAIN, "Failed to setup GPS");
   }
+#endif
 }
 
 /** @brief Helper function to set up threads on the Teensy. */
@@ -120,19 +130,22 @@ void setup_threads() {
   }
 
   int thread_id = 0;
+#ifdef ENABLE_RFM23
   if ((thread_id =
            threads.addThread(Channels::RFM23::rfm23_channel, 0, 4096)) == -1) {
     print_debug(Helpers::MAIN, "Failed to start rfm23_channel");
   } else {
     thread_list.push_back({thread_id, Channels::Channel_ID::RFM23_CHANNEL});
   }
-
+#endif
+#ifdef ENABLE_PDU
   if ((thread_id = threads.addThread(Channels::PDU::pdu_channel, 0, 8192)) ==
       -1) {
     print_debug(Helpers::MAIN, "Failed to start pdu_channel");
   } else {
     thread_list.push_back({thread_id, Channels::Channel_ID::PDU_CHANNEL});
   }
+#endif
 #ifdef TESTS
   if ((thread_id = threads.addThread(Channels::TEST::test_channel, 0, 4096)) ==
       -1) {
@@ -152,23 +165,19 @@ void beacon_artemis_devices() {
 #ifdef ENABLE_TEMPERATURESENSORS
   temperature_sensors.read(uptime);
 #endif
-
 #ifdef ENABLE_CURRENTSENSORS
   current_sensors.read(uptime);
 #endif
-
 #ifdef ENABLE_IMU
   if (!imu.read(uptime)) {
     print_debug(Helpers::MAIN, "Failed to read IMU");
   }
 #endif
-
 #ifdef ENABLE_MAGNETOMETER
   if (!magnetometer.read(uptime)) {
     print_debug(Helpers::MAIN, "Failed to read magnetometer");
   }
 #endif
-
 #ifdef ENABLE_GPS
   gps.read(uptime);
 #endif
@@ -268,7 +277,12 @@ void route_packet_to_ground() {
   }
 }
 
-/** @brief Helper function to ensure the Raspberry Pi is powered. */
+/**
+ * @brief Helper function to ensure the Raspberry Pi is powered.
+ *
+ * @todo This should still function if the current sensors are not enabled via
+ * build flags.
+ */
 void ensure_rpi_is_powered() {
   if (!digitalRead(UART6_RX)) {
     float curr_V =
@@ -319,10 +333,12 @@ void report_rpi_enabled() {
 
 /** @brief Helper function to request PDU switch state update. */
 void update_pdu_switches() {
+#ifdef ENABLE_PDU
   packet.header.type     = PacketComm::TypeId::CommandEpsSwitchStatus;
   packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
   packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
   packet.data.clear();
   packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::All);
   route_packet_to_pdu(packet);
+#endif
 }

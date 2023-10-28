@@ -51,33 +51,20 @@ namespace Artemis {
           report_threads_status();
           report_memory_usage();
           report_queue_size();
-#ifdef ENABLE_RASPBERRYPI
+
           turn_on_rpi();
-#endif
           threads.delay(500);
-#ifdef ENABLE_PDU
           pdu_switch_all_on();
-#endif
           threads.delay(500);
-#ifdef ENABLE_PDU
           pdu_switch_status();
-#endif
           threads.delay(500);
-#ifdef ENABLE_RFM23
           rfm23_transmit();
-#endif
           threads.delay(500);
-#ifdef ENABLE_RASPBERRYPI
           rpi_take_picture_from_teensy();
-#endif
           threads.delay(500);
-#ifdef ENABLE_RASPBERRYPI
           rpi_take_picture_from_ground();
-#endif
           threads.delay(500);
-#ifdef ENABLE_RASPBERRYPI
           turn_off_rpi();
-#endif
           threads.delay(500);
         }
       }
@@ -89,6 +76,7 @@ namespace Artemis {
        * commanding the Teensy to turn on the Raspberry Pi.
        */
       void turn_on_rpi() {
+#ifdef ENABLE_RASPBERRYPI
         if (piIsOff) {
           packet.header.type     = PacketComm::TypeId::CommandEpsSwitchName;
           packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
@@ -100,6 +88,7 @@ namespace Artemis {
           piIsOff         = false;
           piShutdownTimer = 0;
         }
+#endif
       }
 
       /**
@@ -110,6 +99,7 @@ namespace Artemis {
        * seconds must have passed since the Raspberry Pi was turned on.
        */
       void turn_off_rpi() {
+#ifdef ENABLE_RASPBERRYPI
         if (piShutdownTimer > (10 * SECONDS) && !piIsOff) {
           packet.header.type     = PacketComm::TypeId::CommandEpsSwitchName;
           packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
@@ -120,6 +110,7 @@ namespace Artemis {
           route_packet_to_main(packet);
           piIsOff = true;
         }
+#endif
       }
 
       /**
@@ -129,6 +120,7 @@ namespace Artemis {
        * Pi commanding it to take a picture.
        */
       void rpi_take_picture_from_teensy() {
+#ifdef ENABLE_RASPBERRYPI
         if (!piIsOff) {
           packet.header.type     = (PacketComm::TypeId)0x800;
           packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
@@ -136,6 +128,7 @@ namespace Artemis {
           packet.data.resize(0);
           route_packet_to_rpi(packet);
         }
+#endif
       }
 
       /**
@@ -145,11 +138,13 @@ namespace Artemis {
        * commanding it to take a picture.
        */
       void rpi_take_picture_from_ground() {
+#ifdef ENABLE_RASPBERRYPI
         packet.header.type     = PacketComm::TypeId::CommandCameraCapture;
         packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
         packet.header.nodedest = (uint8_t)NODES::RPI_NODE_ID;
         packet.data.clear();
         route_packet_to_main(packet);
+#endif
       }
 
       /**
@@ -159,6 +154,7 @@ namespace Artemis {
        * commanding it to enable all PDU switches.
        */
       void pdu_switch_all_on() {
+#ifdef ENABLE_PDU
         packet.header.type     = PacketComm::TypeId::CommandEpsSwitchName;
         packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
         packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
@@ -166,6 +162,7 @@ namespace Artemis {
         packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::All);
         packet.data.push_back(1);
         route_packet_to_main(packet);
+#endif
       }
 
       /**
@@ -175,12 +172,14 @@ namespace Artemis {
        * commanding it to report the status of all PDU switches.
        */
       void pdu_switch_status() {
+#ifdef ENABLE_PDU
         packet.header.type     = PacketComm::TypeId::CommandEpsSwitchStatus;
         packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
         packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
         packet.data.clear();
         packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::All);
         route_packet_to_pdu(packet);
+#endif
       }
 
       /**
@@ -190,6 +189,7 @@ namespace Artemis {
        * commanding it to send a packet of data to the ground.
        */
       void rfm23_transmit() {
+#ifdef ENABLE_RFM23
         packet.header.type     = PacketComm::TypeId::DataObcResponse;
         packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
         packet.header.nodedest = (uint8_t)NODES::GROUND_NODE_ID;
@@ -207,6 +207,7 @@ namespace Artemis {
         packet_count++;
 
         route_packet_to_main(packet);
+#endif
       }
 
       /** @brief Report on the status of all currently running threads. */
