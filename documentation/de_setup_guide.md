@@ -194,3 +194,10 @@ monitor the FSW all at once, press the "Upload and Monitor" option.
 The FSW will be compiled, uploaded, and sent to the Teensy. A Serial Monitor 
 will be started in the Terminal window at the bottom.
 
+@section step6 Step 6: Apply formatting settings
+In VSCode, enter the settings menu by clicking File > Preferences > Settings.
+
+From there, type "format" in the search bar, and enable the option labelled "Format on save". This automatically applies unform C++ formatting to the code you write whenever you save the file.
+
+![The "Format on Save" option in VSCode's settings menu.](https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step21.png?raw=true)
+
