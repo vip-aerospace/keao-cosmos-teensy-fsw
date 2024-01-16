@@ -1,7 +1,5 @@
 @page development_environment_setup Development Enviornment Setup Guide
 
-@todo Add setup for code formatting on save, ruler, spellcheck
-
 This is a guide on how to set up your Development Environment (DE) to compile, 
 run, and debug the Teensy Flight Software (FSW).
 
@@ -201,3 +199,15 @@ From there, type "format" in the search bar, and enable the option labelled "For
 
 ![The "Format on Save" option in VSCode's settings menu.](https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step21.png?raw=true)
 
+Next, type "ruler" in the search bar, and press the "Edit in settings.json" option under Editor: Rulers. This opens up the settings.json file, and creates an entry called "editor.rulers". Within this entry, type in "80," like so:
+
+```
+{
+    ...
+    "editor.rulers": [
+        80,
+    ]
+}
+```
+
+Save the file, and you should now see a white vertical line at the 80th column of your editor. This marks an absolute width for your file, upon which the editor will try to automatically create a new line.
