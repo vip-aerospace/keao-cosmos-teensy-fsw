@@ -34,7 +34,7 @@
  *
  * It could be possible to put all our code into this one file, but this would
  * be a massive file that would be hard to read and maintain. In addition, we
- * want to be able to seperate the code based on what components of the CubeSat
+ * want to be able to separate the code based on what components of the CubeSat
  * it effects.
  *
  * As a result, we split up the codebase and execution using \link
@@ -176,7 +176,7 @@ build_flags =
  *
  * Channel B is up next, and it polls a temperature sensor over the same I2C
  * connection. The Teensy keeps the I2C connection active and sends a request
- * addressed to the sensor. However, the radio interpets the data in its
+ * addressed to the sensor. However, the radio interprets the data in its
  * entirety to be the data to transmit, and incorrectly transmits the request.
  * In reality, there are other safeguards against this, but this illustrates
  * the problem.

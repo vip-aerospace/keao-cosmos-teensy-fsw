@@ -41,7 +41,7 @@ const float OFFSET_F         = 58.0;
  */
 const float MV_PER_ADC_UNIT  = 3300.0 / 1024.0;
 
-/** @brief The activation temperature, in Celcius, of the heater. */
+/** @brief The activation temperature, in Celsius, of the heater. */
 const float heater_threshold = -10.0;
 
 /** @brief The maximum number of packets that a queue can hold. */
@@ -65,7 +65,7 @@ struct thread_struct {
   uint8_t channel_id;
 };
 
-/** @brief Enumeration of Teensy 4.1 pins, based on Artemis OBC v4.23.*/
+/** @brief Enumeration of Teensy 4.1 pins, based on Artemis OBC v4.23. */
 enum TEENSY_PINS {
   UART4_RXD,
   UART4_TXD,

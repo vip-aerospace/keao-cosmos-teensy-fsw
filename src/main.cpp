@@ -36,20 +36,20 @@ void report_rpi_enabled();
 void update_pdu_switches();
 
 namespace {
-  using namespace Artemis;
-  Devices::IMU                imu;
-  Devices::Magnetometer       magnetometer;
-  Devices::CurrentSensors     current_sensors;
-  Devices::GPS                gps;
-  Devices::TemperatureSensors temperature_sensors;
-  PacketComm                  packet;
-  USBHost                     usb;
-  elapsedMillis               uptime;
+using namespace Artemis;
+Devices::IMU                imu;
+Devices::Magnetometer       magnetometer;
+Devices::CurrentSensors     current_sensors;
+Devices::GPS                gps;
+Devices::TemperatureSensors temperature_sensors;
+PacketComm                  packet;
+USBHost                     usb;
+elapsedMillis               uptime;
 
-  // Deployment variables
-  elapsedMillis               deploymentbeacon;
-  // const unsigned long readInterval = 300 * SECONDS; // Flight
-  const unsigned long         readInterval = 20 * SECONDS; // Testing
+// Deployment variables
+elapsedMillis               deploymentbeacon;
+// const unsigned long readInterval = 300 * SECONDS; // Flight
+const unsigned long         readInterval = 20 * SECONDS; // Testing
 } // namespace
 
 /**
