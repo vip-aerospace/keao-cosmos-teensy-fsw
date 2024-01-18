@@ -240,11 +240,12 @@ namespace Channels {
         packet.header.type            = PacketComm::TypeId::DataObcBeacon;
         packet.header.nodeorig        = (uint8_t)NODES::TEENSY_NODE_ID;
         packet.header.nodedest        = (uint8_t)NODES::GROUND_NODE_ID;
+        packet.header.chanin          = 0;
+        packet.header.chanout         = Channel_ID::RFM23_CHANNEL;
         packet.data.resize(sizeof(beacon));
         memcpy(packet.data.data(), &beacon, sizeof(beacon));
-        packet.header.chanin  = 0;
-        packet.header.chanout = Channel_ID::RFM23_CHANNEL;
-        route_packet_to_rfm23(packet);
+
+        route_packet_to_main(packet);
       }
     }
 
