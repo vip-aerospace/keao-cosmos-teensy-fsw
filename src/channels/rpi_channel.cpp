@@ -14,7 +14,7 @@ namespace Channels {
     using Artemis::Devices::PDU;
     /** @brief The packet used throughout the channel. */
     PacketComm packet;
-    /** @brief A flag to kill the channel and return. */
+    /** @brief Whether the Raspberry Pi is on and active. */
     bool       piIsOn = false;
 
     /**
