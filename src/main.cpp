@@ -132,6 +132,12 @@ void setup_threads() {
   } else {
     thread_list.push_back({thread_id, Channels::Channel_ID::PDU_CHANNEL});
   }
+  if ((thread_id = threads.addThread(Channels::RPI::rpi_channel, 0, 4096)) ==
+      -1) {
+    print_debug(Helpers::MAIN, "Failed to start rpi_channel");
+  } else {
+    thread_list.push_back({thread_id, Channels::Channel_ID::RPI_CHANNEL});
+  }
 #ifdef TESTS
   if ((thread_id = threads.addThread(Channels::TEST::test_channel, 0, 4096)) ==
       -1) {
@@ -140,10 +146,6 @@ void setup_threads() {
     thread_list.push_back({thread_id, Channels::Channel_ID::TEST_CHANNEL});
   }
 #endif
-
-  // Only uncomment these when testing and you want to force the RPi to turn on
-  // thread_list.push_back({threads.addThread(Channels::RPI::rpi_channel),
-  // Channels::Channel_ID::RPI_CHANNEL}); pinMode(RPI_ENABLE, HIGH);
 }
 
 /** @brief Helper function to poll Artemis devices for their readings. */

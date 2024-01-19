@@ -82,6 +82,7 @@ namespace Channels {
      */
     void enableRFM23Radio() {
       // pdu.set_switch(Artemis::Teensy::PDU::PDU_SW::SW_3V3_2, true);
+      // pinMode(RPI_ENABLE, HIGH);
       // threads.delay(1 * SECONDS);
     }
 

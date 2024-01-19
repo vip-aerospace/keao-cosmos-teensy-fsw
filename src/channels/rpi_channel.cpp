@@ -15,7 +15,7 @@ namespace Channels {
     /** @brief The packet used throughout the channel. */
     PacketComm packet;
     /** @brief A flag to kill the channel and return. */
-    bool       kill_channel = false;
+    bool       piIsOn = false;
 
     /**
      * @brief The top-level channel definition.
@@ -26,7 +26,7 @@ namespace Channels {
      */
     void       rpi_channel() {
       setup();
-      return loop();
+      loop();
     }
 
     /**
@@ -34,12 +34,17 @@ namespace Channels {
      *
      * This function is run once, when the channel is started. It connects to
      * the Raspberry Pi over a serial connection.
+     *
+     * @todo Ensure the Pi is on before completing setup.
      */
     void setup() {
       print_debug(Helpers::RPI, "RPI channel starting...");
       Serial2.begin(9600);
       while (!Serial2) {
       }
+      // Try pinging the RPi to ensure we can communicate with it.
+      // Retry and wait until a ping is successful before continuing.
+      // Set the piIsOn variable when successful.
     }
 
     /**
@@ -47,15 +52,19 @@ namespace Channels {
      *
      * This function runs in an infinite loop after setup() completes. It routes
      * packets going to and coming from the Raspberry Pi.
+     *
+     * @todo Handle the case where the Pi is not on.
      */
     void loop() {
       while (true) {
+        if (!piIsOn) {
+          // Try pinging the RPi to ensure we can communicate with it.
+          // Retry and wait until a ping is successful before continuing.
+          // Set the piIsOn variable when successful.
+        }
         receive_from_pi();
         handle_queue();
         threads.delay(100);
-        if (kill_channel) {
-          return;
-        }
       }
     }
 
@@ -103,14 +112,11 @@ namespace Channels {
       digitalWrite(RPI_ENABLE, LOW);
 
       // Empty RPI Queue
-      while (!rpi_queue.empty())
+      while (!rpi_queue.empty()) {
         rpi_queue.pop_front();
-
-      print_debug(Helpers::RPI, "Killing RPi thread");
-      if (!kill_thread(Channel_ID::RPI_CHANNEL)) {
-        print_debug(Helpers::RPI, "Failed to kill RPi thread");
       }
-      kill_channel = true;
+
+      piIsOn = false;
     }
 
     /** @brief Helper function to send a packet to the Raspberry Pi. */
@@ -124,6 +130,7 @@ namespace Channels {
         if (Serial2.write(packet.packetized[i]) != 1) {
           print_debug(Helpers::RPI,
                       "Failed to send byte to RPi: ", (u_int32_t)i);
+          piIsOn = false;
         }
       }
     }
