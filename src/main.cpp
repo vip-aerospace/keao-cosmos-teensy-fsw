@@ -83,9 +83,7 @@ void setup() {
 void loop() {
   beacon_if_deployed();
   route_packets();
-#ifdef ENABLE_GPS
   gps.update();
-#endif
   threads.delay(100);
 }
 
@@ -100,26 +98,18 @@ void setup_connections() {
 
 /** @brief Helper function to set up devices on the Teensy. */
 void setup_devices() {
-#ifdef ENABLE_MAGNETOMETER
   if (!magnetometer.setup()) {
     print_debug(Helpers::MAIN, "Failed to setup magnetometer");
   }
-#endif
-#ifdef ENABLE_IMU
   if (!imu.setup()) {
     print_debug(Helpers::MAIN, "Failed to setup IMU");
   }
-#endif
-#ifdef ENABLE_CURRENTSENSORS
   if (!current_sensors.setup()) {
     print_debug(Helpers::MAIN, "Failed to setup at least one current sensor");
   }
-#endif
-#ifdef ENABLE_GPS
   if (!gps.setup()) {
     print_debug(Helpers::MAIN, "Failed to setup GPS");
   }
-#endif
 }
 
 /** @brief Helper function to set up threads on the Teensy. */
@@ -162,25 +152,15 @@ void setup_threads() {
 
 /** @brief Helper function to poll Artemis devices for their readings. */
 void beacon_artemis_devices() {
-#ifdef ENABLE_TEMPERATURESENSORS
   temperature_sensors.read(uptime);
-#endif
-#ifdef ENABLE_CURRENTSENSORS
   current_sensors.read(uptime);
-#endif
-#ifdef ENABLE_IMU
   if (!imu.read(uptime)) {
     print_debug(Helpers::MAIN, "Failed to read IMU");
   }
-#endif
-#ifdef ENABLE_MAGNETOMETER
   if (!magnetometer.read(uptime)) {
     print_debug(Helpers::MAIN, "Failed to read magnetometer");
   }
-#endif
-#ifdef ENABLE_GPS
   gps.read(uptime);
-#endif
 }
 
 /** @brief Helper function to beacon Artemis devices if in deployment mode. */

@@ -90,9 +90,6 @@
  * @verbatim
 
 build_flags =
-        -D ENABLE_CURRENTSENSORS
-        -D ENABLE_GPS
-;       -D ENABLE_IMU
 
 @endverbatim
 
@@ -103,14 +100,9 @@ build_flags =
  * device is disabled, it will not be initialized or accessed.
  * | Flag Name | Function |
  * |----------|----------|
- * | ENABLE_CURRENTSENSORS | Enable the satellite's current sensors. |
- * | ENABLE_GPS | Enable the satellite's GPS. |
- * | ENABLE_IMU | Enable the satellite's IMU. |
- * | ENABLE_MAGNETOMETER | Enable the satellite's magnetometer. |
  * | ENABLE_PDU | Enable the satellite's PDU. |
  * | ENABLE_RFM23 | Enable the satellite's RFM23 radio. |
  * | ENABLE_RASPBERRYPI | Enable the satellite's Raspberry Pi. |
- * | ENABLE_TEMPERATURESENSORS | Enable the satellite's temperature sensors. |
  *
  * @subsection Tests Tests
  * These flags are used to run test code, generating test data to see how the

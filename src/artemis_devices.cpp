@@ -41,6 +41,10 @@ namespace Devices {
    * @return false The magnetometer could not be read or hasn't been set up.
    */
   bool Magnetometer::read(uint32_t uptime) {
+    if (!magnetometerSetup) {
+      setup();
+    }
+
     PacketComm packet;
     magbeacon  beacon;
     beacon.deci = uptime;
@@ -97,6 +101,10 @@ namespace Devices {
    * @return false The IMU could not be read.
    */
   bool IMU::read(uint32_t uptime) {
+    if (!imuSetup) {
+      setup();
+    }
+
     PacketComm packet;
     imubeacon  beacon;
     beacon.deci = uptime;
@@ -144,11 +152,12 @@ namespace Devices {
   bool CurrentSensors::setup(void) {
     for (auto &current_sensor : current_sensors) {
       if (!current_sensor.second->begin(&Wire2)) {
-        return false;
+        currentSetup = false;
+        return currentSetup;
       }
     }
-
-    return true;
+    currentSetup = true;
+    return currentSetup;
   }
 
   /**
@@ -162,6 +171,10 @@ namespace Devices {
    * powered on.
    */
   void CurrentSensors::read(uint32_t uptime) {
+    if (!currentSetup) {
+      setup();
+    }
+
     PacketComm     packet;
     currentbeacon1 beacon1;
     currentbeacon2 beacon2;
@@ -305,7 +318,7 @@ namespace Devices {
    */
   void GPS::read(uint32_t uptime) {
     if (!gpsSetup) {
-      return;
+      setup();
     }
 
     PacketComm packet;
