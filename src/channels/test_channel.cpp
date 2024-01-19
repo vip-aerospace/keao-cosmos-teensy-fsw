@@ -76,7 +76,6 @@ namespace Channels {
      * commanding the Teensy to turn on the Raspberry Pi.
      */
     void turn_on_rpi() {
-#ifdef ENABLE_RASPBERRYPI
       if (piIsOff) {
         packet.header.type     = PacketComm::TypeId::CommandEpsSwitchName;
         packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
@@ -88,7 +87,6 @@ namespace Channels {
         piIsOff         = false;
         piShutdownTimer = 0;
       }
-#endif
     }
 
     /**
@@ -99,7 +97,6 @@ namespace Channels {
      * seconds must have passed since the Raspberry Pi was turned on.
      */
     void turn_off_rpi() {
-#ifdef ENABLE_RASPBERRYPI
       if (piShutdownTimer > (10 * SECONDS) && !piIsOff) {
         packet.header.type     = PacketComm::TypeId::CommandEpsSwitchName;
         packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
@@ -110,7 +107,6 @@ namespace Channels {
         route_packet_to_main(packet);
         piIsOff = true;
       }
-#endif
     }
 
     /**
@@ -120,7 +116,6 @@ namespace Channels {
      * Pi commanding it to take a picture.
      */
     void rpi_take_picture_from_teensy() {
-#ifdef ENABLE_RASPBERRYPI
       if (!piIsOff) {
         packet.header.type     = (PacketComm::TypeId)0x800;
         packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
@@ -128,7 +123,6 @@ namespace Channels {
         packet.data.resize(0);
         route_packet_to_rpi(packet);
       }
-#endif
     }
 
     /**
@@ -138,13 +132,11 @@ namespace Channels {
      * commanding it to take a picture.
      */
     void rpi_take_picture_from_ground() {
-#ifdef ENABLE_RASPBERRYPI
       packet.header.type     = PacketComm::TypeId::CommandCameraCapture;
       packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
       packet.header.nodedest = (uint8_t)NODES::RPI_NODE_ID;
       packet.data.clear();
       route_packet_to_main(packet);
-#endif
     }
 
     /**
@@ -154,7 +146,6 @@ namespace Channels {
      * commanding it to enable all PDU switches.
      */
     void pdu_switch_all_on() {
-#ifdef ENABLE_PDU
       packet.header.type     = PacketComm::TypeId::CommandEpsSwitchName;
       packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
       packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
@@ -162,7 +153,6 @@ namespace Channels {
       packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::All);
       packet.data.push_back(1);
       route_packet_to_main(packet);
-#endif
     }
 
     /**
@@ -172,14 +162,12 @@ namespace Channels {
      * commanding it to report the status of all PDU switches.
      */
     void pdu_switch_status() {
-#ifdef ENABLE_PDU
       packet.header.type     = PacketComm::TypeId::CommandEpsSwitchStatus;
       packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
       packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
       packet.data.clear();
       packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::All);
       route_packet_to_pdu(packet);
-#endif
     }
 
     /**
@@ -189,7 +177,6 @@ namespace Channels {
      * commanding it to send a packet of data to the ground.
      */
     void rfm23_transmit() {
-#ifdef ENABLE_RFM23
       packet.header.type     = PacketComm::TypeId::DataObcResponse;
       packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
       packet.header.nodedest = (uint8_t)NODES::GROUND_NODE_ID;
@@ -207,7 +194,6 @@ namespace Channels {
       packet_count++;
 
       route_packet_to_main(packet);
-#endif
     }
 
     /** @brief Report on the status of all currently running threads. */

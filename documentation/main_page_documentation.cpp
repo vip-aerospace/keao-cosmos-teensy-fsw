@@ -89,20 +89,12 @@
  * individual lines, like so:
  * @verbatim
 
-build_flags =
+build_flags = DEBUG_PRINT
 
 @endverbatim
 
  * The `;` symbol comments out a flag, disabling it.
  *
- * @subsection EnableDevices Enable Devices
- * These flags are used to enable or disable devices in the satellite. If a
- * device is disabled, it will not be initialized or accessed.
- * | Flag Name | Function |
- * |----------|----------|
- * | ENABLE_PDU | Enable the satellite's PDU. |
- * | ENABLE_RFM23 | Enable the satellite's RFM23 radio. |
- * | ENABLE_RASPBERRYPI | Enable the satellite's Raspberry Pi. |
  *
  * @subsection Tests Tests
  * These flags are used to run test code, generating test data to see how the

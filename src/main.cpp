@@ -120,22 +120,18 @@ void setup_threads() {
   }
 
   int thread_id = 0;
-#ifdef ENABLE_RFM23
   if ((thread_id =
            threads.addThread(Channels::RFM23::rfm23_channel, 0, 4096)) == -1) {
     print_debug(Helpers::MAIN, "Failed to start rfm23_channel");
   } else {
     thread_list.push_back({thread_id, Channels::Channel_ID::RFM23_CHANNEL});
   }
-#endif
-#ifdef ENABLE_PDU
   if ((thread_id = threads.addThread(Channels::PDU::pdu_channel, 0, 8192)) ==
       -1) {
     print_debug(Helpers::MAIN, "Failed to start pdu_channel");
   } else {
     thread_list.push_back({thread_id, Channels::Channel_ID::PDU_CHANNEL});
   }
-#endif
 #ifdef TESTS
   if ((thread_id = threads.addThread(Channels::TEST::test_channel, 0, 4096)) ==
       -1) {
@@ -313,12 +309,10 @@ void report_rpi_enabled() {
 
 /** @brief Helper function to request PDU switch state update. */
 void update_pdu_switches() {
-#ifdef ENABLE_PDU
   packet.header.type     = PacketComm::TypeId::CommandEpsSwitchStatus;
   packet.header.nodeorig = (uint8_t)NODES::GROUND_NODE_ID;
   packet.header.nodedest = (uint8_t)NODES::TEENSY_NODE_ID;
   packet.data.clear();
   packet.data.push_back((uint8_t)Artemis::Devices::PDU::PDU_SW::All);
   route_packet_to_pdu(packet);
-#endif
 }

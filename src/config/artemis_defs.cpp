@@ -118,19 +118,13 @@ void route_packet_to_main(PacketComm packet) {
 }
 /** @brief Wrapper function to send a packet to the RFM23. */
 void route_packet_to_rfm23(PacketComm packet) {
-#ifdef ENABLE_RFM23
   PushQueue(packet, rfm23_queue, rfm23_queue_mtx);
-#endif
 }
 /** @brief Wrapper function to send a packet to the PDU. */
 void route_packet_to_pdu(PacketComm packet) {
-#ifdef ENABLE_PDU
   PushQueue(packet, pdu_queue, pdu_queue_mtx);
-#endif
 }
 /** @brief Wrapper function to send a packet to the Raspberry Pi. */
 void route_packet_to_rpi(PacketComm packet) {
-#ifdef ENABLE_RASPBERRYPI
   PushQueue(packet, rpi_queue, rpi_queue_mtx);
-#endif
 }
