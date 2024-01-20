@@ -30,7 +30,7 @@ jobs:
       run: |
         doxygen Doxyfile
 
-    - name: Clone teensy-fsw-documentation repo
+    - name: Clone artemis-cosmos-teensy-fsw-docs repo
       run: |
         git config --global user.name "GitHub Action"
         git config --global user.email "action@github.com"
