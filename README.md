@@ -5,6 +5,8 @@ This repository contains the HSFL COSMOS flight software for the Artemis Cubesat
 
 For documentation and tutorials, visit our [project website](https://sites.google.com/hawaii.edu/artemiscubesatkit).
 
+The flight software source is documented using [Doxygen](https://www.doxygen.nl/index.html). The resulting HTML documentation is hosted [here](https://hsfl.github.io/artemis-cosmos-teensy-fsw-docs/index.html), and is automatically updated when commits are pushed to the main branch. 
+
 ## Flight Software Architetcture 
 
 ![Flight Software Architetcture](/images/FSWArchitecture.png)
