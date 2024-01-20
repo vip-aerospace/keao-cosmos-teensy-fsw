@@ -36,10 +36,13 @@ jobs:
         git config --global user.email "action@github.com"
         git clone https://${{ secrets.PAT_TEENSY_FSW_DOCS }}@github.com/hsfl/artemis-cosmos-teensy-fsw-docs.git target-repo
 
-    - name: Clear local clone of teensy-fsw-docuementation repo
+    - name: Clear local clone of teensy-fsw-documentation repo except readme.md
       run: |
         cd target-repo
-        rm -rf *
+        # Find and delete all files except readme.md
+        find . -type f -not -name 'readme.md' -exec rm -f {} +
+        # Find and delete all directories except the current directory
+        find . -mindepth 1 -type d -exec rm -rf {} +
         cd ..
 
     - name: Copy images to teensy-fsw-documentation repo
