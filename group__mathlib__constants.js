@@ -1,5 +1,7 @@
 var group__mathlib__constants =
 [
+    [ "Mutual Exclusions (Mutexes)", "Multithreading.html#Mutexes", null ],
+    [ "An Analogy", "Multithreading.html#MultithreadingAnalogy", null ],
     [ "DEG2RAD", "group__mathlib__constants.html#gaa3616a5af1a14b0a5a1b2f542066ae45", null ],
     [ "DEGOF", "group__mathlib__constants.html#ga8d16f42baecf5fa97fcefed765943080", null ],
     [ "RAD2DEG", "group__mathlib__constants.html#gaacc958134b53425ec947541bb72ac8b1", null ],
