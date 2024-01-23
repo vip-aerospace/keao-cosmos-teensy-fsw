@@ -88,6 +88,10 @@ $(document).ready(function(){initNavTree('todo.html',''); initResizable(); });
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><dl class="reflist">
+<dt>Member <a class="el" href="main_8cpp.html#a1ed3879fd52d775ef4e40b0282cc25ec">ensure_rpi_is_powered</a>  ()</dt>
+<dd><a class="anchor" id="_todo000016"></a>This should still function if the current sensors are not enabled via build flags.  </dd>
+<dt>Member <a class="el" href="artemis__defs_8cpp.html#ab15879e515965b29fc4876c8eddb0160">kill_thread</a>  (uint8_t target_channel_id)</dt>
+<dd><a class="anchor" id="_todo000015"></a>Check return types here. </dd>
 <dt>Member <a class="el" href="namespaceArtemis_1_1Channels_1_1PDU.html#afdf6d308b8044e23e67a9e7db9debd5d">Artemis::Channels::PDU::deploy</a>  ()</dt>
 <dd><p class="startdd"><a class="anchor" id="_todo000010"></a>SD is begun twice. is this needed?</p>
 <p class="enddd"><a class="anchor" id="_todo000011"></a>try storing burnwire complete and deployment separately. deployed.txt should only be written after DEPLOYMENT_LENGTH.  </p>
@@ -112,12 +116,8 @@ $(document).ready(function(){initNavTree('todo.html',''); initResizable(); });
 <dd><a class="anchor" id="_todo000007"></a>The transmit and receive pins are set high and low respectively. check if this is intended behavior. either change the pin definitions or use setGpioReversed().  </dd>
 <dt>Member <a class="el" href="classArtemis_1_1Devices_1_1RFM23.html#abe4cf36e15b3d1ad3b22bcba6e165ea4">Artemis::Devices::RFM23::send</a>  (PacketComm &amp;packet)</dt>
 <dd><p class="startdd"><a class="anchor" id="_todo000005"></a>The function puts the rfm23 into sleep mode, then idle mode. Is this intended? idle overrides sleep.</p>
-<p class="enddd"><a class="anchor" id="_todo000006"></a>The transmit and receive pins are set low and high respectively. check if this is intended behavior. either change the pin definitions or use setGpioReversed().  </p>
+<p class="enddd"><a class="anchor" id="_todo000006"></a>The transmit and receive pins are set low and high respectively. check if this is intended behavior. either change the pin definitions or use setGpioReversed(). </p>
 </dd>
-<dt>Member <a class="el" href="main_8cpp.html#a1ed3879fd52d775ef4e40b0282cc25ec">ensure_rpi_is_powered</a>  ()</dt>
-<dd><a class="anchor" id="_todo000016"></a>This should still function if the current sensors are not enabled via build flags.  </dd>
-<dt>Member <a class="el" href="artemis__defs_8cpp.html#ab15879e515965b29fc4876c8eddb0160">kill_thread</a>  (uint8_t target_channel_id)</dt>
-<dd><a class="anchor" id="_todo000015"></a>Check return types here.</dd>
 </dl>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
