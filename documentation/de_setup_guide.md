@@ -199,7 +199,7 @@ From there, type "format" in the search bar, and enable the option labelled
 "Format on save". This automatically applies uniform C++ formatting to the code 
 you write whenever you save the file.
 
-![The "Format on Save" option in VSCode's settings menu.](https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step21.png?raw=true)
+![The "Format on Save" option in VSCode's settings menu.](https://raw.githubusercontent.com/hsfl/artemis-cosmos-teensy-fsw/main/documentation/step21.png)
 
 Next, type "ruler" in the search bar, and press the "Edit in settings.json" 
 option under Editor: Rulers. This opens up the settings.json file, and creates 
