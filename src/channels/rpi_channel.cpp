@@ -121,6 +121,9 @@ namespace Channels {
             return;
           }
 
+          print_debug(Helpers::RPI, "Pushing packet of type ",
+                    (uint16_t)packet.header.type, " to main queue.");
+          
           // If the un-packetizing is successful, pass the packet to be routed 
           // in the main queue.
           PushQueue(packet, main_queue, main_queue_mtx);
@@ -142,7 +145,7 @@ namespace Channels {
     void handle_queue() {
       if (PullQueue(packet, rpi_queue, rpi_queue_mtx)) {
         print_debug(Helpers::RPI, "Pulled packet of type ",
-                    (uint16_t)packet.header.type, " from queue.");
+                    (uint16_t)packet.header.type, " from Raspberry Pi queue.");
         switch (packet.header.type) {
           case PacketComm::TypeId::CommandEpsSwitchName: {
             if ((PDU::PDU_SW)packet.data[0] == PDU::PDU_SW::RPI &&
