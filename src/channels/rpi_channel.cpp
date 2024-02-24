@@ -75,7 +75,32 @@ namespace Channels {
      * read in the data and store it in a PacketComm packet. Add that packet to
      * the main_queue for routing.
      */
-    void receive_from_pi() {}
+    void receive_from_pi() {
+      while(Serial2.available()){
+        uint8_t inChar = Serial2.read();
+        if(inChar == 0xC0){
+          uint8_t readBuffer[2048];
+          size_t readBytes = Serial2.readBytesUntil((SLIP_FEND), readBuffer, (size_t)2048);
+          packet.packetized.resize(readBytes);
+          memcpy(packet.packetized.data(), &readBuffer[0], readBytes);
+          print_hexdump(Helpers::RPI, "Got raw from RPi: ", &packet.packetized[0],
+                      packet.packetized.size());
+          int32_t iretn = slip_unpack(packet.packetized, packet.wrapped);
+          print_debug(Helpers::RPI, "slip_unpack iretn=", iretn);
+          /*
+          if(!packet.SLIPUnPacketize()){
+            print_debug(Helpers::RPI, "Failed to SLIP unpacketize incoming packet");
+            return;
+          }
+          print_hexdump(Helpers::RPI, "Got decoded header from RPi: ", (uint8_t*)&packet.header,
+                      sizeof(PacketComm::Header));
+          print_hexdump(Helpers::RPI, "Got decoded data from RPi: ", packet.data.data(),
+                      packet.data.size());
+          // PushQueue(packet, main_queue, main_queue_mtx);
+          */
+        }
+      }
+    }
 
     /**
      * @brief Helper function to handle packet queue.
