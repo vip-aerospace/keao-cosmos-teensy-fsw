@@ -70,35 +70,66 @@ namespace Channels {
 
     /**
      * @brief Helper function to receive a packet from the Raspberry Pi.
-     *
-     * @todo Complete this. If data is available from the serial connection,
-     * read in the data and store it in a PacketComm packet. Add that packet to
-     * the main_queue for routing.
+     * 
+     * It seems that the micro-cosmos implementation of PacketComm/SLIPLib does 
+     * not provide a convenient get_slip() method. This means that we need to 
+     * manually parse the Serial stream for something that *looks like* SLIP
+     * packets. From there, we use the standard SLIPUnPacketize() method to turn
+     * it back into a regular packet for routing.
+     * 
+     * This method is temporarily extra-documented, to explain how this 
+     * searching works.
+     * 
+     * @todo See if there's a better way of doing this.
      */
     void receive_from_pi() {
+      // While there are bytes available on the serial connection to the RPi
       while(Serial2.available()){
+        // Read a character from that connection.
         uint8_t inChar = Serial2.read();
+        // If it is our magic character,
         if(inChar == 0xC0){
+          // Create a large buffer for the incoming packet.
           uint8_t readBuffer[2048];
-          size_t readBytes = Serial2.readBytesUntil((SLIP_FEND), readBuffer, (size_t)2048);
-          packet.packetized.resize(readBytes);
-          memcpy(packet.packetized.data(), &readBuffer[0], readBytes);
-          print_hexdump(Helpers::RPI, "Got raw from RPi: ", &packet.packetized[0],
-                      packet.packetized.size());
-          int32_t iretn = slip_unpack(packet.packetized, packet.wrapped);
-          print_debug(Helpers::RPI, "slip_unpack iretn=", iretn);
-          /*
+          // Clear the buffer.
+          memset(readBuffer, 0, sizeof(readBuffer));
+          // Read the packet's bytes in from the serial connection.
+          // Note that this reads everything between the start and end flags 
+          // (each of which are 0xC0), but does not include those flags.
+          // Therefore, write these incoming bytes to the buffer starting from 
+          // the *second* position in the array (index 1), and cap the maximum
+          // number of bytes to read to be the size of the buffer plus both 
+          // flags.
+          size_t readBytes = Serial2.readBytesUntil((SLIP_FEND), &readBuffer[1], (size_t)2046);
+          // Resize the packetized copy of the packet to be the number of bytes 
+          // read in, plus the start and end flags.
+          packet.packetized.resize(readBytes + 2);
+          // Manually add the start...
+          readBuffer[0] = 0xC0;
+          // ...and end flags to the buffer at the appropriate places, "capping
+          // off" the received data.
+          readBuffer[readBytes + 1] = 0xC0;
+          // Copy the packet in the buffer to the actual packet, in the 
+          // packetized vector for further processing.
+          memcpy(packet.packetized.data(), &readBuffer[0], readBytes + 2);
+          
+          // Invoke the micro-cosmos SLIPUnPacketize. This assumes that the 
+          // packet's packetized vector has the start and end flags, as well as 
+          // a CRC checksum at the end.
           if(!packet.SLIPUnPacketize()){
             print_debug(Helpers::RPI, "Failed to SLIP unpacketize incoming packet");
             return;
           }
-          print_hexdump(Helpers::RPI, "Got decoded header from RPi: ", (uint8_t*)&packet.header,
-                      sizeof(PacketComm::Header));
-          print_hexdump(Helpers::RPI, "Got decoded data from RPi: ", packet.data.data(),
-                      packet.data.size());
-          // PushQueue(packet, main_queue, main_queue_mtx);
-          */
+
+          // If the un-packetizing is successful, pass the packet to be routed 
+          // in the main queue.
+          PushQueue(packet, main_queue, main_queue_mtx);
         }
+        // Note that, implicitly, this discards anything outside the bounds of
+        // the first packet. This means that the last few bytes of the first 
+        // partial packet will be discarded. This is considered expected 
+        // behavior, since there's nothing you can do to get that first packet's
+        // bytes anyways.
       }
     }
 
