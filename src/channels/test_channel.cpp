@@ -52,19 +52,19 @@ namespace Channels {
         report_memory_usage();
         report_queue_size();
 
-        turn_on_rpi();
+        //turn_on_rpi();
         threads.delay(500);
-        pdu_switch_all_on();
+        //pdu_switch_all_on();
         threads.delay(500);
-        pdu_switch_status();
+        //pdu_switch_status();
         threads.delay(500);
-        rfm23_transmit();
+        //rfm23_transmit();
         threads.delay(500);
         rpi_take_picture_from_teensy();
         threads.delay(500);
-        rpi_take_picture_from_ground();
+        //rpi_take_picture_from_ground();
         threads.delay(500);
-        turn_off_rpi();
+        //turn_off_rpi();
         threads.delay(500);
       }
     }
@@ -117,7 +117,7 @@ namespace Channels {
      */
     void rpi_take_picture_from_teensy() {
       if (!piIsOff) {
-        packet.header.type     = (PacketComm::TypeId)0x800;
+        packet.header.type     = (PacketComm::TypeId)0x882;
         packet.header.nodeorig = (uint8_t)NODES::TEENSY_NODE_ID;
         packet.header.nodedest = (uint8_t)NODES::RPI_NODE_ID;
         packet.data.resize(0);

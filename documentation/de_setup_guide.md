@@ -1,3 +1,4 @@
+@todo Inlcude installatin of Git for Windows if using Windows
 @page development_environment_setup Development Environment Setup Guide
 
 This is a guide on how to set up your Development Environment (DE) to compile, 
