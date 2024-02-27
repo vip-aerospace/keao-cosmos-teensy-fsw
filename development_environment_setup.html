@@ -92,25 +92,25 @@ $(document).ready(function(){initNavTree('development_environment_setup.html',''
 Step 1: Install VSCode</h1>
 <p>The FSW is written and compiled using <a href="https://code.visualstudio.com/">Visual Studio Code (VSCode)</a>. Download and install this editor.</p>
 <p>Once installed, click the Extensions tab on the left navigation menu.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step1.png?raw=true" alt="The Extensions tab is the fifth tab down on the left." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step1.png?raw=true" alt="The Extensions tab is the fifth tab down on the left." class="inline"/></p>
 <p>Search for the C/C++ extension and install it if not already installed.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step2.png?raw=true" alt="Searching for the C/C++ extension made by Microsoft." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step2.png?raw=true" alt="Searching for the C/C++ extension made by Microsoft." class="inline"/></p>
 <h1><a class="anchor" id="step2"></a>
 Step 2: Install PlatformIO</h1>
 <p>The PlatformIO IDE is used for programming the Teensy. It is installed as an extension to VSCode. Search for the PlatformIO IDE extension and install it.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step3.png?raw=true" alt="Searching for the PlatformIO IDE extension made by PlatformIO." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step3.png?raw=true" alt="Searching for the PlatformIO IDE extension made by PlatformIO." class="inline"/></p>
 <p>You should then see the shell install the IDE. If you do not see this, restart VSCode.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step4.png?raw=true" alt="The shell installing PlatformIO IDE." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step4.png?raw=true" alt="The shell installing PlatformIO IDE." class="inline"/></p>
 <p>After installation is complete, <b>RESTART</b> VSCode. Pressing "Reload Now" is not sufficient.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step5.png?raw=true" alt="PlatformIO IDE installation is complete." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step5.png?raw=true" alt="PlatformIO IDE installation is complete." class="inline"/></p>
 <p>Verify PlatformIO IDE is installed. You should see a new icon in the left navigation menu.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step6.png?raw=true" alt="PlatformIO IDE icon in the left navigation menu." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step6.png?raw=true" alt="PlatformIO IDE icon in the left navigation menu." class="inline"/></p>
 <h1><a class="anchor" id="step3"></a>
 Step 3: Build a test project</h1>
 <p>You can now verify that the PlatformIO IDE has been installed correctly by creating a test project. Begin by pressing the home button on the bottom navigation bar.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step7.png?raw=true" alt="The home button on the bottom navigation bar." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step7.png?raw=true" alt="The home button on the bottom navigation bar." class="inline"/></p>
 <p>Click on "New Project". If this page does not appear, restart VSCode. If the page still doesn't appear, retry the installation process.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step8.png?raw=true" alt="The New Project button on the PIO Home page." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step8.png?raw=true" alt="The New Project button on the PIO Home page." class="inline"/></p>
 <p>Fill out the Project Wizard as shown and click Finish. Wait for the IDE to create the project.</p>
 <ul>
 <li>The Name is agent_artemis</li>
@@ -118,11 +118,11 @@ Step 3: Build a test project</h1>
 <li>The Framework is Arduino</li>
 <li>The Location is set to Use default location</li>
 </ul>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step9.png?raw=true" alt="The Project Wizard dialog." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step9.png?raw=true" alt="The Project Wizard dialog." class="inline"/></p>
 <p>If VSCode prompts you to trust the authors, click Yes.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step10.png?raw=true" alt="The trust authors dialog." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step10.png?raw=true" alt="The trust authors dialog." class="inline"/></p>
 <p>You should now see the project open in your workspace.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step11.png?raw=true" alt="The agent_artemis project open in the VSCode workspace." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step11.png?raw=true" alt="The agent_artemis project open in the VSCode workspace." class="inline"/></p>
 <p>The main code is located in <code><a class="el" href="main_8cpp.html" title="The main operating loop for the Teensy.">src/main.cpp</a></code>. Add the following code to this file: </p><div class="fragment"><div class="line">/**</div>
 <div class="line"> * Blink</div>
 <div class="line"> *</div>
@@ -157,25 +157,25 @@ Step 3: Build a test project</h1>
 <div class="line">}</div>
 </div><!-- fragment --><p>Before building the project, ensure the environment is set to Teensy 4.1. If the environment (as shown in the bottom navigation bar) says "Default", change it.</p>
 <p>Click on Default (agent_artemis).</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step12.png?raw=true" alt="The Default Environment." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step12.png?raw=true" alt="The Default Environment." class="inline"/></p>
 <p>On the top of VSCode, a dropdown should have appeared. Click on env:teensy41</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step13.png?raw=true" alt="The Environment Selection dropdown." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step13.png?raw=true" alt="The Environment Selection dropdown." class="inline"/></p>
 <p>Verify your environment has changed.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step14.png?raw=true" alt="The teensy41 Environment." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step14.png?raw=true" alt="The teensy41 Environment." class="inline"/></p>
 <p>Click the checkmark on the bottom navigation bar to build.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step15.png?raw=true" alt="The build button on the bottom navigation bar." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step15.png?raw=true" alt="The build button on the bottom navigation bar." class="inline"/></p>
 <p>Connect a Teensy 4.1 to your computer over USB. Click the right arrow icon on the bottom navigation bar to upload the project to your Teensy.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step16.png?raw=true" alt="The upload button on the bottom navigation bar." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step16.png?raw=true" alt="The upload button on the bottom navigation bar." class="inline"/></p>
 <p>After a successful upload, you can monitor the Serial output by clicking the plug icon on the bottom navigation bar.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step17.png?raw=true" alt="The monitor button on the bottom navigation bar." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step17.png?raw=true" alt="The monitor button on the bottom navigation bar." class="inline"/></p>
 <h1><a class="anchor" id="step4"></a>
 Step 4: Clone the FSW</h1>
 <p>Now that you've uploaded a test program, you are ready to work with the FSW. The easiest way to do so is with <a href="https://desktop.github.com/">GitHub Desktop.</a></p>
 <p>Install it and log in using your GitHub credentials. Go to <a href="https://github.com/vip-aerospace/Artemis-Teensy-Flight-Software">the FSW repo.</a> If you do not have access to this repo, verify that you have been added to <a href="https://github.com/vip-aerospace">the VIP Aerospace Technologies organization</a>. If you are not, ask team leadership to be added to the organization.</p>
 <p>Once you have access to the repo, press the green "Code" button, then press the "Open with GitHub Desktop" button.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step18.png?raw=true" alt="The clone menu on the vip-aerospace/Artemis-Teensy-Flight-Software repo." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step18.png?raw=true" alt="The clone menu on the vip-aerospace/Artemis-Teensy-Flight-Software repo." class="inline"/></p>
 <p>GitHub Desktop will open with the Clone a repository dialog. You can choose where you want to save the repository here. It is usually a good idea to save the repo close to your root directory. Choose a local path and press "Clone".</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step19.png?raw=true" alt="The clone a repository dialog in GitHub Desktop." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step19.png?raw=true" alt="The clone a repository dialog in GitHub Desktop." class="inline"/></p>
 <p>Open the repo's directory in the Command Prompt/Terminal, and enter the following:</p>
 <div class="fragment"><div class="line">$ git submodule update --init --recursive</div>
 </div><!-- fragment --><p>This initializes the micro-cosmos submodule, which the FSW relies on.</p>
@@ -188,13 +188,13 @@ Step 5: Run the FSW</h1>
 <p>VSCode will now load the FSW. PlatformIO will also load.</p>
 <p>To build and upload the code to the Teensy, you can use the individual buttons as described earlier in this guide. Alternatively, press the PlatformIO tab on the left navigation menu. The PlatformIO palette will open on the right, with your current environment selected.</p>
 <p>Under teensy41 &gt; General, you have multiple options. To build, upload, and monitor the FSW all at once, press the "Upload and Monitor" option.</p>
-<p><img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step20.png?raw=true" alt="The Upload and Monitor option in the PlatformIO palette." class="inline"/></p>
+<p><img src="https://github.com/hsfl/artemis-cosmos-teensy-fsw/blob/main/documentation/step20.png?raw=true" alt="The Upload and Monitor option in the PlatformIO palette." class="inline"/></p>
 <p>The FSW will be compiled, uploaded, and sent to the Teensy. A Serial Monitor will be started in the Terminal window at the bottom.</p>
 <h1><a class="anchor" id="step6"></a>
 Step 6: Apply formatting settings</h1>
 <p>In VSCode, enter the settings menu by clicking File &gt; Preferences &gt; Settings.</p>
 <p>From there, type "format" in the search bar, and enable the option labelled "Format on save". This automatically applies uniform C++ formatting to the code you write whenever you save the file.</p>
-<p>&lt;img src="https://github.com/vip-aerospace/teensy-fsw-documentation/blob/main/documentation/step21.png?raw=true" alt="The "Format on Save" option in VSCode's settings menu."/&gt;</p>
+<p>&lt;img src="https://raw.githubusercontent.com/hsfl/artemis-cosmos-teensy-fsw/main/documentation/step21.png" alt="The "Format on Save" option in VSCode's settings menu."/&gt;</p>
 <p>Next, type "ruler" in the search bar, and press the "Edit in settings.json" option under Editor: Rulers. This opens up the settings.json file, and creates an entry called "editor.rulers". Within this entry, type in "80," like so:</p>
 <div class="fragment"><div class="line">{</div>
 <div class="line">    ...</div>

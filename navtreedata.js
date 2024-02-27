@@ -34,6 +34,7 @@ var NAVTREE =
         [ "Debug Flags", "index.html#DebugFlags", null ]
       ] ]
     ] ],
+    [ "de_setup_guide", "md_documentation_de_setup_guide.html", null ],
     [ "Development Environment Setup Guide", "development_environment_setup.html", [
       [ "Step 1: Install VSCode", "development_environment_setup.html#step1", null ],
       [ "Step 2: Install PlatformIO", "development_environment_setup.html#step2", null ],
@@ -81,12 +82,12 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "",
-"classCosmos_1_1Support_1_1Ax25Handle.html#a4ac5a9ebc2848f0e43cd93276d8444df",
+"classCosmos_1_1Support_1_1Ax25Handle.html#a503dbd15dc6941df66b3c82eb6aaaa6e",
 "cosmos-errno_8h.html#a263cd2fa74e429b223f8de7d50b86047a25c81aa2b51a564e8cb0738eda6e7a9d",
 "cosmos-errno_8h.html#a263cd2fa74e429b223f8de7d50b86047ab08e623848cb898d1aeefd0c449c3fa6",
-"cosmos-errno_8h.html#aa3002ca2265eda18f59f16231665ef0f",
-"group__mathlib__constants.html",
-"sliplib_8h.html"
+"cosmos-errno_8h.html#aa3feb0572e56fbc1ef13b0575e3d4da2",
+"group__error.html",
+"rpi__channel_8cpp.html#ab8bfc2b30aedf2be64040f09b018935a"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
